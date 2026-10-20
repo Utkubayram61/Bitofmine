@@ -3108,7 +3108,7 @@ function mobInit(){newGameInit();const body=document.body;
   const hud=document.createElement('div');hud.id='mHud';hud.className='plate';hud.innerHTML=`<div class="mt"><b style="color:var(--ember);letter-spacing:.12em">YABANYURT</b><span id="mClock"></span><img class="ii" id="mWx" alt=""></div>`+[['heart','#d8473f','hp'],['food','#e0a040','food'],['drop','#4aa8e0','wat'],['bolt','#e8d050','en'],['thermo','#8ad06a','tmp']].map(([ic,c,k])=>`<div class="mb"><img class="ii" alt="" src="${iconURL(ic)}"><span><i id="m_${k}" style="background:${c}"></i></span></div>`).join('');
   hud.addEventListener('click',()=>body.classList.toggle('mobHud'));body.appendChild(hud);el('hud').addEventListener('click',()=>{if(MOB.on)body.classList.remove('mobHud');});
   const fb=document.createElement('button');fb.type='button';fb.id='mFsB';fb.className='plate';fb.innerHTML='<span>⛶</span>';fb.title='Tam ekran';body.appendChild(fb);
-  fb.addEventListener('click',e=>{e.stopPropagation();if(fsCan())goFS();else if(IOS&&!STANDALONE)toast('Tam ekran','Safari: Paylaş ▸ Ana Ekrana Ekle, sonra simgeden aç');});
+  fb.addEventListener('click',e=>{e.stopPropagation();if(fsCan())goFS();else if(IOS&&!STANDALONE)toast('Tam ekran',(/CriOS/.test(navigator.userAgent)?'Chrome: adres çubuğundaki Paylaş ▸ Ana Ekrana Ekle, sonra simgeden aç':'Safari: Paylaş ▸ Ana Ekrana Ekle, sonra simgeden aç'));});
   const syncFs=()=>{fb.classList.toggle('on',fsOn());fb.style.display=(fsCan()||(IOS&&!STANDALONE))&&!STANDALONE?'':'none';};document.addEventListener('fullscreenchange',syncFs);document.addEventListener('webkitfullscreenchange',syncFs);syncFs();
   ['gesturestart','gesturechange'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
   const mb=document.createElement('button');mb.type='button';mb.id='mMenuB';mb.className='plate';mb.innerHTML=`<img class="ii" alt="" src="${iconURL('bag')}">`;body.appendChild(mb);
@@ -3275,7 +3275,7 @@ function menuDraw(){const b=el('mBody');let h='';const cur=slotInfo(CURSLOT);
 function menuAct(btn){const m=btn.dataset.m,i=+btn.dataset.i;initAudio();sfx('pick');
   if(m==='cloud'){MENU.view='cloud';CLOUD.msg='';menuDraw();if(CLOUD.sess&&!CLOUD.info)cloudCheck(true);return;}if(cloudAct(m))return;
   if(MOB.on&&(m==='cont'||m==='new'||m==='load'||m==='resume')&&!fsOn()&&fsCan())goFS(true);
-  if(m==='fs'){if(fsCan())goFS();else toast('Tam ekran','Safari: Paylaş ▸ Ana Ekrana Ekle, sonra simgeden aç');setTimeout(menuDraw,400);return;}
+  if(m==='fs'){if(fsCan())goFS();else toast('Tam ekran',(/CriOS/.test(navigator.userAgent)?'Chrome: adres çubuğundaki Paylaş ▸ Ana Ekrana Ekle, sonra simgeden aç':'Safari: Paylaş ▸ Ana Ekrana Ekle, sonra simgeden aç'));setTimeout(menuDraw,400);return;}
   if(m==='cont'||m==='resume'){menuClose();return;}
   if(m==='save'){save();note('Kaydedildi · Yuva '+(CURSLOT+1));menuDraw();return;}
   if(m==='new'||m==='load'||m==='settings'||m==='controls'){MENU.view=m;MENU.arm=null;menuDraw();return;}
