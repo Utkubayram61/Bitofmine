@@ -3145,7 +3145,7 @@ function mobTick(dt){if(!MOB.on)return;MOB.t-=dt;
   document.body.classList.toggle('joying',ptr.active&&ptr.type!=='mouse');document.body.classList.toggle('busy',!!ACT.mode||FISH.state!=='idle');}
 // touch camera: right half drag rotates, two fingers pinch zoom
 function mobCamDown(e){if(!MOB.on||e.pointerType==='mouse'||BLD.on||PLC.on||mapOpen)return false;
-  if(ptr.active&&ptr.type!=='mouse'&&ptr.id!==e.pointerId&&!MOB.cam.size&&(performance.now()-(MOB.jt||0)<450||Math.hypot(ptr.cx-ptr.bx,ptr.cy-ptr.by)<14)){
+  if(ptr.active&&ptr.type!=='mouse'&&ptr.id!==e.pointerId&&!MOB.cam.size&&performance.now()-(MOB.jt||0)<220&&Math.hypot(ptr.cx-ptr.bx,ptr.cy-ptr.by)<10&&Math.hypot(e.clientX-ptr.cx,e.clientY-ptr.cy)<innerWidth*.34){
     MOB.cam.set(ptr.id,{x:ptr.cx,y:ptr.cy});ptr.active=false;ptr.dx=ptr.dy=0;el('joy').style.display='none';MOB.cam.set(e.pointerId,{x:e.clientX,y:e.clientY});const[p1,p2]=[...MOB.cam.values()];MOB.pinch=Math.hypot(p1.x-p2.x,p1.y-p2.y);try{canvas.setPointerCapture(e.pointerId);}catch(_){}return true;}
   if(e.clientX<innerWidth*.42&&!ptr.active)MOB.jt=performance.now();if(e.clientX<innerWidth*.42&&!MOB.cam.size)return false;if(e.clientX<innerWidth*.42&&ptr.active)return false;
   if(e.clientX<innerWidth*.42)return false;MOB.cam.set(e.pointerId,{x:e.clientX,y:e.clientY});if(MOB.cam.size===2){const[p1,p2]=[...MOB.cam.values()];MOB.pinch=Math.hypot(p1.x-p2.x,p1.y-p2.y);}try{canvas.setPointerCapture(e.pointerId);}catch(_){}mobFS();return true;}
