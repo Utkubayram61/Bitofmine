@@ -86,7 +86,7 @@ kbd{font-family:var(--font-pixel);font-size:11px;background:#2c2540;border:1px s
 @media (max-width:640px){#combo{top:calc(env(safe-area-inset-top,0px) + 170px)}#comboN{font-size:18px}}
 #stam{position:fixed;width:44px;height:5px;background:#1a1420;border:1px solid #3a2f48;display:none;z-index:3;pointer-events:none}#stam i{display:block;height:100%;width:100%;background:#e8c050}#stam.low i{background:#d8574a}
 #cbtn button.on{border-color:var(--ember);color:var(--ember)}
-#cbtn button{position:static;font-family:var(--font-pixel);font-size:15px;color:var(--parchment);cursor:pointer;display:flex;gap:8px;align-items:center;padding:10px 14px}
+#cbtn button{position:static;font-family:var(--font-pixel);font-size:15px;color:var(--parchment);cursor:pointer;display:flex;gap:8px;align-items:center;padding:10px 14px;touch-action:none}
 #cbAtk{border-color:#d8473f!important}#cbPar{border-color:#e8c050!important}
 body.bmode #cbtn{display:none!important}
 @media (max-width:640px){#cbtn{bottom:calc(env(safe-area-inset-bottom,0px) + 112px)}#cbtn button{padding:12px 14px}}
@@ -431,6 +431,9 @@ body.mob #menu .mi{font-size:14px;padding:7px 12px 7px 26px}body.mob #menu .mi s
 body.mob #mBody{gap:5px}body.mob #menu .mctl{max-height:46vh}
 @media (max-height:420px){#menu .mlogo{font-size:26px;margin-bottom:6px}#menu .mi{padding:6px 12px 6px 26px;font-size:14px}#mBody{gap:4px}}
 
+#menu .cform{display:flex;flex-direction:column;gap:7px;margin:2px 0 6px}#menu .cform p{margin:0;font-size:12px;line-height:1.5;color:var(--parchment)}#menu .cform .cmut{color:var(--dim);font-size:11px}
+#menu .cform input{font-family:inherit;font-size:15px;padding:9px 10px;background:#1b1626;border:2px solid #4d4160;color:var(--parchment);outline:none;border-radius:0}#menu .cform input:focus{border-color:#c8a050}
+#menu .crow{display:flex;gap:6px}#menu .crow .mi{flex:1}#menu .cmsg{font-size:12px;color:#9fd67a;padding:4px 2px}#menu .cmsg.err{color:#e98a7a}
 </style>
 
 <canvas id="game" aria-label="Yabanyurt oyun alanı"></canvas>
@@ -529,6 +532,7 @@ body.mob #mBody{gap:5px}body.mob #menu .mctl{max-height:46vh}
    Yabanyurt — Three.js isometric pixel-art open world
    3D scene → low-res render target → outline/edge composite → screen
    ==================================================================== */
+addEventListener('keydown',e=>{const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA')){e.stopImmediatePropagation();if(e.key==='Enter'){const b=document.querySelector('#mBody [data-m=cin]');if(b)b.click();}}},true);addEventListener('keyup',e=>{const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))e.stopImmediatePropagation();},true);
 const T=THREE, V3=T.Vector3;
 
 /* ---------------- noise & world functions ---------------- */
@@ -2683,7 +2687,7 @@ let bndT=0;
 function mapBound(dt){bndT=Math.max(0,bndT-dt);if(CAVE)return;const lim=1.03;const fix=(o)=>{const r=rbound(o.x,o.z);if(r>lim){const k=lim/r;o.x*=k;o.z*=k;return true;}return false;};
   let hit=false;if(DRG.ride){hit=fix(DRG);P.x=DRG.x;P.z=DRG.z;}else if(BOAT){hit=fix(BOAT);P.x=BOAT.x;P.z=BOAT.z;}else{hit=fix(P);if(HZ.mounted){HZ.x=P.x;HZ.z=P.z;}}
   if(hit&&bndT<=0){bndT=8;toast('Haritanın sınırı','Ötesi şimdilik keşfedilmemiş sular');}}
-function v11Tick(dt){menuTick(dt);storyTick(dt);npcTick(dt);mobTick(dt);mapBound(dt);gdnTick(dt);huntTick(dt);oreSparkle(dt);NATU.uNight.value=CAVE?0:SKYS.night;worldEvTick(dt);combatTick(dt);bTick();plcTick();if(panelKind==='store'){const b=built.get('__house');if(!b||!b.chests.some(c=>Math.hypot(c[0]-P.x,c[1]-P.z)<3))closePanel();}if(CLOAK.visible){const tg=(HZ.mounted?.55:P.moving?(P.run?.7:.34):.06)+Math.sin(tnow*(P.moving||HZ.mounted?9:2)+.5)*(P.moving||HZ.mounted?.09:.03)*(1+WX.storm*2);CLOAK.rotation.x+=(tg-CLOAK.rotation.x)*Math.min(1,dt*6);
+function v11Tick(dt){cloudTick(dt);menuTick(dt);storyTick(dt);npcTick(dt);mobTick(dt);mapBound(dt);gdnTick(dt);huntTick(dt);oreSparkle(dt);NATU.uNight.value=CAVE?0:SKYS.night;worldEvTick(dt);combatTick(dt);bTick();plcTick();if(panelKind==='store'){const b=built.get('__house');if(!b||!b.chests.some(c=>Math.hypot(c[0]-P.x,c[1]-P.z)<3))closePanel();}if(CLOAK.visible){const tg=(HZ.mounted?.55:P.moving?(P.run?.7:.34):.06)+Math.sin(tnow*(P.moving||HZ.mounted?9:2)+.5)*(P.moving||HZ.mounted?.09:.03)*(1+WX.storm*2);CLOAK.rotation.x+=(tg-CLOAK.rotation.x)*Math.min(1,dt*6);
     if(WEAR.back==='moon'){const n=SKYS.night*(.6+.4*Math.sin(tnow*1.5));CLOAKM.material.emissive.setRGB(.1*n,.17*n,.42*n);}}
   HATS.lamp.intensity=WEAR.head==='miner'&&!P.swim?(CAVE?6.5:SKYS.night*3.4):0;
   v11T-=dt;if(v11T>0)return;v11T=.4;const nf=SKYS.night,mi=moonIllum(),fk=Math.floor((gameHour()+8)/24);
@@ -3233,7 +3237,7 @@ function menuDraw(){const b=el('mBody');let h='';const cur=slotInfo(CURSLOT);
   if(MENU.view==='main'){
     if(MENU.mode==='title'){if(cur)h+=mi('cont','Devam Et',`Yuva ${CURSLOT+1} · Gün ${cur.day} · ${fmtClock(cur.clock)} · ${cur.reg}`,'pri');h+=mi('new','Yeni Oyun',cur?'':'Bir gemi kazasından sağ kurtuldun…',cur?'':'pri');h+=mi('load','Kayıt Yükle');}
     else{h+=mi('resume','Devam Et','','pri');h+=mi('save','Kaydet',`Yuva ${CURSLOT+1}`);h+=mi('load','Kayıt Yükle');}
-    h+=mi('settings','Ayarlar');h+=mi('controls','Kontroller');if(MENU.mode==='pause')h+=mi('title','Ana Menü','İlerlemen kaydedilir');}
+    h+=mi('cloud','Bulut Kaydı',CLOUD.sess?(CLOUD.sess.user.email||'Giriş yapıldı'):'Giriş yap · her cihazdan devam et');h+=mi('settings','Ayarlar');h+=mi('controls','Kontroller');if(MENU.mode==='pause')h+=mi('title','Ana Menü','İlerlemen kaydedilir');}
   else if(MENU.view==='load'||MENU.view==='new'){h+=`<div class="mh">${MENU.view==='new'?'Yeni oyun için bir yuva seç':'Kayıt yükle'}</div>`;
     for(let i=0;i<3;i++){const s=slotInfo(i),arm=MENU.arm==='s'+i,armD=MENU.arm==='d'+i;const lbl=`Yuva ${i+1}${i===CURSLOT&&s?' · son oynanan':''}`;
       const sub=s?`Gün ${s.day} · ${fmtClock(s.clock)} · ${s.reg}<br>${fmtPT(s.pt)} oynandı${s.ts?' · '+fmtTS(s.ts):''}`:'Boş yuva';
@@ -3245,12 +3249,14 @@ function menuDraw(){const b=el('mBody');let h='';const cur=slotInfo(CURSLOT);
     h+=`<button type="button" class="mi set" data-m="touch"><span class="ml">Dokunmatik kontroller</span><b>${MOB.on?'Açık':'Kapalı'}</b></button>`;
     h+=`<button type="button" class="mi set" data-m="tilt"><span class="ml">Kamera açısı</span><b>${PITCH>1?'Yüksek':PITCH>.75?'Orta':'Alçak'}</b></button>`;
     h+=mi('back','‹ Geri','','sm');}
+  else if(MENU.view==='cloud'){h+=cloudView();}
   else if(MENU.view==='controls'){h+=`<div class="mh">Kontroller</div><div class="mctl">`;
     if(MOB.on)h+=[['Sol yarı','Yürü · sonuna kadar it: koş'],['Sağ yarı','Kaydır: kamerayı çevir · iki parmak: yakınlaş'],['Büyük tuş','Etkileşim: kes, topla, konuş, balık tut'],['Kılıç','Saldır · basılı tut: ağır vuruş'],['Şimşek / Kask','Takla / savuş · basılı tut: blok'],['Çanta simgesi','Menü: çanta, zanaat, inşa, harita']].map(r=>`<div><kbd>${r[0]}</kbd><span>${r[1]}</span></div>`).join('');
     else h+=el('helpList').innerHTML.replace(/<li>/g,'<div>').replace(/<\/li>/g,'</div>');
     h+=`</div>`+mi('back','‹ Geri','','sm');}
   b.innerHTML=h;const f=b.querySelector('button.mi:not([disabled])');if(f&&!MOB.on)f.focus({preventScroll:true});}
 function menuAct(btn){const m=btn.dataset.m,i=+btn.dataset.i;initAudio();sfx('pick');
+  if(m==='cloud'){MENU.view='cloud';CLOUD.msg='';menuDraw();if(CLOUD.sess&&!CLOUD.info)cloudCheck(true);return;}if(cloudAct(m))return;
   if(m==='cont'||m==='resume'){menuClose();return;}
   if(m==='save'){save();note('Kaydedildi · Yuva '+(CURSLOT+1));menuDraw();return;}
   if(m==='new'||m==='load'||m==='settings'||m==='controls'){MENU.view=m;MENU.arm=null;menuDraw();return;}
@@ -3268,8 +3274,57 @@ function menuAct(btn){const m=btn.dataset.m,i=+btn.dataset.i;initAudio();sfx('pi
   if(m==='tilt'){pitchT=PITCH>1?.5:PITCH>.75?1.2:.9;setTimeout(menuDraw,350);return;}}
 function menuInit(){el('menu').addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if(b&&!b.disabled)menuAct(b);});
   el('menu').addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){const L=[...el('mBody').querySelectorAll('button:not([disabled])')];let k=L.indexOf(document.activeElement);k=(k+(e.key==='ArrowDown'?1:-1)+L.length)%L.length;L[k]&&L[k].focus();e.preventDefault();}});
-  el('mVer').textContent='v45';}
+  el('mVer').textContent='v46';cloudInit();}
 function menuTick(dt){if(!MENU.on){PLAYT+=dt;return;}if(MENU.mode==='title'){yawT+=dt*.045;viewHT=12.5;pitchT=.52;}}
+
+/* ================= v46: cloud save (Supabase) ================= */
+const CLOUD={url:'https://tgspevlllvepwsrhuoju.supabase.co',key:'sb_publishable_pertot4SRknUwf4OSCpywA_Aw9pKbGk',sess:null,busy:false,msg:'',msgErr:false,info:null,lastPush:0,dirty:false,t:120,checked:false};
+function cloudLoadSess(){try{const s=JSON.parse(localStorage.getItem('yb_cloud')||'null');if(s&&s.access_token&&s.refresh_token&&s.user)CLOUD.sess=s;}catch(_){}}
+function cloudStoreSess(s){CLOUD.sess=s;try{if(s)localStorage.setItem('yb_cloud',JSON.stringify(s));else localStorage.removeItem('yb_cloud');}catch(_){}}
+function cloudSessFrom(r){return{access_token:r.access_token,refresh_token:r.refresh_token,expires_at:r.expires_at||Math.floor(Date.now()/1000)+(r.expires_in||3600),user:{id:r.user&&r.user.id,email:r.user&&r.user.email}};}
+async function cloudAuth(path,body,tok){const r=await fetch(CLOUD.url+'/auth/v1/'+path,{method:'POST',headers:{apikey:CLOUD.key,'Content-Type':'application/json',...(tok?{Authorization:'Bearer '+tok}:{})},body:JSON.stringify(body||{})});let j=null;try{j=await r.json();}catch(_){}if(!r.ok){const m=(j&&(j.msg||j.error_description||j.message||j.error))||('HTTP '+r.status);throw new Error(m);}return j;}
+async function cloudToken(){const s=CLOUD.sess;if(!s)throw new Error('Giriş yapılmadı');if(s.expires_at-60>Date.now()/1000)return s.access_token;
+  try{const r=await cloudAuth('token?grant_type=refresh_token',{refresh_token:s.refresh_token});cloudStoreSess(cloudSessFrom(r));return CLOUD.sess.access_token;}catch(e){cloudStoreSess(null);throw new Error('Oturum süresi doldu, tekrar giriş yap');}}
+function cloudErrTR(m){m=String(m||'');if(/invalid login|invalid_credentials|Invalid login credentials/i.test(m))return'E-posta ya da şifre hatalı';if(/already registered|already been registered|user_already_exists/i.test(m))return'Bu e-postayla zaten hesap var, giriş yap';
+  if(/password should be at least|weak_password/i.test(m))return'Şifre en az 6 karakter olmalı';if(/email not confirmed/i.test(m))return'E-postana gelen onay bağlantısına tıkla, sonra giriş yap';if(/unable to validate email|invalid email|email_address_invalid/i.test(m))return'Geçerli bir e-posta yaz';
+  if(/rate limit|over_email_send_rate/i.test(m))return'Çok fazla deneme, biraz bekle';if(/Failed to fetch|NetworkError|Load failed/i.test(m))return'Bağlantı yok, internetini kontrol et';return m;}
+async function cloudSignIn(email,pw,create){if(CLOUD.busy)return;CLOUD.busy=true;cloudMsg(create?'Hesap oluşturuluyor…':'Giriş yapılıyor…');
+  try{let r;if(create){r=await cloudAuth('signup',{email,password:pw});if(!r.access_token){cloudMsg('Hesap oluşturuldu. E-postana gelen onay bağlantısına tıkla, sonra giriş yap.');CLOUD.busy=false;return;}}
+    else r=await cloudAuth('token?grant_type=password',{email,password:pw});cloudStoreSess(cloudSessFrom(r));CLOUD.pw='';CLOUD.busy=false;cloudMsg('Giriş yapıldı');await cloudCheck(true);}
+  catch(e){CLOUD.busy=false;cloudMsg(cloudErrTR(e.message),true);}}
+async function cloudSignOut(){const s=CLOUD.sess;cloudStoreSess(null);CLOUD.info=null;cloudMsg('Çıkış yapıldı');try{if(s)await cloudAuth('logout',{},s.access_token);}catch(_){}}
+function cloudLocalPayload(){try{return localStorage.getItem(SAVE_KEY);}catch(_){return null;}}
+async function cloudPush(opts){if(!CLOUD.sess||NOSAVE)return false;if(!opts||!opts.noSave)save();const raw=cloudLocalPayload();if(!raw)return false;let data;try{data=JSON.parse(raw);}catch(_){return false;}
+  const tok=await cloudToken(),body=JSON.stringify({user_id:CLOUD.sess.user.id,data,updated_at:new Date().toISOString()});
+  const r=await fetch(CLOUD.url+'/rest/v1/saves?on_conflict=user_id',{method:'POST',keepalive:!!(opts&&opts.unload)&&body.length<60000,headers:{apikey:CLOUD.key,Authorization:'Bearer '+tok,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},body});
+  if(!r.ok){let t='';try{t=await r.text();}catch(_){}throw new Error('Kayıt gönderilemedi ('+r.status+') '+t.slice(0,80));}CLOUD.lastPush=Date.now();CLOUD.dirty=false;CLOUD.info={day:data.day||1,clock:data.clock||0,ts:data.ts||Date.now(),pt:data.pt||0};return true;}
+async function cloudFetch(){const tok=await cloudToken();const r=await fetch(CLOUD.url+'/rest/v1/saves?select=data,updated_at&user_id=eq.'+encodeURIComponent(CLOUD.sess.user.id),{headers:{apikey:CLOUD.key,Authorization:'Bearer '+tok}});
+  if(!r.ok)throw new Error('Bulut okunamadı ('+r.status+')');const a=await r.json();return a&&a[0]?a[0]:null;}
+function cloudInfoOf(d){return d?{day:d.day||1,clock:d.clock||0,ts:d.ts||0,pt:d.pt||0}:null;}
+// after login / at start: compare cloud vs this device
+async function cloudCheck(fromLogin){if(!CLOUD.sess)return;try{const row=await cloudFetch();CLOUD.checked=true;const cd=row&&row.data,ci=cloudInfoOf(cd);CLOUD.info=ci;const li=slotInfo(CURSLOT);
+    if(!cd){if(li){await cloudPush({noSave:MENU.on&&MENU.mode==='title'});cloudMsg('Bu cihazdaki kaydın buluta yüklendi');}else cloudMsg('Bulutta henüz kayıt yok');if(MENU.on)menuDraw();return;}
+    if(!li||(ci.ts>li.ts+5000)){CLOUD.offer=cd;cloudMsg(li?'Bulutta daha yeni bir kayıt var':'Bulutta kayıtlı oyunun var');if(MENU.on){MENU.view='cloud';menuDraw();}else if(fromLogin===false)toast('Bulut','Bulutta daha yeni kayıt var · Menü › Bulut Kaydı');return;}
+    if(li.ts>ci.ts+5000){await cloudPush({noSave:MENU.on&&MENU.mode==='title'});cloudMsg('Buluttaki kayıt güncellendi');}else cloudMsg('Kaydın bulutla eşit');if(MENU.on)menuDraw();}
+  catch(e){cloudMsg(cloudErrTR(e.message),true);}}
+function cloudUseOffer(){const d=CLOUD.offer;if(!d)return;try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));}catch(_){cloudMsg('Kayıt yazılamadı',true);return;}CLOUD.offer=null;bootWith('cont');}
+function cloudMsg(t,err){CLOUD.msg=t;CLOUD.msgErr=!!err;if(MENU.on&&MENU.view==='cloud')menuDraw();}
+function cloudView(){let h=`<div class="mh">Bulut Kaydı</div>`;const s=CLOUD.sess;
+  if(!s){h+=`<div class="cform"><p>Giriş yaparsan oyunun buluta kaydedilir; telefonda ya da bilgisayarda kaldığın yerden devam edersin.</p>
+    <input id="cEmail" type="email" autocomplete="email" placeholder="E-posta" inputmode="email" value="${(CLOUD.em||'').replace(/"/g,'&quot;')}"><input id="cPw" type="password" autocomplete="current-password" placeholder="Şifre (en az 6 karakter)" value="${(CLOUD.pw||'').replace(/"/g,'&quot;')}">
+    <div class="crow"><button type="button" class="mi pri" data-m="cin"><span class="ml">Giriş yap</span></button><button type="button" class="mi" data-m="cup"><span class="ml">Hesap oluştur</span></button></div></div>`;}
+  else{const ci=CLOUD.info;h+=`<div class="cform"><p><b>${s.user.email||''}</b> olarak giriş yaptın.</p><p class="cmut">${ci?`Buluttaki kayıt: Gün ${ci.day} · ${fmtClock(ci.clock)}${ci.ts?' · '+fmtTS(ci.ts):''}`:CLOUD.checked?'Bulutta henüz kayıt yok':'Bulut durumu kontrol ediliyor…'}${CLOUD.lastPush?'<br>Son gönderim: '+fmtTS(CLOUD.lastPush):''}</p></div>`;
+    if(CLOUD.offer){const oi=cloudInfoOf(CLOUD.offer);h+=mi('cuse','Buluttaki kaydı yükle',`Gün ${oi.day} · ${fmtClock(oi.clock)} · ${fmtTS(oi.ts)} · bu cihazdaki yuvanın yerine geçer`,'pri');}
+    if(MENU.mode==='pause'||slotInfo(CURSLOT))h+=mi('cpush','Şimdi buluta kaydet',`Yuva ${CURSLOT+1}`);h+=mi('ccheck','Bulutla karşılaştır');h+=mi('cout','Çıkış yap','','sm');}
+  if(CLOUD.msg)h+=`<div class="cmsg ${CLOUD.msgErr?'err':''}">${CLOUD.msg}</div>`;h+=mi('back','‹ Geri','','sm');return h;}
+function cloudAct(m){if(m==='cin'||m==='cup'){const e=(el('cEmail').value||'').trim(),p=el('cPw').value||'';CLOUD.em=e;CLOUD.pw=p;if(!e||!p){cloudMsg('E-posta ve şifre yaz',true);return true;}cloudSignIn(e,p,m==='cup');return true;}
+  if(m==='cout'){cloudSignOut();return true;}if(m==='cuse'){cloudUseOffer();return true;}
+  if(m==='cpush'){cloudMsg('Gönderiliyor…');cloudPush({noSave:MENU.mode==='title'}).then(ok=>cloudMsg(ok?'Buluta kaydedildi':'Gönderilecek kayıt yok',!ok)).catch(e=>cloudMsg(cloudErrTR(e.message),true));return true;}
+  if(m==='ccheck'){cloudMsg('Kontrol ediliyor…');cloudCheck(true);return true;}return false;}
+function cloudTick(dt){if(!CLOUD.sess||MENU.on||INTRO.on)return;CLOUD.t-=dt;if(CLOUD.t<=0){CLOUD.t=180;cloudPush().catch(()=>{});}}
+function cloudInit(){cloudLoadSess();if(CLOUD.sess)setTimeout(()=>cloudCheck(false),2500);
+  const flush=()=>{if(CLOUD.sess&&!NOSAVE&&Date.now()-CLOUD.lastPush>20000)cloudPush({unload:true}).catch(()=>{});};
+  addEventListener('pagehide',flush);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush();});}
 
 /* ================= v34: hunting — bow, arrows, traps, skinning ================= */
 const HUNT={arrows:[],log:{},tg:null};
@@ -4694,7 +4749,7 @@ function start2(data){
   P.y=G(P.x,P.z);HZ.y=G(HZ.x,HZ.z);drawMini();updHud();el('load').hidden=true;last=performance.now();requestAnimationFrame(loop);
   menuInit();{const boot=readBoot(),hot=!!(data&&data.v===4);if(boot==='new'||boot==='cont'||hot){if(!sv&&WRECK)introStart();}else{if(!sv)NOSAVE=true;menuOpen('title',{fresh:!sv});}}
   if(!sv&&!WRECK)setTimeout(()=>toast(MOB.on?'Sol: yürü · Sağ: kamera · Büyük tuş: etkileşim':'E ile etkileşim','Ağaç kes, topla, balık tut'),3600);}
-window.__yb={MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
+window.__yb={CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
   setWeather:t=>{WX.type=t;const d=WDEF[t];[WX.cloud,WX.rain,WX.storm,WX.fog]=d;[WX.tc,WX.tr,WX.ts,WX.tf]=d;WX.wet=d[1];WX.t=0;WX.dur=999;},setYaw:v=>{yaw=yawT=v}};
 try{if(window.claude&&window.claude.hot&&typeof window.claude.hot.snapshot==='function')window.claude.hot.snapshot(()=>{save();return{v:4,px:P.x,pz:P.z,hx:HZ.x,hz:HZ.z,clock,day};});}catch(_){}
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
