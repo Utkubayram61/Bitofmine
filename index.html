@@ -3144,15 +3144,22 @@ function mobTick(dt){if(!MOB.on)return;MOB.t-=dt;
     const c=el('clock');el('mClock').textContent=c?c.textContent:'';const w=el('wxI'),mw=el('mWx');if(w&&w.src&&mw.src!==w.src)mw.src=w.src;}
   document.body.classList.toggle('joying',ptr.active&&ptr.type!=='mouse');document.body.classList.toggle('busy',!!ACT.mode||FISH.state!=='idle');}
 // touch camera: right half drag rotates, two fingers pinch zoom
-function mobCamDown(e){if(!MOB.on||e.pointerType==='mouse'||BLD.on||PLC.on||mapOpen)return false;
-  if(ptr.active&&ptr.type!=='mouse'&&ptr.id!==e.pointerId&&!MOB.cam.size&&performance.now()-(MOB.jt||0)<220&&Math.hypot(ptr.cx-ptr.bx,ptr.cy-ptr.by)<10&&Math.hypot(e.clientX-ptr.cx,e.clientY-ptr.cy)<innerWidth*.34){
-    MOB.cam.set(ptr.id,{x:ptr.cx,y:ptr.cy});ptr.active=false;ptr.dx=ptr.dy=0;el('joy').style.display='none';MOB.cam.set(e.pointerId,{x:e.clientX,y:e.clientY});const[p1,p2]=[...MOB.cam.values()];MOB.pinch=Math.hypot(p1.x-p2.x,p1.y-p2.y);try{canvas.setPointerCapture(e.pointerId);}catch(_){}return true;}
-  if(e.clientX<innerWidth*.42&&!ptr.active)MOB.jt=performance.now();if(e.clientX<innerWidth*.42&&!MOB.cam.size)return false;if(e.clientX<innerWidth*.42&&ptr.active)return false;
-  if(e.clientX<innerWidth*.42)return false;MOB.cam.set(e.pointerId,{x:e.clientX,y:e.clientY});if(MOB.cam.size===2){const[p1,p2]=[...MOB.cam.values()];MOB.pinch=Math.hypot(p1.x-p2.x,p1.y-p2.y);}try{canvas.setPointerCapture(e.pointerId);}catch(_){}mobFS();return true;}
-function mobCamMove(e){const c=MOB.cam.get(e.pointerId);if(!c)return false;const dx=e.clientX-c.x,dy=e.clientY-c.y;c.x=e.clientX;c.y=e.clientY;
-  if(MOB.cam.size>=2){const[p1,p2]=[...MOB.cam.values()],d=Math.hypot(p1.x-p2.x,p1.y-p2.y);if(MOB.pinch>0&&d>0){viewHT=Math.max(9,Math.min(36,viewHT*Math.pow(MOB.pinch/d,1.35)));viewH+=(viewHT-viewH)*.5;}MOB.pinch=d;}
-  else{yawT-=dx*.0085;pitchT=Math.max(.22,Math.min(1.45,pitchT+dy*.005));}return true;}
-function mobCamUp(e){if(!MOB.cam.delete(e.pointerId))return false;MOB.pinch=0;if(MOB.cam.size===2){const[p1,p2]=[...MOB.cam.values()];MOB.pinch=Math.hypot(p1.x-p2.x,p1.y-p2.y);}return true;}
+// touch gestures: left = joystick, right = camera; zoom ONLY when two fingers land together, close to each other, around the screen centre
+function mobPinchOK(a,b){const W=innerWidth,mx=(a.x+b.x)/2;return Math.hypot(a.x-b.x,a.y-b.y)<W*.26&&mx>W*.24&&mx<W*.76;}
+function mobCamDown(e){if(!MOB.on||e.pointerType==='mouse'||BLD.on||PLC.on||mapOpen)return false;const now=performance.now(),id=e.pointerId,pt={x:e.clientX,y:e.clientY};
+  if(!MOB.touches)MOB.touches=new Map(),MOB.dead=new Set();const first=MOB.touches.size===1?[...MOB.touches.entries()][0]:null;MOB.touches.set(id,{x:pt.x,y:pt.y,t:now});
+  if(first&&now-first[1].t<260&&!MOB.pinchMode&&mobPinchOK(first[1],pt)){const fid=first[0];
+    if(ptr.active&&ptr.id===fid){ptr.active=false;ptr.dx=ptr.dy=0;el('joy').style.display='none';}
+    MOB.cam.clear();MOB.cam.set(fid,{x:first[1].x,y:first[1].y});MOB.cam.set(id,pt);MOB.pinchMode=true;MOB.pinch=Math.hypot(first[1].x-pt.x,first[1].y-pt.y);try{canvas.setPointerCapture(id);}catch(_){}return true;}
+  if(MOB.touches.size>2||MOB.pinchMode){MOB.dead.add(id);return true;}
+  if(e.clientX<innerWidth*.5)return false;
+  if(MOB.cam.size){MOB.dead.add(id);return true;}
+  MOB.cam.set(id,pt);try{canvas.setPointerCapture(id);}catch(_){}mobFS();return true;}
+function mobCamMove(e){if(MOB.touches){const t=MOB.touches.get(e.pointerId);if(t){t.x=e.clientX;t.y=e.clientY;}}if(MOB.dead&&MOB.dead.has(e.pointerId))return true;const c=MOB.cam.get(e.pointerId);if(!c)return false;const dx=e.clientX-c.x,dy=e.clientY-c.y;c.x=e.clientX;c.y=e.clientY;
+  if(MOB.pinchMode){if(MOB.cam.size>=2){const[p1,p2]=[...MOB.cam.values()],d=Math.hypot(p1.x-p2.x,p1.y-p2.y);if(MOB.pinch>0&&d>0){viewHT=Math.max(9,Math.min(36,viewHT*Math.pow(MOB.pinch/d,1.35)));viewH+=(viewHT-viewH)*.5;}MOB.pinch=d;}return true;}
+  yawT-=dx*.0085;pitchT=Math.max(.22,Math.min(1.45,pitchT+dy*.005));return true;}
+function mobCamUp(e){const id=e.pointerId;if(MOB.touches)MOB.touches.delete(id);if(MOB.dead&&MOB.dead.delete(id))return true;if(!MOB.cam.delete(id))return false;
+  if(MOB.pinchMode){for(const k of MOB.cam.keys())MOB.dead.add(k);MOB.cam.clear();MOB.pinchMode=false;MOB.pinch=0;}return true;}
 
 /* ================= v44: opening — shipwreck on the shore ================= */
 const KIT={axe:true,stick:true,crate:true,camp:true,intro:true};
