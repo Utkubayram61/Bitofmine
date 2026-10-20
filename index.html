@@ -2012,13 +2012,25 @@ function spawnPlaced(o){if(o.t==='pier'){spawnPier(o);return;}const h=HQ(o.x,o.z
     sleep.push(W(0,-.2));const w=W(0,-.45);cols.push([w[0],w[1],.85]);firePit(0,2.4);add(new T.CylinderGeometry(.2,.22,1.4,8),MAT.wood,1.7,hAt(1.7,2.7)+.18,2.7,.5,0,Math.PI/2);
     const w2=W(1.7,2.7);cols.push([w2[0],w2[1],.5]);}
   scene.add(g);built.set(o.id,{g,em,cols,floors:[],anim:[],rects:[],smoke:[],beasts:[],L:{kind:'p'+o.t,x:o.x,z:o.z,h,id:o.id},placed:true,sleep:sleep.length?sleep:null,cover:roofs?[{x:sleep[0][0],z:sleep[0][1],r:1.35,y:h+.95,roof:roofs}]:gdn&&gdn.cover?gdn.cover:null,gdn,trapG});if(gdn)gdnVis(o);if(trapG)trapVis(o);}
-function placeBuild(id){if(id==='pier'||id==='boat'||id==='sail'){enterPlace(id);return;}if(CAVE){note('Mağarada inşa edilemez');return;}const B=BUILDS.find(b=>b.id===id);if(!has(B.need)){note('Malzeme yetersiz');return;}const d=V52R[id]?V52R[id][0]:id==='camp'?4.2:id==='green'?4.2:id==='lean'?2.6:id==='gbed'?2:2.2,x=P.x+Math.sin(P.rot)*d,z=P.z+Math.cos(P.rot)*d,h=HQ(x,z);
-  let bad=BOAT||P.swim||HZ.mounted||h<WLAT(x,z)+.2||slopeAt(x,z)>.65||floorAt(x,z)>h+.05||(ln=>!!ln&&!CAMPOK.has(ln.kind))(landmarkNear(x,z,4));
-  if(!bad&&id==='green'){for(const[u,v]of[[-2.4,-2.1],[2.4,-2.1],[-2.4,2.1],[2.4,2.1]]){const c=Math.cos(P.rot),s2=Math.sin(P.rot),xx=x+u*c+v*s2,zz=z-u*s2+v*c,hh=HQ(xx,zz);if(hh<WLAT(xx,zz)+.15||Math.abs(hh-h)>.9)bad=true;}}
-  if(!bad){const rad=V52R[id]?V52R[id][1]:id==='camp'?1.6:id==='green'?2.6:id==='gbed'?1.2:.8;for(let k=0;k<8&&!bad;k++){const a=k/8*Math.PI*2,xx=x+Math.cos(a)*rad,zz=z+Math.sin(a)*rad;if(HQ(xx,zz)<WLAT(xx,zz)+.1)bad=true;}
-    const fx2=id==='camp'?P.x+Math.sin(P.rot)*1.8:x,fz2=id==='camp'?P.z+Math.cos(P.rot)*1.8:z;eachChunk(c=>{for(const o of c.cols)if(Math.hypot(o[0]-x,o[1]-z)<o[2]+(V52R[id]?V52R[id][2]:id==='camp'?1.4:id==='green'?2.6:id==='gbed'?1.1:.8)||Math.hypot(o[0]-fx2,o[1]-fz2)<o[2]+.8)bad=true;});for(const b of built.values())if(b.placed&&Math.hypot(b.L.x-x,b.L.z-z)<(V52R[id]?V52R[id][3]:id==='camp'?4:id==='green'?4.6:id==='gbed'?2.2:2.2))bad=true;}
-  if(bad){note('Buraya kurulamaz');return;}
-  take(B.need);const o={t:id,x,z,r:P.rot+(id==='camp'||id==='lean'||V52T.has(id)?Math.PI:0),exp:id==='lean'?gameHour()+48:undefined,fuel:8,id:'pl'+Date.now().toString(36)+((Math.random()*1e4)|0)};if(id==='coop'||id==='pen')o.ls=v52NewLs(id);if(id==='gbed'||id==='green'){o.r=P.rot+Math.PI/2;o.g=gdnNew(id,x,z);gdnGift();}PLACED.push(o);spawnPlaced(o);if(o.g)gdnClearGrass(o);closePanel();toast('İnşa',B.n+' kuruldu'+(id==='coop'?' · iki tavuk yerleşti':id==='pen'?' · bir koyun ve bir inek yerleşti':''));sfx('thud');save();}
+const PLCW=new Set(['pier','boat','sail']);for(const k in GEO){const v=GEO[k];(Array.isArray(v)?v:[v]).forEach(g=>{if(g&&g.isBufferGeometry)g.userData.shared=true;});}
+function landD(id){return V52R[id]?V52R[id][0]:id==='camp'?4.2:id==='green'?4.2:id==='lean'?2.6:id==='gbed'?2:2.2;}
+function landR(id,rot){return id==='gbed'||id==='green'?rot+Math.PI/2:rot+(id==='camp'||id==='lean'||V52T.has(id)?Math.PI:0);}
+function landWhy(id,x,z,rot){if(CAVE)return'Mağarada inşa edilemez';if(BOAT||P.swim||HZ.mounted)return'Önce yere in';const h=HQ(x,z);
+  if(h<WLAT(x,z)+.2)return'Suyun üstüne kurulamaz';if(slopeAt(x,z)>.65)return'Zemin çok eğimli';if(floorAt(x,z)>h+.05)return'Burası dolu';{const ln=landmarkNear(x,z,4);if(ln&&!CAMPOK.has(ln.kind))return'Bir yapının çok yakını';}
+  if(id==='green'){const c=Math.cos(rot),s2=Math.sin(rot);for(const[u,v]of[[-2.4,-2.1],[2.4,-2.1],[-2.4,2.1],[2.4,2.1]]){const xx=x+u*c+v*s2,zz=z-u*s2+v*c,hh=HQ(xx,zz);if(hh<WLAT(xx,zz)+.15||Math.abs(hh-h)>.9)return'Sera için zemin yeterince düz değil';}}
+  const rad=V52R[id]?V52R[id][1]:id==='camp'?1.6:id==='green'?2.6:id==='gbed'?1.2:.8;for(let k=0;k<8;k++){const a=k/8*Math.PI*2,xx=x+Math.cos(a)*rad,zz=z+Math.sin(a)*rad;if(HQ(xx,zz)<WLAT(xx,zz)+.1)return'Suya çok yakın';}
+  const fx2=id==='camp'?x-Math.sin(rot)*2.4:x,fz2=id==='camp'?z-Math.cos(rot)*2.4:z,cr=V52R[id]?V52R[id][2]:id==='camp'?1.4:id==='green'?2.6:id==='gbed'?1.1:.8;let hit=false;
+  chunksAround(x,z,c=>{if(hit)return;for(const o of c.cols)if(Math.hypot(o[0]-x,o[1]-z)<o[2]+cr||Math.hypot(o[0]-fx2,o[1]-fz2)<o[2]+.8){hit=true;break;}});if(hit)return'Ağaç ya da kaya engelliyor';
+  for(const[bid,b]of built)if(b.placed&&b.L&&bid!=='__ghost'&&Math.hypot(b.L.x-x,b.L.z-z)<(V52R[id]?V52R[id][3]:id==='camp'?4:id==='green'?4.6:id==='gbed'?2.2:2.2))return'Çok yakında başka bir yapı var';
+  return null;}
+function placeBuild(id,at){if(PLCW.has(id)||!at){enterPlace(id);return;}const B=BUILDS.find(b=>b.id===id);const why=landWhy(id,at.x,at.z,at.r)||(has(B.need)?null:'Malzeme yetersiz');if(why){note(why);return false;}
+  take(B.need);const x=at.x,z=at.z,o={t:id,x,z,r:landR(id,at.r),exp:id==='lean'?gameHour()+48:undefined,fuel:8,id:'pl'+Date.now().toString(36)+((Math.random()*1e4)|0)};if(id==='coop'||id==='pen')o.ls=v52NewLs(id);if(id==='gbed'||id==='green'){o.g=gdnNew(id,x,z);gdnGift();}
+  PLACED.push(o);spawnPlaced(o);if(o.g)gdnClearGrass(o);closePanel();toast('İnşa',B.n+' kuruldu'+(id==='coop'?' · iki tavuk yerleşti':id==='pen'?' · bir koyun ve bir inek yerleşti':''));sfx('thud');save();return true;}
+function landGhost(id,x,z,r,mt){const o={t:id,x,z,r,fuel:8,id:'__ghost',ghost:1};if(id==='gbed'||id==='green')o.g=gdnNew(id,x,z);if(id==='coop'||id==='pen')o.ls=v52NewLs(id);
+  try{spawnPlaced(o);}catch(e){console.warn('ghost',e);}const b=built.get('__ghost');built.delete('__ghost');if(!b)return new T.Group();scene.remove(b.g);unregister(b.g);
+  b.g.traverse(q=>{if(q.isMesh||q.isLine||q.isPoints){q.material=mt;q.castShadow=false;q.receiveShadow=false;}});
+  const ar=new T.Mesh(new T.ConeGeometry(.28,.5,3).rotateX(Math.PI/2),mt);const fd=id==='gbed'||id==='green'?-Math.PI/2:id==='camp'||id==='lean'||V52T.has(id)?Math.PI:0;const dd=(V52R[id]?V52R[id][1]:id==='camp'?1.9:id==='green'?2.9:1.2)+.5;
+  ar.position.set(Math.sin(fd)*dd,HQ(x,z)+.15,Math.cos(fd)*dd);ar.rotation.y=fd;b.g.add(ar);return b.g;}
 // ---- sleeping
 function sleep(){if(P.sleeping)return;LASTBED={x:P.x,z:P.z};closePanel();P.sleeping=true;setSit(false);ACT.mode=null;FISH.state='idle';const f=el('fade');f.classList.add('on');
   setTimeout(()=>{let hrs=(6.5-clock+24)%24;if(hrs<1)hrs+=24;clock+=hrs;while(clock>=24){clock-=24;day++;}ST.en=100;ST.hp=100;if(nearBed()){ST.temp=Math.max(ST.temp,72);ST.wet=0;setTimeout(()=>note('Kendi yatağında deliksiz uyudun'),2700);}ST.food=Math.max(0,ST.food-hrs*.33);ST.water=Math.max(0,ST.water-hrs*.5);ST.temp=Math.max(ST.temp,48);ST.sick=Math.max(0,(ST.sick||0)-hrs);WX.t+=hrs*20;
@@ -2103,7 +2115,7 @@ function craftHtml2(){const cats=['Aletler','Giysiler'];let h=`<div class="subta
   return h+'</div><p class="hint">Yün köy ağıllarındaki koyunlardan, reçine çam kesince, demir ve değerli taşlar kazmayla kayalardan çıkar.</p>';}
 function buildHtml2(){let h=card(ico('house',54),'Kalıcı Ev','Zemin, duvar, kapı, pencere, çatı ve eşyalarla evini parça parça kur.','<span></span><button type="button" class="pri" data-house="1">Ev Yapımı</button>','big')+'<div class="sec">Kamp ve kıyı</div><div class="cards">';
   for(const b of BUILDS){const ok=has(b.need);h+=card(ico(b.id),b.n,b.d,needChips(b.need)+`<button type="button" class="${ok?'pri':''}" data-build="${b.id}" ${ok?'':'disabled'}>Kur</button>`,ok?'can':'');}
-  return h+'</div><p class="hint">Kamp ateşi ve barınaklar önündeki boş, düz zemine kurulur. İskele ve teknelerin yerini sen seçersin.</p>';}
+  return h+'</div><p class="hint">Kur\'a basınca yapının hayaleti çıkar: yerini imleçle ya da dokunarak, yönünü R / Döndür ile seçersin. Yeşilse kurulabilir.</p>';}
 function cookHtml2(){const fx2=it=>fxChips(it);let h='<div class="cards">';for(const r of RECIPES){const it=ITEMS[r.id],ok=has(r.need)&&!ACT.mode;h+=card(ico(r.id),it.n,'',needChips(r.need)+fx2(it)+`<button type="button" class="${ok?'pri':''}" data-cook="${r.id}" ${ok?'':'disabled'}>Pişir</button>`,ok?'can':'');}
   h+='</div><div class="sec">Ateş</div><div class="cards">';
   if(panelFire&&panelFire.fuel!==undefined)h+=card(ico('fire'),'Ateş',panelFire.fuel>0?'Yaklaşık '+Math.ceil(panelFire.fuel)+' saat daha yanar.':'Sönmüş.',`<span></span><button type="button" data-fuel="1" ${INV.wood>0?'':'disabled'}>Odun ekle</button>`);
@@ -3706,7 +3718,7 @@ function exitBuilder(){if(!BLD.on)return;BLD.on=false;document.body.classList.re
 function selCat(c){BLD.cat=c;const f=Object.keys(PCS).find(k=>PCS[k].cat===c);if(f)BLD.sel=f;BLD.del=false;updBldUI();}
 function updBldUI(){if(!BLD.on)return;el('bTabs').innerHTML=PCAT.map((c,i)=>`<button type="button" data-bcat="${i}" class="${BLD.cat===i?'on':''}">${c}<kbd>${i+1}</kbd></button>`).join('');
   el('bList').innerHTML=Object.entries(PCS).filter(([k,d])=>d.cat===BLD.cat).map(([k,d])=>`<button type="button" data-bsel="${k}" class="pc ${BLD.sel===k?'on':''} ${has(d.need)?'':'no'}"><span class="pct">${ico(k,28)}<b>${d.n}</b></span>${needChips(d.need)}</button>`).join('');
-  el('bDel').classList.toggle('on',!!BLD.del);el('bInf').classList.toggle('on',!!CREATIVE);el('bFlat').textContent=HOUSE&&HOUSE.flat?'Yeniden Düzle':'Arsayı Düzle';el('bLot').hidden=!HOUSE||Object.keys(HOUSE.pcs).length>0;el('bRot').disabled=!PCS[BLD.sel].rot;BLD.gkey='~';}
+  el('bDel').classList.toggle('on',!!BLD.del);el('bInf').classList.toggle('on',!!CREATIVE);el('bFlat').textContent=HOUSE&&HOUSE.flat?'Yeniden Düzle':'Arsayı Düzle';el('bLot').hidden=!HOUSE||Object.keys(HOUSE.pcs).length>0;el('bRot').disabled=false;BLD.gkey='~';}
 function slotAt(D,wx,wz){const u=(wx-HOUSE.ox)/HCS,v=(wz-HOUSE.oz)/HCS,i=Math.floor(u),j=Math.floor(v);
   if(D.at==='cell'){if(i<0||j<0||i>=HLN||j>=HLN)return null;return{key:D.L+','+i+','+j,L:D.L,i,j};}
   const fu=u-i,fv=v-j;if(Math.min(fv,1-fv)<Math.min(fu,1-fu)){const jj=fv<.5?j:j+1;if(i<0||i>=HLN||jj<0||jj>HLN)return null;return{key:'h,'+i+','+jj,e:'h',i,j:jj};}
@@ -3727,15 +3739,16 @@ function clearGhost(){if(BLD.ghost){scene.remove(BLD.ghost);BLD.ghost.traverse(o
 function ghostMesh(s,t,r,col){const D=PCS[t],g=new T.Group(),mt=ghostMat(col),L=[];let x,z,ry;[x,z,ry]=slotWorld(s);
   if(D.L==='r'){pbox(L,HCS+.1,.16,HCS+.1,'#fff',x,HOUSE.y+HWH+.08,z);}else if(D.L==='f'){floorGeo(L,t,s.i,s.j);}
   else if(s.e){const eg=edgeGeo(t,r,s.key,wallBase(s));eg.L.forEach(q=>{q.rotateY(ry);q.translate(x,(t==='fence'?HQ(x,z)-.04:HOUSE.y)+HWH/2,z);});L.push(...eg.L);if(eg.ex.leaf){const lf=eg.ex.leaf;lf.L.forEach(q=>{q.translate(lf.px,lf.y,0);q.rotateY(ry);q.translate(x,HOUSE.y+HWH/2,z);});L.push(...lf.L);}}
-  else{const og=objGeo(t,roofDist(HOUSE.pcs),s.i,s.j);og.L.forEach(q=>{q.rotateY(r*Math.PI/2);q.translate(x,HOUSE.y,z);});L.push(...og.L);}
+  else{const og=objGeo(t,roofDist(HOUSE.pcs),s.i,s.j);if(D.rot&&D.at==='cell'&&D.L!=='g'){const a=prep(new T.ConeGeometry(.13,.24,3),'#fff');a.rotateX(Math.PI/2);a.translate(0,.05,.68);og.L.push(a);}og.L.forEach(q=>{q.rotateY(r*Math.PI/2);q.translate(x,HOUSE.y,z);});L.push(...og.L);}
   if(!L.length)return g;const m=new T.Mesh(merge(L),mt);m.renderOrder=6;m.layers.set(1);g.add(m);return g;}
 function bTick(){if(!BLD.on||!HOUSE)return;BLD.hideRoof=PCS[BLD.sel].cat!==2;if(!BLD.hasM){setGhost(null);return;}
   _nd.set(((BLD.mx*DPR/PIXD+SUB.x)/(RW-2))*2-1,(1-BLD.my*DPR/(PIXD*(RH-2)))*2-1);RAYC.setFromCamera(_nd,cam);const D=PCS[BLD.sel],yy=HOUSE.y+(D.L==='r'?HWH:0),o=RAYC.ray.origin,d=RAYC.ray.direction;if(Math.abs(d.y)<1e-5)return;
   const t=(yy-o.y)/d.y;BLD.hover=slotAt(D,o.x+d.x*t,o.z+d.z*t);setGhost(BLD.hover);}
+function bRotate(){const s=BLD.hover,pc=HOUSE&&HOUSE.pcs,cur=s&&pc&&pc[s.key];if(cur&&!BLD.del&&PCS[cur.t]&&PCS[cur.t].rot&&PCS[cur.t].at==='cell'){cur.r=(cur.r+1)&3;sfx('pick');puff(s);afterChange(false);note(PCS[cur.t].n+' döndürüldü');return;}if(PCS[BLD.sel].rot){BLD.rot=(BLD.rot+1)&3;BLD.gkey='';}}
 function setGhost(s){const pc=HOUSE?HOUSE.pcs:{},cur=s&&pc[s.key],v=s?(BLD.del?(cur?null:'Burada sökülecek bir şey yok'):pValid(BLD.sel,s)):null,key=s?s.key+'|'+BLD.sel+'|'+BLD.rot+'|'+BLD.del+'|'+(v||''):'';if(key===BLD.gkey)return;BLD.gkey=key;clearGhost();
   const info=el('bInfo');if(!s){info.textContent=BLD.del?'Sökmek için bir parçanın üstüne gel':'İmleci arsadaki ızgaraya getir';return;}
   if(!(BLD.del&&!cur)){BLD.ghost=ghostMesh(s,BLD.del?cur.t:BLD.sel,BLD.del?cur.r:BLD.rot,BLD.del?'#ff6a5a':v?'#ff6a5a':'#8fe07a');scene.add(BLD.ghost);}
-  const tap=matchMedia('(pointer: coarse)').matches;info.textContent=BLD.del?(cur?PCS[cur.t].n+' · '+(tap?'tekrar dokun':'tıkla')+': sök, malzemesi geri gelir':v):(v?PCS[BLD.sel].n+' · '+v:PCS[BLD.sel].n+' · '+(tap?'tekrar dokun ya da Yerleştir':'tıkla: yerleştir')+(PCS[BLD.sel].rot?' · R: döndür':''));}
+  const tap=matchMedia('(pointer: coarse)').matches;info.textContent=BLD.del?(cur?PCS[cur.t].n+' · '+(tap?'tekrar dokun':'tıkla')+': sök, malzemesi geri gelir':v):(cur&&PCS[cur.t].rot&&PCS[cur.t].at==='cell'?PCS[cur.t].n+' · '+(tap?'Döndür':'R')+': bu eşyayı çevir · Sök ile kaldır':v?PCS[BLD.sel].n+' · '+v:PCS[BLD.sel].n+' · '+(tap?'tekrar dokun ya da Yerleştir':'tıkla: yerleştir')+(PCS[BLD.sel].rot?(tap?' · Döndür ile yönünü ayarla':' · R: döndür'):''));}
 function puff(s){const[x,z]=slotWorld(s);for(let k=0;k<14;k++)addP({k:'dust',lit:1,x:x+(Math.random()-.5)*1.3,y:HOUSE.y+.2+(s.e?Math.random()*2:0),z:z+(Math.random()-.5)*1.3,vx:(Math.random()-.5)*1.6,vy:.8+Math.random(),vz:(Math.random()-.5)*1.6,life:0,max:.7,c:[.75,.68,.55],s:2});}
 function bClick(){const s=BLD.hover;if(!s||!HOUSE)return;const pc=HOUSE.pcs;
   if(BLD.del){const cur=pc[s.key];if(!cur){note('Burada sökülecek bir şey yok');return;}if(cur.t==='chest'&&ORDER.some(k=>STORE[k]>0)&&Object.values(pc).filter(p=>p.t==='chest').length===1){note('Önce sandığı boşalt');return;}
@@ -3747,11 +3760,11 @@ function afterChange(floor){buildHouse();if(floor)refreshLot();BLD.gkey='';updBl
 function bLot(){if(!HOUSE||Object.keys(HOUSE.pcs).length){note('Arsa boş olmalı');return;}const old=HOUSE;HOUSE=null;if(!makeLot()){HOUSE=old;return;}BLD.grid.visible=true;BLD.gkey='';refreshLot();note('Arsa taşındı');}
 // ---- builder input
 function v11Init(){el('bld').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;initAudio();const d=b.dataset;
-  if(d.bcat!==undefined)selCat(+d.bcat);else if(d.bsel){BLD.sel=d.bsel;BLD.del=false;updBldUI();}else if(b.id==='bX')exitBuilder();else if(b.id==='bRot'){BLD.rot=(BLD.rot+1)&3;BLD.gkey='';}else if(b.id==='bDel'){BLD.del=!BLD.del;updBldUI();}else if(b.id==='bOk')bClick();else if(b.id==='bLot')bLot();else if(b.id==='bFlat')startLevel();else if(b.id==='bInf'){CREATIVE=!CREATIVE;updBldUI();refreshPanel();toast('Sınırsız Kaynak',CREATIVE?'Açık · malzeme harcanmaz':'Kapalı');save();}b.blur();});
+  if(d.bcat!==undefined)selCat(+d.bcat);else if(d.bsel){BLD.sel=d.bsel;BLD.del=false;updBldUI();}else if(b.id==='bX')exitBuilder();else if(b.id==='bRot'){bRotate();}else if(b.id==='bDel'){BLD.del=!BLD.del;updBldUI();}else if(b.id==='bOk')bClick();else if(b.id==='bLot')bLot();else if(b.id==='bFlat')startLevel();else if(b.id==='bInf'){CREATIVE=!CREATIVE;updBldUI();refreshPanel();toast('Sınırsız Kaynak',CREATIVE?'Açık · malzeme harcanmaz':'Kapalı');save();}b.blur();});
 el('craft').addEventListener('click',()=>{togglePanel('craft');el('craft').blur();});el('prompt2').addEventListener('click',()=>{altAct();el('prompt2').blur();});}
 addEventListener('keydown',e=>{if(e.repeat)return;const c=e.code;
   if(BLD.on){const stop=()=>{e.stopImmediatePropagation();e.preventDefault();};
-    if(c==='KeyR'){if(PCS[BLD.sel].rot){BLD.rot=(BLD.rot+1)&3;BLD.gkey='';}stop();return;}if(c==='KeyX'){BLD.del=!BLD.del;updBldUI();stop();return;}
+    if(c==='KeyR'){bRotate();stop();return;}if(c==='KeyX'){BLD.del=!BLD.del;updBldUI();stop();return;}
     if(c==='Escape'||c==='KeyY'){exitBuilder();stop();return;}if(/^Digit[1-5]$/.test(c)){selCat(+c.slice(5)-1);stop();return;}if(c==='KeyI'||c==='Tab'||c==='KeyB'||c==='KeyM'||c==='KeyT'){stop();return;}return;}
   if(c==='KeyV'){altAct();}else if(c==='KeyY'){if(!(e.target&&e.target.tagName==='BUTTON'))enterBuilder();}else if(c==='KeyT'){initAudio();togglePanel('craft');}},true);
 addEventListener('pointerdown',e=>{if(!BLD.on||e.target!==canvas)return;if(e.pointerType==='mouse'){BLD.mx=e.clientX;BLD.my=e.clientY;BLD.hasM=true;if(e.button===0){bTick();bClick();e.stopImmediatePropagation();}return;}BLD.tap={x:e.clientX,y:e.clientY,t:performance.now(),id:e.pointerId};},true);
@@ -3874,21 +3887,23 @@ function plcEval(){const B=BUILDS.find(b=>b.id===PLC.id);let why=null;PLC.r=PLC.
   if(Math.hypot(PLC.x-P.x,PLC.z-P.z)>32)why='Çok uzak · biraz yaklaş';
   else if(PLC.id==='pier'){if(HQ(PLC.x,PLC.z)<WLAT(PLC.x,PLC.z)-.05)why='İskele kıyıdan başlar · imleci kıyıya getir';else{let ok=null;for(let k=0;k<16&&ok===null;k++){const a=PLC.rot+(k%2?1:-1)*Math.ceil(k/2)*Math.PI/8,f=pierFit(PLC.x,PLC.z,a);if(!f.why)ok={a,y:f.y};}
       if(ok){PLC.r=ok.a;PLC.y=ok.y;const cx=PLC.x+Math.sin(ok.a)*PIERL/2,cz=PLC.z+Math.cos(ok.a)*PIERL/2;for(const b of built.values())if(b.placed&&b.L&&Math.hypot(b.L.x-cx,b.L.z-cz)<4)why='Çok yakında başka bir yapı var';}else why=pierFit(PLC.x,PLC.z,PLC.rot).why;}}
+  else if(!PLCW.has(PLC.id)){const ek=PLC.id+'|'+Math.round(PLC.x*4)+'|'+Math.round(PLC.z*4)+'|'+PLC.rot.toFixed(2);if(ek!==PLC.ek){PLC.ek=ek;PLC.ew=landWhy(PLC.id,PLC.x,PLC.z,PLC.rot);}why=PLC.ew;}
   else why=boatFit(PLC.x,PLC.z,PLC.rot);
   if(!why&&!has(B.need))why='Malzeme yetersiz · '+Object.entries(B.need).map(([k,n])=>n+' '+ITEMS[k].n).join(', ');PLC.why=why;return why;}
-function plcGhost(){const ok=!PLC.why,key=[PLC.id,Math.round(PLC.x*4),Math.round(PLC.z*4),PLC.r.toFixed(2),ok].join('|');if(key===PLC.gkey)return;PLC.gkey=key;plcClear();const mt=ghostMat(ok?'#8fe07a':'#ff6a5a');let g;
+function plcGhost(){const ok=!PLC.why,land=!PLCW.has(PLC.id),q=land?2:4,key=[PLC.id,Math.round(PLC.x*q),Math.round(PLC.z*q),PLC.r.toFixed(2),ok].join('|');if(key===PLC.gkey)return;PLC.gkey=key;plcClear();const mt=ghostMat(ok?'#8fe07a':'#ff6a5a');let g;
   if(PLC.id==='pier'){const y=ok?PLC.y:WLAT(PLC.x,PLC.z)+.55,o={x:PLC.x+Math.sin(PLC.r)*PIERL/2,z:PLC.z+Math.cos(PLC.r)*PIERL/2,r:PLC.r};g=new T.Group();g.position.set(o.x,0,o.z);g.rotation.y=o.r;const L=[];pbox(L,1.6,.1,PIERL,'#fff',0,y-.05,0);[-1,1].forEach(sd=>[-PIERL/2+1.2,0,PIERL/2-.4].forEach(v=>pbox(L,.16,1.2,.16,'#fff',sd*.72,y-.5,v)));pbox(L,.1,1.6,.1,'#fff',.62,y+.8,PIERL/2-1.4);
     const m=new T.Mesh(merge(L),mt);m.renderOrder=6;g.add(m);}
+  else if(land){const gx=Math.round(PLC.x*q)/q,gz=Math.round(PLC.z*q)/q;g=landGhost(PLC.id,gx,gz,landR(PLC.id,PLC.rot),mt);}
   else{const md=buildBoat();if(PLC.id==='sail')addSail(md);g=md.g;unregister(g);g.traverse(o=>{if(o.isMesh){o.material=mt;o.castShadow=false;}});g.position.set(PLC.x,WLAT(PLC.x,PLC.z)-.08,PLC.z);g.rotation.y=PLC.r;}
   g.traverse(o=>o.layers.set(1));PLC.ghost=g;scene.add(g);}
 function plcClear(){if(PLC.ghost){scene.remove(PLC.ghost);PLC.ghost.traverse(o=>{if(o.geometry&&!o.geometry.userData.shared&&!Object.values(HGEO).includes(o.geometry))o.geometry.dispose();});PLC.ghost=null;}}
 function enterPlace(id){if(CAVE){note('Mağarada yapılamaz');return;}if(BOAT||HZ.mounted||P.swim){note('Önce karaya çık');return;}if(BLD.on)exitBuilder();closePanel();
-  PLC.on=true;PLC.id=id;PLC.rot=P.rot;PLC.gkey='';PLC.last='';PLC.x=P.x+Math.sin(P.rot)*3;PLC.z=P.z+Math.cos(P.rot)*3;document.body.classList.add('bmode');el('plc').hidden=false;
-  el('plcName').textContent=BUILDS.find(b=>b.id===id).n;toast('Yerleştir',matchMedia('(pointer: coarse)').matches?'Yerini seçmek için dokun':'İmleçle yerini göster, tıkla');}
+  PLC.on=true;PLC.id=id;PLC.rot=P.rot;PLC.gkey='';PLC.last='';PLC.has=false;PLC.ek='';{const dd=PLCW.has(id)?3:landD(id);PLC.x=P.x+Math.sin(P.rot)*dd;PLC.z=P.z+Math.cos(P.rot)*dd;}document.body.classList.add('bmode');el('plc').hidden=false;
+  el('plcName').textContent=BUILDS.find(b=>b.id===id).n;toast('Yerleştir',matchMedia('(pointer: coarse)').matches?'Yerini seçmek için dokun · Döndür ile yönünü ayarla':'İmleçle yerini göster · R: döndür · tıkla: kur');}
 function exitPlace(){PLC.on=false;plcClear();PLC.gkey='';document.body.classList.remove('bmode');el('plc').hidden=true;}
 function plcTick(){if(!PLC.on)return;if(PLC.has){const p=rayGround(PLC.mx,PLC.my);if(p){PLC.x=p[0];PLC.z=p[1];}}const why=plcEval();plcGhost();
   const tap=matchMedia('(pointer: coarse)').matches;el('plcInfo').textContent=why||(tap?'tekrar dokun ya da Yerleştir':'tıkla: yerleştir · R: döndür');el('plcInfo').classList.toggle('bad',!!why);}
-function plcPlace(){if(!PLC.on)return;if(plcEval()){note(PLC.why);return;}const B=BUILDS.find(b=>b.id===PLC.id);take(B.need);
+function plcPlace(){if(!PLC.on)return;if(plcEval()){note(PLC.why);return;}if(!PLCW.has(PLC.id)){if(placeBuild(PLC.id,{x:PLC.x,z:PLC.z,r:PLC.rot})!==false)exitPlace();return;}const B=BUILDS.find(b=>b.id===PLC.id);take(B.need);
   if(PLC.id==='pier'){const o={t:'pier',x:PLC.x+Math.sin(PLC.r)*PIERL/2,z:PLC.z+Math.cos(PLC.r)*PIERL/2,r:PLC.r,y:PLC.y,id:'pl'+Date.now().toString(36)+((Math.random()*1e4)|0)};PLACED.push(o);spawnPier(o);sfx('thud');toast('İnşa','İskele kuruldu');}
   else{const b={id:'b'+Date.now().toString(36),x:PLC.x,z:PLC.z,rot:PLC.r,t:PLC.id==='sail'?'sail':'row'};BOATS.push(b);sfx('splash');for(let k=0;k<14;k++)addP({k:'spray',lit:1,x:b.x+(Math.random()-.5)*1.5,y:WLAT(b.x,b.z)+.1,z:b.z+(Math.random()-.5)*1.5,vx:(Math.random()-.5)*2,vy:1+Math.random()*1.5,vz:(Math.random()-.5)*2,ph:0,life:0,max:.7,c:[.9,.96,1],s:2});toast('İnşa',B.n+' suya indirildi');}
   save();exitPlace();}
@@ -4855,7 +4870,7 @@ Object.assign(ICOMAP,{plank:['plank'],rope:['rope'],cloth:['cloth'],tleather:['h
 
 // ---- house pieces: furniture & decor
 PCAT.length=0;PCAT.push('Zemin','Duvar','Çatı','Mobilya','Süs');
-['lamp','plant','mlamp'].forEach(k=>PCS[k].cat=4);
+['lamp','plant','mlamp'].forEach(k=>PCS[k].cat=4);setTimeout(()=>{for(const k in PCS)if(PCS[k].cat>=3)PCS[k].rot=1;},0);
 Object.assign(PCS,{
   chairb:{n:'Sandalye',cat:3,at:'cell',L:'o',need:{plank:2},rot:1},bench:{n:'Bank',cat:3,at:'cell',L:'o',need:{plank:3},rot:1},
   armchair:{n:'Koltuk',cat:3,at:'cell',L:'o',need:{plank:2,cloth:2},rot:1},sofa:{n:'Kanepe',cat:3,at:'cell',L:'o',need:{plank:3,cloth:3,tleather:1},rot:1},
@@ -4972,7 +4987,7 @@ function v52Spawn(o,g,em,cols,h,W){const sub=new T.Group();sub.position.y=h;g.ad
     [[-2.3,-2.2],[-1.3,-2.6]].forEach(([x,z])=>B(.08,1.3,.08,WK,x,.65,z));Bx(1.6,.06,1.1,'#7a6a58',-1.8,1.25,-2.05,-.35);B(.8,.45,.55,'#d8c070',.6,.22,R+.75);B(.82,.04,.57,'#c8a850',.6,.3,R+.75);col(-1.9,-1.6,.5);col(1.9,-1.6,.45);col(.6,R+.75,.5);
     const feedM=new T.Mesh(hbox(1.2,.08,.32),hmat('#d8c070',true));feedM.position.set(-1.9,.33,-1.6);feedM.rotation.y=.5;sub.add(feedM);xtra.vis={feedM,eggs:[]};const hc=W(0,.2);xtra.home=[hc[0],hc[1],R-.75];fin();}
   V52.tmp=xtra;}
-function v52Post(o){const b=built.get(o.id);if(!b)return;const c=Math.cos(o.r),s=Math.sin(o.r),W=(u,v)=>[o.x+u*c+v*s,o.z-u*s+v*c];
+function v52Post(o){const b=built.get(o.id);if(!b)return;if(o.ghost){V52.tmp=null;return;}const c=Math.cos(o.r),s=Math.sin(o.r),W=(u,v)=>[o.x+u*c+v*s,o.z-u*s+v*c];
   if(o.t==='camp'){const w=W(1.7,2.7),f=W(0,2.4);b.seats=[{x:w[0],z:w[1],y:HQ(w[0],w[1])+.4,rot:Math.atan2(f[0]-w[0],f[1]-w[1])}];return;}
   if(!V52T.has(o.t))return;const x=V52.tmp||{};V52.tmp=null;if(x.anim)b.anim.push(...x.anim);b.ws=WSDEF[o.t]?o.t:null;
   if(x.seats)b.seats=x.seats.map(q=>{const w=W(q.u,q.v);return{x:w[0],z:w[1],y:q.y,rot:q.rot};});
