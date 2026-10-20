@@ -2,9 +2,11 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Yabanyurt</title>
 <meta name="description" content="Yabanyurt — vahşi bir adada keşfet, avlan, inşa et ve hayatta kal. İzometrik pixel-art açık dünya.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
 <meta name="theme-color" content="#120e1a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -352,6 +354,7 @@ body.mob #mHud{display:flex;position:fixed;top:calc(env(safe-area-inset-top,0px)
 #mHud .mt{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--parchment);letter-spacing:.04em;white-space:nowrap}#mHud .mt .ii{width:14px;height:14px}
 #mHud .mb{display:flex;align-items:center;gap:5px}#mHud .mb .ii{width:12px;height:12px;flex:none}#mHud .mb span{flex:1;height:5px;background:#1a1420;border:1px solid #3a2f48;position:relative;min-width:110px}#mHud .mb i{position:absolute;inset:0;width:50%;display:block}
 body.mob #mapWrap{width:108px;height:66px;top:calc(env(safe-area-inset-top,0px) + 8px);right:calc(env(safe-area-inset-right,0px) + 10px)}body.mob #mapLabel{display:none}
+body.mob #mFsB{display:grid;place-items:center;position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:calc(env(safe-area-inset-right,0px) + 178px);width:46px;height:46px;padding:0;z-index:4;font-size:22px;color:var(--parchment);line-height:1}#mFsB{display:none}#mFsB.on{border-color:#c8a050}
 body.mob #mMenuB{display:grid;place-items:center;position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:calc(env(safe-area-inset-right,0px) + 126px);width:46px;height:46px;padding:0;z-index:4}
 #mMenuB .ii{width:26px;height:26px}
 body.mob #mSheet:not([hidden]){display:grid;position:fixed;top:calc(env(safe-area-inset-top,0px) + 62px);right:calc(env(safe-area-inset-right,0px) + 10px);grid-template-columns:repeat(4,72px);gap:6px;padding:8px;z-index:7}
@@ -3092,12 +3095,22 @@ const MACTI={chop:'wood',pick:'flower',berry:'berry',mine:'pick',needpick:'pick'
 function mobBtn(id,ico,cls,lbl){const b=document.createElement('button');b.type='button';b.id=id;if(cls)b.className=cls;b.innerHTML=`<img class="ii" alt="" src="${iconURL(ico)}">`+(lbl?`<small>${lbl}</small>`:'');return b;}
 function mobHold(b,down,up){b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();initAudio();mobFS();b.classList.add('dn');down&&down();try{b.setPointerCapture(e.pointerId);}catch(_){}});
   const end=e=>{b.classList.remove('dn');up&&up();};b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);b.addEventListener('contextmenu',e=>e.preventDefault());b.addEventListener('click',e=>{e.preventDefault();b.blur();});}
-function mobFS(){if(MOB.fs)return;MOB.fs=true;try{const d=document.documentElement;if(d.requestFullscreen&&!document.fullscreenElement)d.requestFullscreen({navigationUI:'hide'}).then(()=>{try{screen.orientation.lock('landscape').catch(()=>{});}catch(_){}}).catch(()=>{});}catch(_){}}
+function fsOn(){return!!(document.fullscreenElement||document.webkitFullscreenElement);}
+function fsCan(){const d=document.documentElement;return!!(d.requestFullscreen||d.webkitRequestFullscreen);}
+const IOS=/iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1&&!document.documentElement.requestFullscreen);
+const STANDALONE=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function goFS(on){try{const d=document.documentElement;if(on===false||(on===undefined&&fsOn())){(document.exitFullscreen||document.webkitExitFullscreen||(()=>{})).call(document);return;}
+  const p=d.requestFullscreen?d.requestFullscreen({navigationUI:'hide'}):d.webkitRequestFullscreen?d.webkitRequestFullscreen():null;if(p&&p.then)p.then(()=>{try{screen.orientation.lock('landscape').catch(()=>{});}catch(_){}}).catch(()=>{});}catch(_){}}
+function mobFS(){if(MOB.fs)return;MOB.fs=true;if(!fsOn()&&fsCan()){goFS(true);return;}try{const d=document.documentElement;if(d.requestFullscreen&&!document.fullscreenElement)d.requestFullscreen({navigationUI:'hide'}).then(()=>{try{screen.orientation.lock('landscape').catch(()=>{});}catch(_){}}).catch(()=>{});}catch(_){}}
 function newGameInit(){const b=el('newGame');if(b)b.addEventListener('click',()=>{el('setPop').hidden=true;menuOpen('pause');});const pb=document.createElement('button');pb.id='pauseB';pb.type='button';pb.hidden=true;pb.addEventListener('click',()=>menuOpen('pause'));document.body.appendChild(pb);}
 function mobInit(){newGameInit();const body=document.body;
   const rot=document.createElement('div');rot.id='mRot';rot.innerHTML='<div class="ph"></div><b>Telefonunu yan çevir</b><small>Yabanyurt yatay ekranda oynanır</small>';body.appendChild(rot);
   const hud=document.createElement('div');hud.id='mHud';hud.className='plate';hud.innerHTML=`<div class="mt"><b style="color:var(--ember);letter-spacing:.12em">YABANYURT</b><span id="mClock"></span><img class="ii" id="mWx" alt=""></div>`+[['heart','#d8473f','hp'],['food','#e0a040','food'],['drop','#4aa8e0','wat'],['bolt','#e8d050','en'],['thermo','#8ad06a','tmp']].map(([ic,c,k])=>`<div class="mb"><img class="ii" alt="" src="${iconURL(ic)}"><span><i id="m_${k}" style="background:${c}"></i></span></div>`).join('');
   hud.addEventListener('click',()=>body.classList.toggle('mobHud'));body.appendChild(hud);el('hud').addEventListener('click',()=>{if(MOB.on)body.classList.remove('mobHud');});
+  const fb=document.createElement('button');fb.type='button';fb.id='mFsB';fb.className='plate';fb.innerHTML='<span>⛶</span>';fb.title='Tam ekran';body.appendChild(fb);
+  fb.addEventListener('click',e=>{e.stopPropagation();if(fsCan())goFS();else if(IOS&&!STANDALONE)toast('Tam ekran','Safari: Paylaş ▸ Ana Ekrana Ekle, sonra simgeden aç');});
+  const syncFs=()=>{fb.classList.toggle('on',fsOn());fb.style.display=(fsCan()||(IOS&&!STANDALONE))&&!STANDALONE?'':'none';};document.addEventListener('fullscreenchange',syncFs);document.addEventListener('webkitfullscreenchange',syncFs);syncFs();
+  ['gesturestart','gesturechange'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
   const mb=document.createElement('button');mb.type='button';mb.id='mMenuB';mb.className='plate';mb.innerHTML=`<img class="ii" alt="" src="${iconURL('bag')}">`;body.appendChild(mb);
   const sh=document.createElement('div');sh.id='mSheet';sh.className='plate';sh.hidden=true;
   const items=[['bag','bag','Çanta'],['craft','anvil','Zanaat'],['build','hammer','İnşa'],['logBtn','book','Defter'],['mapBtn','mapico','Harita'],['horse','horseh','At'],['rest','rest','Dinlen'],['pauseB','gear','Menü']];
@@ -3131,10 +3144,13 @@ function mobTick(dt){if(!MOB.on)return;MOB.t-=dt;
     const c=el('clock');el('mClock').textContent=c?c.textContent:'';const w=el('wxI'),mw=el('mWx');if(w&&w.src&&mw.src!==w.src)mw.src=w.src;}
   document.body.classList.toggle('joying',ptr.active&&ptr.type!=='mouse');document.body.classList.toggle('busy',!!ACT.mode||FISH.state!=='idle');}
 // touch camera: right half drag rotates, two fingers pinch zoom
-function mobCamDown(e){if(!MOB.on||e.pointerType==='mouse'||BLD.on||PLC.on||mapOpen)return false;if(e.clientX<innerWidth*.42&&!MOB.cam.size)return false;if(e.clientX<innerWidth*.42&&ptr.active)return false;
+function mobCamDown(e){if(!MOB.on||e.pointerType==='mouse'||BLD.on||PLC.on||mapOpen)return false;
+  if(ptr.active&&ptr.type!=='mouse'&&ptr.id!==e.pointerId&&!MOB.cam.size&&(performance.now()-(MOB.jt||0)<450||Math.hypot(ptr.cx-ptr.bx,ptr.cy-ptr.by)<14)){
+    MOB.cam.set(ptr.id,{x:ptr.cx,y:ptr.cy});ptr.active=false;ptr.dx=ptr.dy=0;el('joy').style.display='none';MOB.cam.set(e.pointerId,{x:e.clientX,y:e.clientY});const[p1,p2]=[...MOB.cam.values()];MOB.pinch=Math.hypot(p1.x-p2.x,p1.y-p2.y);try{canvas.setPointerCapture(e.pointerId);}catch(_){}return true;}
+  if(e.clientX<innerWidth*.42&&!ptr.active)MOB.jt=performance.now();if(e.clientX<innerWidth*.42&&!MOB.cam.size)return false;if(e.clientX<innerWidth*.42&&ptr.active)return false;
   if(e.clientX<innerWidth*.42)return false;MOB.cam.set(e.pointerId,{x:e.clientX,y:e.clientY});if(MOB.cam.size===2){const[p1,p2]=[...MOB.cam.values()];MOB.pinch=Math.hypot(p1.x-p2.x,p1.y-p2.y);}try{canvas.setPointerCapture(e.pointerId);}catch(_){}mobFS();return true;}
 function mobCamMove(e){const c=MOB.cam.get(e.pointerId);if(!c)return false;const dx=e.clientX-c.x,dy=e.clientY-c.y;c.x=e.clientX;c.y=e.clientY;
-  if(MOB.cam.size>=2){const[p1,p2]=[...MOB.cam.values()],d=Math.hypot(p1.x-p2.x,p1.y-p2.y);if(MOB.pinch>0&&d>0)viewHT=Math.max(12,Math.min(36,viewHT*MOB.pinch/d));MOB.pinch=d;}
+  if(MOB.cam.size>=2){const[p1,p2]=[...MOB.cam.values()],d=Math.hypot(p1.x-p2.x,p1.y-p2.y);if(MOB.pinch>0&&d>0){viewHT=Math.max(9,Math.min(36,viewHT*Math.pow(MOB.pinch/d,1.35)));viewH+=(viewHT-viewH)*.5;}MOB.pinch=d;}
   else{yawT-=dx*.0085;pitchT=Math.max(.22,Math.min(1.45,pitchT+dy*.005));}return true;}
 function mobCamUp(e){if(!MOB.cam.delete(e.pointerId))return false;MOB.pinch=0;if(MOB.cam.size===2){const[p1,p2]=[...MOB.cam.values()];MOB.pinch=Math.hypot(p1.x-p2.x,p1.y-p2.y);}return true;}
 
@@ -3246,6 +3262,7 @@ function menuDraw(){const b=el('mBody');let h='';const cur=slotInfo(CURSLOT);
   else if(MENU.view==='settings'){h+=`<div class="mh">Ayarlar</div>`;
     h+=`<button type="button" class="mi set" data-m="snd"><span class="ml">Ses</span><b>${soundOn?'Açık':'Kapalı'}</b></button>`;
     h+=`<button type="button" class="mi set" data-m="gfx"><span class="ml">Grafik kalitesi</span><b>${GQN[GQ.lvl]}</b></button>`;
+    h+=MOB.on&&!STANDALONE?`<button type="button" class="mi set" data-m="fs"><span class="ml">Tam ekran</span><b>${fsOn()?'Açık':fsCan()?'Kapalı':'Ana ekrana ekle'}</b></button>`:'';
     h+=`<button type="button" class="mi set" data-m="touch"><span class="ml">Dokunmatik kontroller</span><b>${MOB.on?'Açık':'Kapalı'}</b></button>`;
     h+=`<button type="button" class="mi set" data-m="tilt"><span class="ml">Kamera açısı</span><b>${PITCH>1?'Yüksek':PITCH>.75?'Orta':'Alçak'}</b></button>`;
     h+=mi('back','‹ Geri','','sm');}
@@ -3257,6 +3274,8 @@ function menuDraw(){const b=el('mBody');let h='';const cur=slotInfo(CURSLOT);
   b.innerHTML=h;const f=b.querySelector('button.mi:not([disabled])');if(f&&!MOB.on)f.focus({preventScroll:true});}
 function menuAct(btn){const m=btn.dataset.m,i=+btn.dataset.i;initAudio();sfx('pick');
   if(m==='cloud'){MENU.view='cloud';CLOUD.msg='';menuDraw();if(CLOUD.sess&&!CLOUD.info)cloudCheck(true);return;}if(cloudAct(m))return;
+  if(MOB.on&&(m==='cont'||m==='new'||m==='load'||m==='resume')&&!fsOn()&&fsCan())goFS(true);
+  if(m==='fs'){if(fsCan())goFS();else toast('Tam ekran','Safari: Paylaş ▸ Ana Ekrana Ekle, sonra simgeden aç');setTimeout(menuDraw,400);return;}
   if(m==='cont'||m==='resume'){menuClose();return;}
   if(m==='save'){save();note('Kaydedildi · Yuva '+(CURSLOT+1));menuDraw();return;}
   if(m==='new'||m==='load'||m==='settings'||m==='controls'){MENU.view=m;MENU.arm=null;menuDraw();return;}
@@ -4749,7 +4768,7 @@ function start2(data){
   P.y=G(P.x,P.z);HZ.y=G(HZ.x,HZ.z);drawMini();updHud();el('load').hidden=true;last=performance.now();requestAnimationFrame(loop);
   menuInit();{const boot=readBoot(),hot=!!(data&&data.v===4);if(boot==='new'||boot==='cont'||hot){if(!sv&&WRECK)introStart();}else{if(!sv)NOSAVE=true;menuOpen('title',{fresh:!sv});}}
   if(!sv&&!WRECK)setTimeout(()=>toast(MOB.on?'Sol: yürü · Sağ: kamera · Büyük tuş: etkileşim':'E ile etkileşim','Ağaç kes, topla, balık tut'),3600);}
-window.__yb={CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
+window.__yb={menuClose,get vh(){return viewHT},CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
   setWeather:t=>{WX.type=t;const d=WDEF[t];[WX.cloud,WX.rain,WX.storm,WX.fog]=d;[WX.tc,WX.tr,WX.ts,WX.tf]=d;WX.wet=d[1];WX.t=0;WX.dur=999;},setYaw:v=>{yaw=yawT=v}};
 try{if(window.claude&&window.claude.hot&&typeof window.claude.hot.snapshot==='function')window.claude.hot.snapshot(()=>{save();return{v:4,px:P.x,pz:P.z,hx:HZ.x,hz:HZ.z,clock,day};});}catch(_){}
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});

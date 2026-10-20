@@ -1,0 +1,30 @@
+{
+ "name": "Yabanyurt",
+ "short_name": "Yabanyurt",
+ "description": "Vahşi bir adada keşfet, avlan, inşa et ve hayatta kal.",
+ "start_url": "/",
+ "scope": "/",
+ "display": "fullscreen",
+ "orientation": "landscape",
+ "background_color": "#120e1a",
+ "theme_color": "#120e1a",
+ "lang": "tr",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
