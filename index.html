@@ -444,6 +444,17 @@ body.mob.bmob #mBld{display:grid;position:fixed;top:calc(env(safe-area-inset-top
 #mBld button.ok{border-color:#8fe07a;color:#b8f0a8}#mBld button.on{border-color:#e98a7a;color:#ffb0a4}
 body.mob.bmob #mPad,body.mob.bmob #mJoyHint,body.mob.bmob #joy{display:none!important}
 #miniMe{display:none!important}
+#tameUI{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);transform:translateX(-50%);width:min(360px,calc(100vw - 32px));padding:10px 12px;z-index:9}
+#tameUI .tt{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:6px}#tameUI .tt b{color:#f4b54a;letter-spacing:.06em}#tameUI .tt span{color:var(--dim);font-size:11px}
+#tameUI .tbar{position:relative;height:18px;background:linear-gradient(90deg,#7a2a26,#3a2f48 22%,#3a2f48 78%,#7a2a26);border:2px solid #4d4160}#tameUI .tz{position:absolute;left:30%;right:30%;top:0;bottom:0;background:rgba(143,224,122,.28);border-left:1px solid #8fe07a;border-right:1px solid #8fe07a}
+#tameUI .tn{position:absolute;top:-4px;bottom:-4px;width:6px;margin-left:-3px;left:50%;background:#f1e4c4;box-shadow:0 0 0 2px #1a1422}#tameUI .tn.bad{background:#ff8a7a}
+#tameUI .tp{height:4px;margin-top:6px;background:#1a1420}#tameUI .tp i{display:block;height:100%;width:0;background:#f4b54a}
+#tameUI .tb{display:flex;gap:10px;margin-top:8px}#tameUI .tb button{flex:1;height:44px;font:700 20px/1 "Pixelify Sans",monospace;background:#2a2238;border:2px solid #4d4160;color:#f1e4c4;border-radius:8px;touch-action:none;display:flex;align-items:center;justify-content:center;gap:6px}#tameUI .tb button small{font-size:10px;color:var(--dim)}#tameUI .tb button:active{transform:scale(.95);border-color:#c8a050}
+body.mob #tameUI{bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}body.tride #mPad,body.tride #joy,body.tride #mJoyHint,body.tride #cbtn{display:none!important}body.mob #tameUI .tb button{height:58px;font-size:26px}
+.hstat{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:10.5px;color:var(--dim);margin:2px 0 4px}.hstat b{color:#f4d36a;font-weight:500;letter-spacing:-.04em}
+.hsec{font-size:10.5px;letter-spacing:.08em;color:var(--dim);margin:8px 0 2px;text-transform:uppercase}
+.hrow button{margin-left:6px;padding:2px 8px;font-size:11px}
+
 #miniOv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;box-shadow:inset 0 0 10px rgba(10,8,16,.55)}
 #mapLabel{z-index:3;left:0!important;bottom:0!important;right:0;padding:10px 54px 3px 6px;background:linear-gradient(transparent,rgba(16,12,22,.78));max-width:none!important;text-shadow:0 1px 0 #000,0 0 3px #000;color:#f1e4c4!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.06em!important}
 #mmZ{position:absolute;right:3px;bottom:3px;display:flex;gap:2px;z-index:3}#mmZ button{width:18px;height:18px;padding:0;display:flex;align-items:center;justify-content:center;background:rgba(20,16,30,.82);border:1px solid #4d4160;border-radius:4px;color:#f1e4c4;font:700 13px/1 "Pixelify Sans",monospace;cursor:pointer}#mmZ button:hover{border-color:#c8a050}
@@ -491,7 +502,7 @@ body.mob.bmob #bRot,body.mob.bmob #bDel,body.mob.bmob #bOk,body.mob.bmob #bX,bod
     <li><kbd>M</kbd><span>büyük harita, yer işaretle</span></li>
     <li><kbd>E</kbd><span>atın yanında: sev / besle · suya bakarken: su iç</span></li>
     <li><kbd>F</kbd><span>ata bin / in · binerken E: zıpla</span></li>
-    <li><kbd>G</kbd><span>atı çağır (ıslık)</span></li>
+    <li><kbd>G</kbd><span>ıslık · atını çağır, yabani atın dikkatini çek</span></li>
     <li><kbd>E</kbd><span>dinlenen ejderhanın yanında: bin · uçarken E / F: in</span></li>
     <li><kbd>Sağ tık</kbd><span>basılı tutup sürükle: sağa-sola döndür, yukarı-aşağı eğ (Q / C, ⇅)</span></li>
     <li><kbd>Tekerlek</kbd><span>yakınlaş / uzaklaş</span></li>
@@ -680,12 +691,15 @@ const cloudTex=(()=>{const S=128,d=new Uint8Array(S*S);for(let y=0;y<S;y++)for(l
   const t=new T.DataTexture(d,S,S,T.RedFormat);t.wrapS=t.wrapT=T.RepeatWrapping;t.magFilter=T.LinearFilter;t.minFilter=T.LinearFilter;t.needsUpdate=true;return t;})();
 const GQ=(()=>{let l=null;try{l=localStorage.getItem('yabanyurt-gfx');}catch(e){}l=l===null?(matchMedia('(pointer: coarse)').matches?1:2):+l;return{lvl:Math.max(0,Math.min(2,l|0))};})();
 const GQN=['Düşük','Orta','Yüksek'],GQD=[.8,.34,.44],GQA=[0,.75,1];
-const FXU={uGrassR:{value:new T.Vector2(1e4,1e4)},uTime:{value:0},tCloud:{value:cloudTex},uCloud:{value:.3},uWind:{value:1},uCover:{value:0},uWet:{value:0},uRim:{value:0},uRimCol:{value:new T.Color(1,.8,.5)},uSunXZ:{value:new T.Vector2(1,0)},uPush:{value:[new T.Vector4(),new T.Vector4()]}};
+const FXU={uGrassR:{value:new T.Vector2(1e4,1e4)},uTime:{value:0},tCloud:{value:cloudTex},uCloud:{value:.3},uWind:{value:1},uCover:{value:0},uWet:{value:0},uRim:{value:0},uRimCol:{value:new T.Color(1,.8,.5)},uSunXZ:{value:new T.Vector2(1,0)},uPush:{value:[new T.Vector4(),new T.Vector4()]},uSnow:{value:0},uAut:{value:0},uWin:{value:0},uDry:{value:0}};
 const gradMap=(()=>{const t=new T.DataTexture(new Uint8Array([72,150,255]),3,1,T.RedFormat);t.minFilter=t.magFilter=T.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;return t;})();
-const V_HEAD=`uniform float uTime;uniform float uWind;uniform vec4 uPush[2];uniform vec2 uGrassR;varying vec3 vWPos;varying float vH;varying float vGust;\n`;
+const V_HEAD=`uniform float uSnow;uniform float uWin;uniform float uTime;uniform float uWind;uniform vec4 uPush[2];uniform vec2 uGrassR;varying vec3 vWPos;varying float vH;varying float vGust;\n`;
 const V_PROJ=`
 #if defined(GRASS)&&defined(USE_INSTANCING)
-{vec3 gip=(modelMatrix*vec4(instanceMatrix[3].xyz,1.)).xyz;float gfd=1.-smoothstep(uGrassR.x,uGrassR.y,max(abs(gip.x-uPush[0].x),abs(gip.z-uPush[0].z)));transformed*=vec3(mix(.55,1.,gfd),gfd,mix(.55,1.,gfd));}
+{vec3 gip=(modelMatrix*vec4(instanceMatrix[3].xyz,1.)).xyz;float gfd=1.-smoothstep(uGrassR.x,uGrassR.y,max(abs(gip.x-uPush[0].x),abs(gip.z-uPush[0].z)));transformed*=vec3(mix(.55,1.,gfd),gfd,mix(.55,1.,gfd));transformed.y*=1.-uSnow*.6;}
+#endif
+#if defined(PUSH)&&!defined(GRASS)
+transformed*=max(0.,1.-max(uSnow*1.4,uWin*.85));
 #endif
 vec4 mvPosition=vec4(transformed,1.0);
 #ifdef USE_INSTANCING
@@ -724,7 +738,7 @@ vWPos=wP.xyz;vH=transformed.y;
 mvPosition=viewMatrix*wP;
 gl_Position=projectionMatrix*mvPosition;
 `;
-const F_HEAD=`varying float vGust;uniform float uRim;uniform vec3 uRimCol;uniform vec2 uSunXZ;uniform sampler2D tCloud;uniform float uCloud;uniform float uCover;uniform float uWet;uniform float uTime;varying vec3 vWPos;varying float vH;
+const F_HEAD=`uniform float uSnow;uniform float uAut;uniform float uWin;uniform float uDry;varying float vGust;uniform float uRim;uniform vec3 uRimCol;uniform vec2 uSunXZ;uniform sampler2D tCloud;uniform float uCloud;uniform float uCover;uniform float uWet;uniform float uTime;varying vec3 vWPos;varying float vH;
 const float BAY[16]=float[16](0.,8.,2.,10.,12.,4.,14.,6.,3.,11.,1.,9.,15.,7.,13.,5.);
 float fxHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 `;
@@ -751,10 +765,34 @@ gl_FragColor.rgb*=.93+fxHash(floor(vWPos.xz*5.))*.12;
 {float gh=clamp(vH,0.,1.);gl_FragColor.rgb*=mix(.97,1.08,gh)*(1.+vGust*.26*gh);gl_FragColor.rgb+=uRimCol*uRim*gh*gh*.3;}
 #endif
 }`;
+const F_SEASON=`
+#if defined(SPECKLE)||defined(LEAF)||defined(GRASS)||defined(WIND)||defined(SNOWY)
+{vec3 sc=diffuseColor.rgb;float gm=clamp((sc.g-max(sc.r*.95,sc.b*1.05))*4.,0.,1.);float hz=fxHash(floor(vWPos.xz*1.3)+floor(vWPos.y*1.3)*3.1);
+#ifdef LEAF
+{vec3 au=hz<.33?vec3(.86,.42,.1):hz<.66?vec3(.74,.22,.08):vec3(.93,.7,.18);float lm=.7+.6*dot(sc,vec3(.33));sc=mix(sc,au*lm,uAut*gm*.92);sc=mix(sc,vec3(.44,.36,.28)*(.8+.4*hz),uWin*gm*.8);}
+#endif
+#ifdef GRASS
+{sc=mix(sc,vec3(.8,.68,.34)*(.8+.4*hz),gm*clamp(uDry*.7+uAut*.75,0.,1.));sc=mix(sc,vec3(.56,.49,.33),gm*uWin*.75);}
+#endif
+#ifdef SPECKLE
+{sc=mix(sc,sc*vec3(1.12,.98,.72),gm*clamp(uDry*.6+uAut*.6,0.,1.));sc=mix(sc,vec3(.52,.47,.34),gm*uWin*.55);}
+#endif
+{vec3 swn=normalize((vec4(normal,0.)*viewMatrix).xyz);float up=swn.y;
+#ifdef UPNORMAL
+up=1.;
+#endif
+float n2=texture2D(tCloud,vWPos.xz*.035).r;float cov=smoothstep(.42,.8,up)*clamp((uSnow*1.75-n2*.85-.12)*3.,0.,1.);
+#ifdef GRASS
+cov=clamp(uSnow*1.7-.25,0.,1.);
+#endif
+sc=mix(sc,vec3(.9,.93,1.)*(.95+hz*.07),cov);}
+diffuseColor.rgb=sc;}
+#endif
+`;
 function fxCompile(shader){
   shader.uniforms.uTime=FXU.uTime;shader.uniforms.uWind=FXU.uWind;shader.uniforms.uGrassR=FXU.uGrassR;
   shader.vertexShader=V_HEAD+shader.vertexShader.replace('#include <beginnormal_vertex>','#include <beginnormal_vertex>\n#ifdef UPNORMAL\nobjectNormal=vec3(0.,1.,0.);\n#endif').replace('#include <project_vertex>',V_PROJ);
-  shader.uniforms.uPush=FXU.uPush;if(this.userData.lit){shader.uniforms.uRim=FXU.uRim;shader.uniforms.uRimCol=FXU.uRimCol;shader.uniforms.uSunXZ=FXU.uSunXZ;shader.uniforms.tCloud=FXU.tCloud;shader.uniforms.uCloud=FXU.uCloud;shader.uniforms.uCover=FXU.uCover;shader.uniforms.uWet=FXU.uWet;shader.fragmentShader=F_HEAD+shader.fragmentShader.replace('#include <dithering_fragment>',F_TAIL);}
+  shader.uniforms.uPush=FXU.uPush;shader.uniforms.uSnow=FXU.uSnow;shader.uniforms.uWin=FXU.uWin;if(this.userData.lit){shader.uniforms.uRim=FXU.uRim;shader.uniforms.uRimCol=FXU.uRimCol;shader.uniforms.uSunXZ=FXU.uSunXZ;shader.uniforms.tCloud=FXU.tCloud;shader.uniforms.uCloud=FXU.uCloud;shader.uniforms.uCover=FXU.uCover;shader.uniforms.uWet=FXU.uWet;shader.uniforms.uSnow=FXU.uSnow;shader.uniforms.uAut=FXU.uAut;shader.uniforms.uWin=FXU.uWin;shader.uniforms.uDry=FXU.uDry;shader.fragmentShader=F_HEAD+shader.fragmentShader.replace('#include <dithering_fragment>',F_TAIL).replace('#include <normal_fragment_maps>','#include <normal_fragment_maps>\n'+F_SEASON);}
 }
 function toon(p,defines){const m=new T.MeshToonMaterial(Object.assign({gradientMap:gradMap},p));m.defines=Object.assign({},defines||{});m.userData.lit=true;m.onBeforeCompile=fxCompile;return m;}
 function nrm(defines,flat){const m=new T.MeshNormalMaterial({flatShading:!!flat});m.defines=Object.assign({},defines||{});m.userData.lit=false;m.onBeforeCompile=fxCompile;return m;}
@@ -771,19 +809,19 @@ const MAT={
   canopy:toon({color:'#ffffff',vertexColors:true},Object.assign({LEAF:''},WIND_TREE)),
   pine:toon({vertexColors:true},WIND_PINE),
   snowPine:toon({vertexColors:true},WIND_PINE),
-  rock:toon({color:'#ffffff',flatShading:true,vertexColors:true}),
+  rock:toon({color:'#ffffff',flatShading:true,vertexColors:true},{SNOWY:''}),
   bush:toon({color:'#ffffff',vertexColors:true},{WIND:'',WIND_BASE:'0.2',WIND_AMP:'.06',LEAF:''}),
   cactus:toon({vertexColors:true}),
   grass:toon({color:'#ffffff',side:T.DoubleSide,vertexColors:true},{WIND:'',WIND_BASE:'0.0',WIND_AMP:'.42',GRASS:'',UPNORMAL:''}),
   flower:toon({color:'#ffffff',vertexColors:true},{WIND:'',WIND_BASE:'0.0',WIND_AMP:'.42',UPNORMAL:'',PUSH:''}),
-  marble:toon({color:'#d9cfbd'}),
-  stone:toon({color:'#8d899c'}),
+  marble:toon({color:'#d9cfbd'},{SNOWY:''}),
+  stone:toon({color:'#8d899c'},{SNOWY:''}),
   canvas:toon({color:'#d4b27a',flatShading:true}),
   wood:toon({color:'#8a5e3c'}),
   dark:new T.MeshBasicMaterial({color:'#2a1f1a',side:T.DoubleSide}),
   sand:toon({color:'#d9b87c',flatShading:true}),sandStep:toon({color:'#c9a66a',flatShading:true}),redrock:toon({color:'#b5643f',flatShading:true}),moai:toon({color:'#8a857a',flatShading:true}),
-  stoneF:toon({color:'#8d899c',flatShading:true}),marbleF:toon({color:'#dcd2c0',flatShading:true}),banner:toon({color:'#c23b3b',side:T.DoubleSide}),pukao:toon({color:'#9a4a38',flatShading:true}),
-  plaster:toon({color:'#e8dcc0',flatShading:true}),plaster2:toon({color:'#d9c49c',flatShading:true}),timber:toon({color:'#b98a5c',flatShading:true}),roofRed:toon({color:'#b4503a',flatShading:true,side:T.DoubleSide}),thatch:toon({color:'#c4a056',flatShading:true,side:T.DoubleSide}),slate:toon({color:'#5d6272',flatShading:true,side:T.DoubleSide}),doorWood:toon({color:'#6a4630',flatShading:true}),path:toon({color:'#a68c66'}),
+  stoneF:toon({color:'#8d899c',flatShading:true},{SNOWY:''}),marbleF:toon({color:'#dcd2c0',flatShading:true}),banner:toon({color:'#c23b3b',side:T.DoubleSide}),pukao:toon({color:'#9a4a38',flatShading:true}),
+  plaster:toon({color:'#e8dcc0',flatShading:true}),plaster2:toon({color:'#d9c49c',flatShading:true}),timber:toon({color:'#b98a5c',flatShading:true}),roofRed:toon({color:'#b4503a',flatShading:true,side:T.DoubleSide},{SNOWY:''}),thatch:toon({color:'#c4a056',flatShading:true,side:T.DoubleSide},{SNOWY:''}),slate:toon({color:'#5d6272',flatShading:true,side:T.DoubleSide},{SNOWY:''}),doorWood:toon({color:'#6a4630',flatShading:true}),path:toon({color:'#a68c66'}),
   bigCanopy:toon({color:'#3f9a6a'},{WIND:'',WIND_BASE:'8.0',WIND_AMP:'.0025'}),bigBark:toon({color:'#5e4230'})
 };
 const NM={plain:nrm(),flat:nrm({},true),tree:nrm(WIND_TREE),pine:nrm(WIND_PINE),bush:nrm({WIND:'',WIND_BASE:'0.2',WIND_AMP:'.06'}),big:nrm({WIND:'',WIND_BASE:'8.0',WIND_AMP:'.0025'})};
@@ -1480,9 +1518,11 @@ for(let i=0;i<RN;i++){rainD[i*3]=(Math.random()-.5)*58;rainD[i*3+1]=Math.random(
 const rain=new T.LineSegments(rainGeo,new T.LineBasicMaterial({color:'#b8cde6',transparent:true,opacity:0,depthWrite:false}));rain.layers.set(1);rain.frustumCulled=false;rain.renderOrder=7;rain.visible=false;scene.add(rain);
 const boltGeo=new T.BufferGeometry();boltGeo.setAttribute('position',new T.BufferAttribute(new Float32Array(80*6),3));
 const bolt=new T.LineSegments(boltGeo,new T.LineBasicMaterial({color:'#f2f6ff'}));bolt.layers.set(1);bolt.frustumCulled=false;bolt.visible=false;bolt.renderOrder=8;scene.add(bolt);
-function isSnowy(){return P.y>13||P.biome===7;}
-function nextWeather(){const r=Math.random();let acc=0,pick='clear';WX.zw=Math.random()<.35;for(const[k,w]of[['clear',.56],['cloudy',.27],['rain',.035],['storm',.0175],['fog',.04]]){acc+=w;if(r<acc){pick=k;break;}}
-  if(pick===WX.type)pick=pick==='clear'?'cloudy':'clear';WX.type=pick;WX.t=0;WX.dur=pick==='clear'?170+Math.random()*160:pick==='cloudy'?90+Math.random()*80:pick==='fog'?60+Math.random()*50:35+Math.random()*35;[WX.tc,WX.tr,WX.ts,WX.tf]=WDEF[pick];toast('Hava',WMSG[pick]);}
+var SZN={len:3,idx:0,f:0,yr:0,snow:0,aut:0,win:0,dry:0,snowy:false,ice:false,last:-1,snap:0,iceT:0,ices:new Map(),snowingPrev:false};
+function isSnowyBase(){return P.y>13||P.biome===7;}
+function isSnowy(){return isSnowyBase()||(!CAVE&&SZN.snowy);}
+function nextWeather(){const r=Math.random();let acc=0,pick='clear';WX.zw=Math.random()<.35;for(const[k,w]of sznWeights()){acc+=w;if(r<acc){pick=k;break;}}
+  if(pick===WX.type)pick=pick==='clear'?'cloudy':'clear';WX.type=pick;WX.t=0;WX.dur=pick==='clear'?170+Math.random()*160:pick==='cloudy'?90+Math.random()*80:pick==='fog'?60+Math.random()*50:35+Math.random()*35;[WX.tc,WX.tr,WX.ts,WX.tf]=WDEF[pick];toast('Hava',SZN.snowy&&(pick==='rain'||pick==='storm')?(pick==='storm'?'Tipi geliyor':'Kar yağacak gibi'):WMSG[pick]);}
 function updateWeather(dt){const k=dt*(P.sit&&!P.seat?1.5:1);WX.t+=k;if(WX.t>WX.dur)nextWeather();
   WX.zr+=(rainZone(P.x,P.z)-WX.zr)*Math.min(1,dt*.3);WX.cloud+=(Math.max(WX.tc,WX.zr*(WX.zw?.85:.4))-WX.cloud)*Math.min(1,k*.12);WX.rain+=(Math.max(WX.tr,WX.zw?WX.zr*.9:0)-WX.rain)*Math.min(1,k*.09);WX.storm+=(WX.ts-WX.storm)*Math.min(1,k*.09);WX.fog+=(WX.tf-WX.fog)*Math.min(1,k*.08);
   WX.wet+=(WX.rain-WX.wet)*Math.min(1,k*(WX.rain>WX.wet?.15:.03));
@@ -2064,7 +2104,7 @@ function updateStats(dt){const gh=dt*(P.sit&&!P.seat?RESTX:1)/HOURS,hot=ST.temp>
   // fatigue: slow, day-long tiredness — one night's sleep resets it; exertion adds only a little
   const drain=(1+ST.wet*.25)*(cold?1.2:1)*(ST.water<12?1.2:1),ex=(P.run&&!HZ.mounted&&P.moving?.9:0)+(HZ.mounted&&HZ.speed>8.5?.45:HZ.mounted&&HZ.speed>3?.2:0)+(P.swim?1.6:0)+(ACT.mode==='chop'||ACT.mode==='mine'||ACT.mode==='dig'?1.2:0)+(P.climb?1:0);
   ST.en=Math.max(0,Math.min(100,ST.en+(P.sit?gh*(P.cover||P.nearFire?2.4:1.7)*(P.seat?6:8):-gh*(3.1+ex)*drain)));
-  if(!HZ.mounted&&HZ.graze&&HZ.speed<.5)HZ.food=Math.min(100,HZ.food+gh*4);else HZ.food=Math.max(0,HZ.food-gh*(HZ.mounted?(HZ.speed>8.5?.9:.4):.2));HZ.petCd=Math.max(0,HZ.petCd-dt);
+  if(!HZ.mounted&&HZ.graze&&HZ.speed<.5)HZ.food=Math.min(100,HZ.food+gh*4);else HZ.food=Math.max(0,HZ.food-gh*(HZ.mounted?(HZ.speed>8.5?.9:.4):.2)/(HZ.end||1));HZ.petCd=Math.max(0,HZ.petCd-dt);
   warn('food',ST.food<12,ST.food>25,'Açlık','Bir şeyler yemelisin');warn('en',ST.en<12,ST.en>25,'Yorgunluk','Dinlen ya da uyu');
   warn('wet',ST.wet>.8&&!P.swim,ST.wet<.3,'Sırılsıklam','Bir barınak ya da ateş bul');warn('water',ST.water<14,ST.water>30,'Susuzluk','Bir dereden ya da gölden su iç');
   warn('cold',ST.temp<22,ST.temp>35,'Üşüyorsun','Ateş yak, kurulan ya da barınağa gir');warn('hot',ST.temp>86,ST.temp<75,'Bunaldın','Gölgeye geç ve su iç');warn('hfood',HZ.food<15,HZ.food>30,'Atın acıktı','Onu besle ya da otlamasına izin ver');
@@ -3305,6 +3345,7 @@ function menuDraw(){const b=el('mBody');let h='';const cur=slotInfo(CURSLOT);
     h+=`<button type="button" class="mi set" data-m="snd"><span class="ml">Ses</span><b>${soundOn?'Açık':'Kapalı'}</b></button>`;
     h+=`<button type="button" class="mi set" data-m="gfx"><span class="ml">Grafik kalitesi</span><b>${GQN[GQ.lvl]}</b></button>`;
     h+=MOB.on&&!STANDALONE?`<button type="button" class="mi set" data-m="fs"><span class="ml">Tam ekran</span><b>${fsOn()?'Açık':fsCan()?'Kapalı':'Ana ekrana ekle'}</b></button>`:'';
+    h+=`<button type="button" class="mi set" data-m="seas"><span class="ml">Mevsim süresi</span><b>${SZN.len} gün</b></button>`;
     h+=`<button type="button" class="mi set" data-m="enm"><span class="ml">Gece düşmanları</span><b>${['Açık','Az','Kapalı'][SKC.mode]}</b></button>`;
     h+=`<button type="button" class="mi set" data-m="vis"><span class="ml">Görüntü</span><b>${VIS.smooth?'Yumuşak':'Pixel art'}</b></button>`;
     h+=`<button type="button" class="mi set" data-m="touch"><span class="ml">Dokunmatik kontroller</span><b>${MOB.on?'Açık':'Kapalı'}</b></button>`;
@@ -3332,6 +3373,7 @@ function menuAct(btn){const m=btn.dataset.m,i=+btn.dataset.i;initAudio();sfx('pi
       if(MENU.mode==='pause')save();try{localStorage.removeItem(slotKey(i));}catch(_){}setSlot(i);if(MENU.sbx)try{localStorage.setItem('yb_sbx','1');}catch(_){}bootWith('new');return;}
     if(!s)return;if(i===CURSLOT&&!MENU.fresh){menuClose();return;}if(MENU.mode==='pause')save();setSlot(i);bootWith('cont');return;}
   if(m==='del'){if(MENU.arm!=='d'+i){MENU.arm='d'+i;menuDraw();return;}try{localStorage.removeItem(slotKey(i));}catch(_){}MENU.arm=null;if(i===CURSLOT&&MENU.mode==='pause')NOSAVE=true;menuDraw();return;}
+  if(m==='seas'){const L=[2,3,5];SZN.len=L[(L.indexOf(SZN.len)+1)%3];try{localStorage.setItem('yb_seas',String(SZN.len));}catch(_){}SZN.snap=1;menuDraw();return;}
   if(m==='enm'){SKC.mode=(SKC.mode+1)%3;try{localStorage.setItem('yb_enm',String(SKC.mode));}catch(_){}menuDraw();return;}
   if(m==='vis'){VIS.smooth=!VIS.smooth;try{localStorage.setItem('yb_smooth',VIS.smooth?'1':'0');}catch(_){}resize();setGfx(GQ.lvl);menuDraw();return;}
   if(m==='snd'){toggleSound();menuDraw();return;}
@@ -4407,7 +4449,7 @@ function update(dt){tnow+=dt;FXU.uTime.value=tnow;
   const h0=HQ(P.x,P.z),wl0=WLAT(P.x,P.z);P.wade=!BOAT&&!DRG.ride&&h0<wl0&&floorAt(P.x,P.z)<h0;P.swim=P.wade&&!HZ.mounted&&h0<wl0-1.05;
   if(DRG.ride){dragonRide(dt,moving,mx,mz,run);}
   else if(HZ.mounted){
-    if(moving){const ta=Math.atan2(mx,mz),d=Math.atan2(Math.sin(ta-HZ.rot),Math.cos(ta-HZ.rot)),rate=(run?2.4:3.4)*dt*(HZ.swim?.6:1);HZ.rot+=Math.max(-rate,Math.min(rate,d));const want=(run?13.5:6.2)*(V52.shoe?1.08:1)*(Math.abs(d)>1.5?.3:1)*horseWaterK(run)*trailK()*climbK(Math.sin(HZ.rot),Math.cos(HZ.rot),h0,.6)*(HZ.food<15?.8:1)*(HZ.bond>70?1.05:1);HZ.speed+=(want-HZ.speed)*Math.min(1,dt*(want>HZ.speed?1.8:3.5));}
+    if(moving){const ta=Math.atan2(mx,mz),d=Math.atan2(Math.sin(ta-HZ.rot),Math.cos(ta-HZ.rot)),rate=(run?2.4:3.4)*dt*(HZ.swim?.6:1);HZ.rot+=Math.max(-rate,Math.min(rate,d));const want=(run?13.5:6.2)*(V52.shoe?1.08:1)*(Math.abs(d)>1.5?.3:1)*horseWaterK(run)*trailK()*climbK(Math.sin(HZ.rot),Math.cos(HZ.rot),h0,.6)*(HZ.food<15?.8:1)*(HZ.bond>70?1.05:1)*(HZ.spd||1);HZ.speed+=(want-HZ.speed)*Math.min(1,dt*(want>HZ.speed?1.8:3.5));}
     else HZ.speed+=(0-HZ.speed)*Math.min(1,dt*3.2);
     jumpAhead();
     const sp=HZ.speed*dt,dx=Math.sin(HZ.rot)*sp,dz=Math.cos(HZ.rot)*sp,jp=HZ.jumpT>0;const r=slideMove(P.x,P.z,dx,dz,(nx,nz)=>blockedFrom(P.x,P.z,nx,nz,1.25,.3,false,true,jp));
@@ -4539,13 +4581,13 @@ function animateHero(dt){const p=HERO.parts,g=HERO.g;apUndo();const lerp=(o,v)=>
   p.head.rotation.y=CB.bow&&(CB.drawing||CB.shotT>0)&&!CB.roll?.5:P.moving||ACT.mode||FISH.state!=='idle'?0:Math.sin(tnow*.4)*.25;if(ST.temp<16&&!HZ.mounted&&!P.sleeping)g.position.x+=Math.sin(tnow*70)*.014;
   animPolish(dt,p,g);smearTick(dt);}
 function ambientFx(dt){if(reduceMotion)return;const nf=SKYS.night;let fly=0,leaf=0,flake=0;for(const p of parts){if(p.k==='fly')fly++;else if(p.k==='leaf')leaf++;else if(p.k==='flake')flake++;}const rr=a=>(Math.random()-.5)*a;const b=P.biome,sn=isSnowy();
-  if(nf>.5&&WX.rain<.4&&(b>=3&&b<=5)&&fly<22&&Math.random()<dt*5)addP({k:'fly',x:P.x+rr(46),y:P.y+.3+Math.random()*1.8,z:P.z+rr(46),ph:Math.random()*9,life:0,max:7+Math.random()*7,c:[.85,1,.45],s:2});
-  if(nf<.7&&(b===5||b===4)&&leaf<40&&Math.random()<dt*(b===5?6:2)*(1+WX.storm*3)){const au=Math.random()<.25;addP({k:'leaf',lit:1,x:P.x+rr(40),y:P.y+5+Math.random()*4,z:P.z+rr(40),ph:Math.random()*9,life:0,max:9,c:au?[.85,.45,.15]:[.35,.6,.25],s:2});}
-  if(sn&&flake<600)for(let i=0;i<Math.ceil(dt*(60+WX.rain*260));i++)addP({k:'flake',lit:1,x:P.x+rr(60),y:P.y+10+Math.random()*10,z:P.z+rr(60),ph:Math.random()*9,life:0,max:8,c:[1,1,1],s:Math.random()<.3?2:1});
+  if(nf>.5&&WX.rain<.4&&(b>=3&&b<=5)&&fly<22&&SZN.idx!==3&&Math.random()<dt*5)addP({k:'fly',x:P.x+rr(46),y:P.y+.3+Math.random()*1.8,z:P.z+rr(46),ph:Math.random()*9,life:0,max:7+Math.random()*7,c:[.85,1,.45],s:2});
+  if(nf<.7&&(b===5||b===4)&&leaf<(SZN.aut>.3?90:40)&&SZN.win<.5&&Math.random()<dt*(b===5?6:2)*(1+WX.storm*3)*(SZN.aut>.3?3:1)){const au=Math.random()<(SZN.aut>.3?.92:.25);addP({k:'leaf',lit:1,x:P.x+rr(40),y:P.y+5+Math.random()*4,z:P.z+rr(40),ph:Math.random()*9,life:0,max:9,c:au?[.85,.45,.15]:[.35,.6,.25],s:2});}
+  if(sn&&flake<600&&(isSnowyBase()||WX.rain>.12||WX.cloud>.7))for(let i=0;i<Math.ceil(dt*(60+WX.rain*260));i++)addP({k:'flake',lit:1,x:P.x+rr(60),y:P.y+10+Math.random()*10,z:P.z+rr(60),ph:Math.random()*9,life:0,max:8,c:[1,1,1],s:Math.random()<.3?2:1});
   if(b===3&&WX.cloud<.5&&(clock>16&&clock<19.5)&&Math.random()<dt*14)addP({k:'mote',x:P.x+rr(36),y:P.y+.2+Math.random()*2,z:P.z+rr(36),ph:Math.random()*9,life:0,max:5,c:[1,.9,.55],s:1});
   if(WX.rain>.25&&!sn){const n=Math.floor(dt*170*WX.rain+Math.random());for(let i=0;i<n;i++){const x=P.x+rr(46),z=P.z+rr(46);if(!coverAt(x,z))addP({k:'splash',lit:1,x,y:G(x,z)+.06,z,life:0,max:.22,c:[.82,.9,1],s:1});}}
   let bf=0;for(const p of parts)if(p.k==='bfly')bf++;
-  if(nf<.3&&WX.rain<.2&&(b===3||b===4)&&bf<4&&Math.random()<dt*.8){const x=P.x+rr(30),z=P.z+rr(30);addP({k:'bfly',lit:1,x,y:HQ(x,z)+.5+Math.random()*.7,z,ph:Math.random()*9,life:0,max:12+Math.random()*8,c:[[1,.85,.3],[.95,.95,.98],[.55,.75,1],[1,.6,.4],[.85,.6,1]][(Math.random()*5)|0],s:2});}
+  if(nf<.3&&WX.rain<.2&&(b===3||b===4)&&bf<4&&SZN.idx!==3&&SZN.win<.3&&Math.random()<dt*.8){const x=P.x+rr(30),z=P.z+rr(30);addP({k:'bfly',lit:1,x,y:HQ(x,z)+.5+Math.random()*.7,z,ph:Math.random()*9,life:0,max:12+Math.random()*8,c:[[1,.85,.3],[.95,.95,.98],[.55,.75,1],[1,.6,.4],[.85,.6,1]][(Math.random()*5)|0],s:2});}
   for(const b2 of built.values())if(b2.smoke)for(const sp of b2.smoke)if(Math.abs(sp.x-P.x)<70&&Math.abs(sp.z-P.z)<70&&Math.random()<dt*3)addP({k:'smoke',lit:1,x:sp.x+rr(.2),y:sp.y,z:sp.z+rr(.2),ph:Math.random()*9,life:0,max:4+Math.random()*2,c:[.78,.78,.8],s:2});
   const plat=regShown==='Rüzgârlı Plato';if((b===2||plat||(b===6&&M(P.x,P.z)<.4)||WX.storm>.5)&&Math.random()<dt*(plat?28:12)*(1+WX.storm*2)){const x=P.x+rr(40),z=P.z+rr(40);addP({k:'gust',lit:1,x,y:HQ(x,z)+.2+Math.random()*1.4,z,vx:6+Math.random()*5,vz:2+Math.random()*2,ph:Math.random()*9,life:0,max:1.4+Math.random(),c:b===2?[.9,.72,.5]:[.85,.82,.7],s:1});}
   if((b===3||b===4)&&nf<.4&&WX.rain<.2&&Math.random()<dt*5)addP({k:'mote',x:P.x+rr(36),y:P.y+.2+Math.random()*2,z:P.z+rr(36),ph:Math.random()*9,life:0,max:5,c:[1,.95,.7],s:1});
@@ -5735,13 +5777,13 @@ function miniFit(){const w=el('mapWrap'),ww=w.clientWidth||170,wh=w.clientHeight
   const dp=Math.min(2,devicePixelRatio||1),ow=Math.round(ww*dp),oh=Math.round(wh*dp);if(MM.ov.width!==ow||MM.ov.height!==oh){MM.ov.width=ow;MM.ov.height=oh;}
   return s0;}
 drawMini=function(){const s0=miniFit();if(CAVE){drawCaveMini();const sc=Math.max(MM.ww/72,MM.wh/72);el('mapRot').style.transform=`translate(-50%,-50%) scale(${sc})`;return;}
-  const W=MINI.W,Hh=MINI.H,hw=W>>1,hh=Hh>>1,upp=MM.Z[MM.z],img=mctx.createImageData(W,Hh),d=img.data,cx=P.x,cz=P.z,gi0=Math.round(cx/upp),gj0=Math.round(cz/upp),C=mmCache(upp);
+  const W=MINI.W,Hh=MINI.H,hw=W>>1,hh=Hh>>1,upp=MM.Z[MM.z],img=mctx.createImageData(W,Hh),d=img.data,snK=Math.min(.8,Math.max(0,SZN.snow-.15)*1.1),cx=P.x,cz=P.z,gi0=Math.round(cx/upp),gj0=Math.round(cz/upp),C=mmCache(upp);
   for(let j=0;j<Hh;j++)for(let i=0;i<W;i++){const gi=gi0+i-hw,gj=gj0+j-hh,key=gi*100003+gj;let c=C.get(key);
     if(!c){const x=gi*upp,z=gj*upp,h=HQ(x,z),wl=WLAT(x,z),wat=h<wl,b=wat?0:biome(h,.3,M(x,z));const cc=_c1.set(MINIC[b]);let k=wat?.75+Math.max(-4,h-wl)*.08:.8+Math.min(h,16)*.02;
       if(!wat){const hn=HQ(x-upp*.7,z-upp*.7);k*=1+Math.max(-.22,Math.min(.22,(h-hn)*.09*2.6/upp));if(h-wl<.35)k*=1.12;}
       else if(HQ(x+upp,z)>=WLAT(x+upp,z)||HQ(x-upp,z)>=WLAT(x-upp,z)||HQ(x,z+upp)>=WLAT(x,z+upp)||HQ(x,z-upp)>=WLAT(x,z-upp))k*=1.18;
-      const toS=v=>Math.round(255*Math.min(1,Math.pow(Math.max(0,v*k),1/2.2)));c=[toS(cc.r),toS(cc.g),toS(cc.b)];if(!wat&&roadMask(x,z)>.5)c=[206,188,152];if(rbound(x,z)>1.03)c=[30,40,62];C.set(key,c);}
-    const q=(j*W+i)*4;d[q]=c[0];d[q+1]=c[1];d[q+2]=c[2];d[q+3]=255;}
+      const toS=v=>Math.round(255*Math.min(1,Math.pow(Math.max(0,v*k),1/2.2)));c=[toS(cc.r),toS(cc.g),toS(cc.b),wat?1:0];if(!wat&&roadMask(x,z)>.5)c=[206,188,152,0];if(rbound(x,z)>1.03)c=[30,40,62,1];C.set(key,c);}
+    const q=(j*W+i)*4,sw=c[3]?0:snK;d[q]=c[0]+(232-c[0])*sw;d[q+1]=c[1]+(238-c[1])*sw;d[q+2]=c[2]+(246-c[2])*sw;d[q+3]=255;}
   mctx.putImageData(img,0,0);MM.gi0=gi0;MM.gj0=gj0;MM.upp=upp;};
 function miniOvTick(){const ov=MM.ov,g2=MM.cx;if(!ov||!ov.width)return;const dp=ov.width/MM.ww,ww=MM.ww,wh=MM.wh,s0=MM.s0;
   g2.setTransform(dp,0,0,dp,0,0);g2.clearRect(0,0,ww,wh);g2.imageSmoothingEnabled=false;
@@ -5784,7 +5826,184 @@ function miniOvTick(){const ov=MM.ov,g2=MM.cx;if(!ov||!ov.width)return;const dp=
     if(lb.textContent!==t)lb.textContent=t;}}
 miniMeTick=function(){miniOvTick();};
 
-window.__yb={MM,mmZoom,miniOvTick,MINI,miniMeTick,CAMO,BM,bmDown,bmMove,bmUp,LMSCALE,SHOPBUY,sndLevels,sndTest,SND,BAN,spawnBandit,spawnBeast,banTick,beastTick,v57Stall,BDEF,get HOURS(){return HOURS},SKC,spawnSkel,skelTick,skTick,skZones,skSafeAt,v52Sandbox,menuDraw,V52,WSDEF,v52Sit,wsCraft,v52FarmTick,v52BuyAnimal,v52Cands,VIS,get PIXD(){return PIXD},get RW(){return RW},menuClose,get vh(){return viewHT},CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
+/* ================= v63: wild horse taming + seasons ================= */
+/* ---------- seasons ---------- */
+SZN.len=(()=>{try{const v=+localStorage.getItem('yb_seas');return [2,3,5].includes(v)?v:3;}catch(_){return 3;}})();
+const SZNN=['İlkbahar','Yaz','Sonbahar','Kış'],SZNI=['🌱','☀','🍂','❄'];
+const SZNMSG=['Karlar eriyor · ekim zamanı geldi','Uzun sıcak günler · su ihtiyacın artar','Yapraklar sararıyor · kış için yiyecek ve odun biriktir','Kar ve ayaz · sıcak giysi ve ateş şart · tarlalar büyümez (sera hariç) · göller donar'];
+function sznWeights(){const i=SZN.idx;
+  if(i===3)return[['clear',.4],['cloudy',.3],['rain',.17],['storm',.05],['fog',.08]];
+  if(i===2)return[['clear',.47],['cloudy',.3],['rain',.1],['storm',.04],['fog',.09]];
+  if(i===0)return[['clear',.52],['cloudy',.28],['rain',.08],['storm',.025],['fog',.05]];
+  return[['clear',.64],['cloudy',.24],['rain',.045],['storm',.03],['fog',.02]];}
+function sznCalc(){const p=Math.max(0,((day-1)+clock/24)/SZN.len),b=Math.floor(p);return{idx:b%4,f:p-b,yr:Math.floor(b/4)};}
+const _ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+function sznTargets(c){const{idx,f,yr}=c;let s=0,a=0,w=0,d=0;
+  if(idx===0){if(yr>0){s=.8*(1-_ss(0,.28,f));w=.8*(1-_ss(0,.3,f));}}
+  else if(idx===1){d=.5*Math.sin(Math.PI*f);}
+  else if(idx===2){a=_ss(0,.3,f);d=.2+.3*_ss(.5,1,f);w=.45*_ss(.78,1,f);s=.3*_ss(.88,1,f);}
+  else{w=1;a=.4*(1-_ss(0,.3,f));s=.5+.42*_ss(0,.35,f)-.3*_ss(.86,1,f);}
+  return[s,a,w,d];}
+function sznTick(dt){const c=sznCalc();SZN.idx=c.idx;SZN.f=c.f;SZN.yr=c.yr;let[s,a,w,d]=sznTargets(c);
+  SZN.snowy=c.idx===3||(c.idx===2&&c.f>.88)||(c.idx===0&&c.yr>0&&c.f<.06);
+  const snowing=SZN.snowy&&WX.rain>.3&&!CAVE;if(snowing)s=Math.min(1,s+.25);
+  if(SZN.last<0||SZN.snap){SZN.snow=s;SZN.aut=a;SZN.win=w;SZN.dry=d;SZN.snap=0;}
+  else{const k=Math.min(1,dt*.03);SZN.snow+=(s-SZN.snow)*Math.min(1,dt*(s>SZN.snow?(snowing?.05:.03):.015));SZN.aut+=(a-SZN.aut)*k;SZN.win+=(w-SZN.win)*k;SZN.dry+=(d-SZN.dry)*k;}
+  FXU.uSnow.value=CAVE?0:SZN.snow;FXU.uAut.value=CAVE?0:SZN.aut;FXU.uWin.value=CAVE?0:SZN.win;FXU.uDry.value=CAVE?0:SZN.dry;
+  SZN.ice=c.idx===3&&c.f>.12&&c.f<.93;
+  if(SZN.last!==c.idx){if(SZN.last>=0&&!INTRO.on){toast(SZNN[c.idx]+' geldi',SZNMSG[c.idx]);chime();}SZN.last=c.idx;}
+  if(snowing&&!SZN.snowingPrev&&!INTRO.on)note(WX.storm>.5?'Tipi başladı':'Kar yağmaya başladı');SZN.snowingPrev=snowing;
+  SZN.iceT-=dt;if(SZN.iceT<=0){SZN.iceT=.5;iceTick();}}
+// frozen ponds
+const ICEMAT=toon({color:'#c3dae6',flatShading:true},{SNOWY:''});
+function iceTick(){if(CAVE)return;const cx=Math.floor(P.x/PC),cz=Math.floor(P.z/PC);
+  if(SZN.ice){for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++){const p=pondCell(cx+dx,cz+dz);if(!p||p.ice||!Number.isFinite(p.lvl))continue;const inP=Math.hypot(P.x-p.x,P.z-p.z)<p.r*1.15;if(inP&&(P.swim||P.wade||BOAT))continue;if(BOATS.some(b=>Math.hypot(b.x-p.x,b.z-p.z)<p.r*1.1))continue;
+      p.ice=1;const g=new T.Group(),m=new T.Mesh(new T.CircleGeometry(p.r*1.08,36).rotateX(-Math.PI/2),ICEMAT);m.receiveShadow=true;g.add(m);
+      const cm=new T.LineBasicMaterial({color:'#e8f4fb'}),pts=[];for(let k=0;k<5;k++){let a=Math.random()*6.28,r0=Math.random()*p.r*.4,x=Math.cos(a)*r0,z=Math.sin(a)*r0;for(let j=0;j<4;j++){const a2=a+(Math.random()-.5)*1.2,l=.6+Math.random()*1.2,nx=x+Math.cos(a2)*l,nz=z+Math.sin(a2)*l;if(Math.hypot(nx,nz)>p.r)break;pts.push(x,.012,z,nx,.012,nz);x=nx;z=nz;}}
+      if(pts.length){const lg=new T.BufferGeometry();lg.setAttribute('position',new T.BufferAttribute(new Float32Array(pts),3));g.add(new T.LineSegments(lg,cm));}
+      g.position.set(p.x,p.lvl+.035,p.z);scene.add(g);SZN.ices.set(p,g);}}
+  else if(SZN.ices.size){let on=false;for(const[p,g]of SZN.ices){if(Math.hypot(P.x-p.x,P.z-p.z)<p.r*1.06)on=true;p.ice=0;scene.remove(g);g.traverse(o=>{if(o.geometry)o.geometry.dispose();});}SZN.ices.clear();if(on&&!HZ.mounted){note('Buz çatladı!');sfx('splash');}}}
+const _v63fa=floorAt;floorAt=function(x,z){const b=_v63fa(x,z);if(!SZN.ices.size)return b;const p=pondNear(x,z);if(p&&p.ice&&Math.hypot(x-p.x,z-p.z)<p.r*1.07)return Math.max(b,p.lvl+.04);return b;};
+const _v63gs=groundSoft;groundSoft=function(x,z){const r=_v63gs(x,z);if(CAVE||SZN.snow<.42)return r;if(!r){const p=pondNear(x,z);if(!(p&&p.ice))return r;}return[.62,.3,.36,.48];};
+const _v63et=envTemp;envTemp=function(){const t=_v63et();if(CAVE)return t;const nf=SKYS.night,{idx,f,yr}=SZN;let o=0;
+  if(idx===1)o=6*(1-nf)*Math.sin(Math.PI*f)+1;else if(idx===2)o=-3-6*f;else if(idx===3)o=-16-6*Math.sin(Math.PI*f);else o=yr>0?-10*(1-f):-2;
+  if(P.cover&&P.cover.house)o*=.25;else if(P.nearFire)o*=.5;return Math.max(0,Math.min(100,t+o));};
+const _v63gt=gdnTick;gdnTick=function(dt){if(SZN.idx===3&&GDN.t-dt<=0){const gh=gameHour();for(const o of PLACED)if(o.g&&o.t!=='green'&&o.g.plots)for(const st of o.g.plots)st.last=gh;}return _v63gt(dt);};
+const _v63sp=startPick;startPick=function(kind,obj){if(kind==='berry'&&SZN.idx===3){note('Kışın çalılarda yemiş kalmadı');return;}return _v63sp(kind,obj);};
+const _v63hud=updHud;updHud=function(){_v63hud();const c=el('clock');if(c&&!CAVE)c.textContent=SZNN[SZN.idx]+' · '+c.textContent;};
+function sznSet(idx,f){const tot=(idx+(f||0))*SZN.len;day=1+Math.floor(tot);clock=(tot-Math.floor(tot))*24;SZN.snap=1;sznTick(0);}
+
+/* ---------- wild horse taming ---------- */
+const HCOATS=[{c:'#8a5a3a',m:'#2a1d18',n:'Doru'},{c:'#3a302b',m:'#1a1412',n:'Yağız'},{c:'#e6e0d4',m:'#b8b0a2',n:'Kır'},{c:'#a8794e',m:'#f0e6d0',n:'Kula'},{c:'#6d6f78',m:'#2e2c30',n:'Boz'},{c:'#5a3a28',m:'#1e1612',n:'Al'}];
+const HNAMES=['Rüzgâr','Yıldız','Karayel','Duman','Sürmeli','Ceylan','Alev','Poyraz','Tarçın','Bulut','Kumral','Fırtına','Şimşek','Gece','Pamuk','Kısrak','Atmaca','Sultan'];
+let HZD={name:'Doru',coat:'#8a5a3a',mane:'#33241d',blaze:false,rare:false,coatN:'Doru',spd:1,end:1,cour:.6,wild:1};
+let STABLE=[];
+const TM={hint:0,mHint:0,wcd:0,ride:null,bL:false,bR:false,rear:0,rearCd:0,fx:0};
+ANAMES.rhorse='Gümüş Yele';RARE.add('rhorse');
+HORSE.g.rotation.order='YXZ';
+function hRoll(rare){if(rare)return{name:'Gümüş Yele',coat:'#dfe4ec',mane:'#fbfdff',blaze:true,rare:true,coatN:'Gümüş',spd:1.2,end:1.3,cour:.95,wild:1.45};
+  const c=HCOATS[(Math.random()*HCOATS.length)|0],r=()=>Math.random();return{name:'',coat:c.c,mane:c.m,blaze:r()<.4,rare:false,coatN:c.n,spd:+(.9+r()*.22).toFixed(3),end:+(.8+r()*.45).toFixed(3),cour:+(.15+r()*.8).toFixed(3),wild:+(.75+r()*.45).toFixed(3)};}
+function horseSkin(d,saddle){const nb=buildHorse({coat:d.coat,mane:d.mane,blaze:!!d.blaze,saddle:saddle!==false});
+  for(const c of [...HORSE.g.children]){HORSE.g.remove(c);unregister(c);}for(const c of [...nb.g.children])HORSE.g.add(c);
+  for(const k in HORSE.p)delete HORSE.p[k];Object.assign(HORSE.p,nb.p);}
+function applyHZD(){horseSkin(HZD,true);HZ.spd=HZD.spd||1;HZ.end=HZD.end||1;HZ.cour=HZD.cour===undefined?.6:HZD.cour;}
+const _v63mk=makeAnimal;makeAnimal=function(type,opts){const A=_v63mk(type,opts);if(type==='whorse'){try{const rare=!!(opts&&opts.rare)||Math.random()<.08,d=hRoll(rare);A.hd=d;
+    if(A.model){A.g.remove(A.model.g);unregister(A.model.g);}const mdl=buildHorse({coat:d.coat,mane:d.mane,saddle:false,blaze:d.blaze});A.g.add(mdl.g);A.model=mdl;A.body=mdl.p.body;if(rare)A.key='rhorse';
+    A.tm={stage:0,spook:0,trust:0,spT:0,fed:0,t1:0};}catch(e){console.warn('whorse',e);}}return A;};
+const _v63ra=removeAnimal;removeAnimal=function(A){if(A&&A.tm&&A.tm.stage>=1&&!A.dead&&Math.hypot(A.x-P.x,A.z-P.z)<200)return;return _v63ra(A);};
+function spawnWildHorse(x,z,rare){const A=makeAnimal('whorse',{rare});A.x=x;A.z=z;A.y=HQ(x,z);A.g.position.set(x,A.y,z);return A;}
+function nearWild(r){let best=null,bd=r;for(const A of animals){if(A.type!=='whorse'||!A.tm||A.dead||A.tm.stage<0)continue;const d=Math.hypot(A.x-P.x,A.z-P.z);if(d<bd){bd=d;best=A;}}return best;}
+const TFOOD=[['carrot',.4],['pumpkin',.35],['wheat',.3],['bread',.3],['berry',.2]];
+function tFood(A){for(const[k,v]of TFOOD){if(A.hd.rare&&k!=='carrot')continue;if((INV[k]||0)>0)return[k,v];}return null;}
+function hNm(A){return A.hd.rare?'Gümüş Yele':'yabani at';}
+function hHearts(x,y,z,n,c){for(let i=0;i<(n||7);i++)addP({k:'mote',x:x+(Math.random()-.5)*.6,y:y+Math.random()*.4,z:z+(Math.random()-.5)*.6,ph:Math.random()*9,life:0,max:1.3,c:c||[1,.45,.6],s:2});}
+function tameWhistle(A){initAudio();whistle();const t=A.tm;
+  if(TM.wcd>0){t.spook=Math.min(1,t.spook+.3);TM.wcd=2.5;note('Çok sık ıslık çaldın · at huzursuz');return;}TM.wcd=2.5;
+  if(t.spT>0){note('At kaçıyor · sakinleşmesini bekle');return;}
+  if(t.stage>=1){t.t1=Math.max(t.t1,45);note(A.hd.rare?'Gümüş Yele seni izliyor':'At seni izliyor');return;}
+  if(t.spook>.5){t.spook=Math.min(1,t.spook+.2);note('At huzursuz · biraz bekle, sonra tekrar dene');return;}
+  t.stage=1;t.t1=45;t.spook=Math.max(0,t.spook-.3);A.state='idle';A.t=2;
+  toast(A.hd.rare?'Gümüş Yele':'Yabani At','Kulaklarını dikti · yavaşça yaklaş ve elinden besle'+(A.hd.rare?' (sadece havuç yer)':''));}
+const _v63ch=callHorse;callHorse=function(){if(!HZ.mounted&&!CAVE&&!TM.ride){const A=nearWild(24);if(A&&A.tm.stage>=0&&A.tm.stage<3){tameWhistle(A);return;}}return _v63ch();};
+const _v63tm=toggleMount;toggleMount=function(){if(TM.ride)return;return _v63tm();};
+function tameTick(dt){TM.wcd=Math.max(0,TM.wcd-dt);if(TM.ride)return;
+  for(const A of animals){if(A.type!=='whorse'||!A.tm||A.dead||A.tm.stage<0)continue;const t=A.tm,d=Math.hypot(A.x-P.x,A.z-P.z);
+    if(A.hd&&A.hd.rare&&A.g.visible&&Math.random()<dt*6)addP({k:'mote',x:A.x+(Math.random()-.5)*1.4,y:A.y+.8+Math.random()*1.4,z:A.z+(Math.random()-.5)*1.4,ph:Math.random()*9,life:0,max:1.6,c:[.85,.92,1],s:1});
+    if(d>70){if(t.stage>0&&d>110)t.stage=0;continue;}
+    if(d<26&&!TM.hint&&!INTRO.on){TM.hint=1;toast(A.hd.rare?'Gümüş Yele!':'Yabani At','Koşmadan yaklaş · ıslık çal (G) · elinden besle · sev · sonra binmeyi dene');}
+    let sp=0;const mv=P.moving&&!HZ.mounted;
+    if(HZ.mounted&&d<20){sp+=.5;if(!TM.mHint){TM.mHint=1;note('Yabani at atından ürküyor · in ve yaya yaklaş');}}
+    if(mv&&P.run&&d<16)sp+=t.stage?.75:1.2;else if(mv&&t.stage===0){if(d<5.5)sp+=.45;else if(d<9)sp+=.18;}
+    if(CB.atk>0&&d<10)sp+=1.5;
+    for(const w of WOLVES)if(liveWolf(w)&&!w.passive&&Math.hypot(w.x-A.x,w.z-A.z)<12){sp+=.8;break;}
+    sp*=t.stage===0?(A.hd.wild||1):1;
+    if(sp>0)t.spook=Math.min(1,t.spook+sp*dt);else t.spook=Math.max(0,t.spook-dt*(P.moving?.12:.3));
+    if(t.spook>=1&&t.spT<=0){t.spT=7;if(t.stage>0){t.trust*=.6;note((A.hd.rare?'Gümüş Yele':'Yabani at')+' ürktü ve kaçtı');}t.stage=0;}
+    if(t.spT>0){t.spT-=dt;A.fleeR=16;if(t.spT<=0)t.spook=.55;continue;}
+    if(t.stage===0){A.fleeR=5;continue;}
+    A.fleeR=0;if(A.state!=='flee'){A.state='idle';A.t=Math.max(A.t,1.5);A.target=Math.atan2(P.x-A.x,P.z-A.z);}
+    if(t.stage===1){t.t1-=dt;if(t.t1<=0){t.stage=0;note('Yabani at ilgisini kaybetti');}}}}
+const _v63ua=updateAnimals;updateAnimals=function(dt){try{tameTick(dt);}catch(e){console.warn('tame',e);}return _v63ua(dt);};
+function tameCands(cand){if(HZ.mounted||P.swim||BOAT||TM.ride||CAVE)return;for(const A of animals){if(A.type!=='whorse'||!A.tm||A.dead||!A.g.visible||A.tm.stage<0)continue;const t=A.tm,d=Math.hypot(A.x-P.x,A.z-P.z);if(d>24||t.spT>0)continue;const nm=hNm(A);
+  if(t.stage===0){if(d>2.6)cand(1.7+d*.03,{k:'twhistle',txt:'Islık çal · '+nm,A});continue;}
+  if(d>3)continue;const f=tFood(A);
+  if(t.stage===1||(t.stage===2&&t.fed<2&&t.trust<.75&&f))cand(d-1.5,f?{k:'tfeed',txt:(A.hd.rare?'Gümüş Yele\'yi':'Atı')+' elinden besle · '+ITEMS[f[0]].n,A,f}:{k:'tinfo',txt:A.hd.rare?'Gümüş Yele sadece havuç yer':'At aç · havuç, kabak, buğday ya da yemiş gerek'});
+  else if(t.stage===2)cand(d-1.5,{k:'tpet',txt:'Atı sev · Güven %'+Math.round(t.trust*100),A});
+  else if(t.stage===3)cand(d-1.6,{k:'tride',txt:'Binmeyi dene · '+(A.hd.rare?'çok huysuz':A.hd.wild>1.05?'huysuz':'ürkek'),A});}}
+const _v63cands=v52Cands;v52Cands=function(cand){_v63cands(cand);tameCands(cand);};
+const _v63ak=v52ActK;v52ActK=function(a){switch(a.k){
+  case'twhistle':tameWhistle(a.A);return true;
+  case'tinfo':note(a.txt);return true;
+  case'tfeed':case'tpet':{const A=a.A;ACT.mode=a.k==='tfeed'?'feed':'pet';ACT.t=0;ACT.dur=a.k==='tfeed'?1.6:2.1;ACT.target={tame:A,f:a.f};P.rot=Math.atan2(A.x-P.x,A.z-P.z);A.tm.t1=Math.max(A.tm.t1,45);A.state='idle';A.t=3;setSit(false);return true;}
+  case'tride':tameRideStart(a.A);return true;}
+  return _v63ak(a);};
+const _v63sp2=startPet;startPet=function(){_v63sp2();ACT.target=null;};
+const _v63ae=actExtra;actExtra=function(dt){const m=ACT.mode,tg=ACT.target;if((m==='pet'||m==='feed')&&tg&&tg.tame){const A=tg.tame,t=A.tm;
+    if(!animals.includes(A)||t.stage<1||Math.hypot(A.x-P.x,A.z-P.z)>3.6){ACT.mode=null;ACT.target=null;return true;}
+    if(ACT.t>=ACT.dur){ACT.mode=null;ACT.target=null;scanT=0;
+      if(m==='feed'){const f=tg.f;if(f&&(INV[f[0]]||0)>0){INV[f[0]]--;refreshPanel();}t.trust=Math.min(1,t.trust+(f?f[1]:.2));t.fed++;if(t.stage===1)t.stage=2;note(`${ITEMS[f?f[0]:'berry'].n} yedi · Güven %${Math.round(t.trust*100)}`);}
+      else{t.trust=Math.min(1,t.trust+.2*(A.hd.rare?.8:1));note(`At başını sana yasladı · Güven %${Math.round(t.trust*100)}`);}
+      hHearts(A.x+Math.sin(A.rot)*.9,A.y+2,A.z+Math.cos(A.rot)*.9);neigh(.5);
+      if(t.trust>=.999&&t.stage<3){t.stage=3;toast('Güven kazandın','Artık binmeyi deneyebilirsin · at seni atmaya çalışacak, dengede kal (A / D)');}}
+    return true;}
+  return _v63ae(dt);};
+// ride / balance minigame
+(function(){const d=document.createElement('div');d.id='tameUI';d.className='plate';d.hidden=true;d.innerHTML='<div class="tt"><b id="tameNm">Yabani At</b><span>Dengede kal!</span></div><div class="tbar"><i class="tz"></i><i id="tameN" class="tn"></i></div><div class="tp"><i id="tameP"></i></div><div class="tb"><button type="button" data-tb="L">◀<small>A</small></button><button type="button" data-tb="R">▶<small>D</small></button></div>';document.body.appendChild(d);
+  d.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-tb]');if(!b)return;e.preventDefault();e.stopPropagation();if(b.dataset.tb==='L')TM.bL=true;else TM.bR=true;try{b.setPointerCapture(e.pointerId);}catch(_){}});
+  const up=e=>{const b=e.target.closest&&e.target.closest('[data-tb]');if(!b)return;if(b.dataset.tb==='L')TM.bL=false;else TM.bR=false;};d.addEventListener('pointerup',up);d.addEventListener('pointercancel',up);d.addEventListener('lostpointercapture',up);})();
+function hzSnap(){return Object.assign({},HZD,{food:HZ.food,bond:HZ.bond});}
+function tameRideStart(A){if(TM.ride||!A||!A.tm||A.tm.stage!==3)return;setSit(false);ACT.mode=null;ACT.target=null;
+  TM.ride={A,t:0,x:0,v:0,f:0,fT:.5,dur:A.hd.rare?8:6.5,W:A.hd.wild||1,old:hzSnap(),ox:HZ.x,oz:HZ.z,orot:HZ.rot,ax:A.x,az:A.z,arot:A.rot,mode:HZ.mode};
+  A.g.scale.setScalar(.0001);A.state='idle';A.t=20;horseSkin(A.hd,false);HZ.x=A.x;HZ.z=A.z;HZ.rot=A.rot;HZ.by=undefined;HZ.y=G(A.x,A.z);P.x=A.x;P.z=A.z;P.rot=A.rot;HZ.mounted=true;HZ.speed=0;HZ.mode='idle';
+  document.body.classList.add('tride');el('tameNm').textContent=A.hd.rare?'Gümüş Yele':'Yabani '+A.hd.coatN;el('tameUI').hidden=false;neigh(1);SHAKE=.2;}
+function tameRideTick(dt){const R=TM.ride;if(!R)return;R.t+=dt;
+  const kL=keys.has('KeyA')||keys.has('ArrowLeft')||TM.bL||(ptr.active&&ptr.type!=='mouse'&&ptr.dx<-.35),kR=keys.has('KeyD')||keys.has('ArrowRight')||TM.bR||(ptr.active&&ptr.type!=='mouse'&&ptr.dx>.35),inp=(kR?1:0)-(kL?1:0);
+  R.fT-=dt;if(R.fT<=0){R.fT=.35+Math.random()*.45;const mag=(1.2+Math.random()*1.25)*R.W*Math.min(1,.3+R.t/1.4);R.f=(Math.random()<.5?-1:1)*mag;if(Math.random()<.35)neigh(.35);}
+  R.v+=(R.f+inp*4.8)*dt;R.v*=Math.max(0,1-dt*1.5);R.x+=R.v*dt*1.45;
+  HZ.x=R.ax;HZ.z=R.az;P.x=R.ax;P.z=R.az;HZ.speed=0;HZ.rot=R.arot+Math.sin(R.t*2.1)*.55;P.rot=HZ.rot;
+  const ph=Math.sin(R.t*4.6),b=Math.abs(ph);HORSE.g.position.y=HZ.y+b*.42;HORSE.g.rotation.x=(ph>0?-.34:.22)*b;HORSE.g.rotation.z=R.x*.38;P.y=G(R.ax,R.az)+b*.42;
+  if(Math.random()<dt*10)addP({k:'dust',lit:1,x:R.ax+(Math.random()-.5)*1.6,y:G(R.ax,R.az)+.05,z:R.az+(Math.random()-.5)*1.6,vx:(Math.random()-.5)*1.4,vy:.9+Math.random(),vz:(Math.random()-.5)*1.4,life:0,max:.6,c:[.6,.52,.4],s:2});
+  el('tameN').style.left=(50+Math.max(-1,Math.min(1,R.x))*46)+'%';el('tameN').classList.toggle('bad',Math.abs(R.x)>.7);el('tameP').style.width=Math.min(100,R.t/R.dur*100)+'%';
+  if(Math.abs(R.x)>=1||ST.hp<=0)tameRideEnd(false);else if(R.t>=R.dur)tameRideEnd(true);}
+function tameRideEnd(ok){const R=TM.ride;if(!R)return;TM.ride=null;TM.bL=TM.bR=false;el('tameUI').hidden=true;document.body.classList.remove('tride');HORSE.g.rotation.x=0;HORSE.g.rotation.z=0;const A=R.A;
+  if(ok){const old=R.old;STABLE.push(old);let rel=null;if(STABLE.length>6)rel=STABLE.shift();
+    const d=Object.assign({},A.hd);if(!d.rare){const used=new Set([HZD.name,...STABLE.map(s=>s.name)]);const free=HNAMES.filter(n=>!used.has(n));d.name=free.length?free[(Math.random()*free.length)|0]:HNAMES[(Math.random()*HNAMES.length)|0];}
+    HZD=d;applyHZD();HZ.food=70;HZ.bond=20;A.tm.stage=-1;_v63ra(A);hHearts(HZ.x,HZ.y+2.2,HZ.z,12);chime();neigh(1);
+    const st=(v,lo,hi)=>hStars(v,lo,hi);toast('Yeni atın: '+d.name,`${d.coatN} · Hız ${st(d.spd,.9,1.12)} · Dayanıklılık ${st(d.end,.8,1.25)} · Cesaret ${st(d.cour,.15,.95)}`);
+    setTimeout(()=>note(old.name+' evine, ahıra döndü'+(rel?' · '+rel.name+' özgür bırakıldı':'')),2600);save();}
+  else{horseSkin(HZD,true);HZ.mounted=false;HZ.x=R.ox;HZ.z=R.oz;HZ.rot=R.orot;HZ.by=undefined;HZ.y=G(R.ox,R.oz);HZ.speed=0;HZ.mode=R.mode==='follow'?'follow':'idle';
+    A.g.scale.setScalar(1);A.x=R.ax;A.z=R.az;A.rot=R.arot;const t=A.tm;t.trust=Math.max(.35,t.trust-.4);t.stage=2;t.fed=Math.min(t.fed,1);t.spook=.35;A.state='flee';A.t=1;A.target=R.arot;
+    const a=R.arot+(R.x>0?1:-1)*Math.PI/2;let nx=R.ax+Math.sin(a)*1.9,nz=R.az+Math.cos(a)*1.9;if(blockedFrom(R.ax,R.az,nx,nz,9,0,false)){nx=R.ax-Math.sin(a)*1.9;nz=R.az-Math.cos(a)*1.9;}P.x=nx;P.z=nz;P.y=G(nx,nz);
+    for(let i=0;i<14;i++)addP({k:'dust',lit:1,x:P.x+(Math.random()-.5)*1.2,y:P.y+.1,z:P.z+(Math.random()-.5)*1.2,vx:(Math.random()-.5)*2,vy:1+Math.random()*1.5,vz:(Math.random()-.5)*2,life:0,max:.7,c:[.6,.52,.4],s:2});
+    hurtPlayer(7);SHAKE=.5;note('At seni sırtından attı! · biraz daha sev, sonra tekrar dene');}}
+const _v63uh=updateHorse;updateHorse=function(dt){_v63uh(dt);if(TM.ride){try{tameRideTick(dt);}catch(e){console.warn('ride',e);tameRideEnd(false);}return;}
+  if(HZ.mounted){TM.rearCd-=dt;if(TM.rearCd<=0&&TM.rear<=0)for(const w of WOLVES){if(!liveWolf(w)||w.passive||(w.ban&&w.state==='lurk'))continue;if(Math.hypot(w.x-P.x,w.z-P.z)<7){TM.rearCd=6;if(Math.random()<(1-(HZ.cour===undefined?.6:HZ.cour))*.65){TM.rear=1.1;note(HZD.name+' ürktü ve şaha kalktı!');neigh(1);}break;}}}
+  if(TM.rear>0){TM.rear-=dt;HZ.speed*=Math.max(0,1-dt*6);const k=Math.sin(Math.min(1,(1.1-TM.rear)/1.1)*Math.PI);HORSE.g.rotation.x=-.55*k;if(HZ.mounted)P.y+=k*.5;if(TM.rear<=0)HORSE.g.rotation.x=0;}
+  if(HZD.rare&&Math.random()<dt*5)addP({k:'mote',x:HZ.x+(Math.random()-.5)*1.4,y:HZ.y+.8+Math.random()*1.4,z:HZ.z+(Math.random()-.5)*1.4,ph:Math.random()*9,life:0,max:1.6,c:[.85,.92,1],s:1});};
+// stable / horse panel
+function hStars(v,lo,hi){const n=Math.max(1,Math.min(5,Math.round(1+(v-lo)/(hi-lo)*4)));return'★'.repeat(n)+'☆'.repeat(5-n);}
+function nearHomeH(){const h=FOUNDPOS.get('__house')||(HOME&&KIT.camp?HOME:null);return!!h&&Math.hypot(P.x-h.x,P.z-h.z)<40;}
+horseMini=function(){const st=n=>'★'.repeat(n)+'☆'.repeat(5-n),d=HZD,nh=nearHomeH();
+  let h=`<div class="logrow" style="margin-top:auto">${ico2('horseh',24)}<span>${d.name}${d.rare?' ✦':''}</span><small>${d.coatN||'Doru'} · Bağ ${st(Math.max(0,Math.min(5,Math.round(HZ.bond/20))))}</small></div>`;
+  h+=`<div class="hstat"><span>Hız <b>${hStars(d.spd||1,.9,1.12)}</b></span><span>Dayanıklılık <b>${hStars(d.end||1,.8,1.25)}</b></span><span>Cesaret <b>${hStars(d.cour===undefined?.6:d.cour,.15,.95)}</b></span></div>`;
+  h+=`<div style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--dim)">Tokluk<span class="meter"><i style="width:${Math.round(HZ.food)}%"></i></span></div>`;
+  if(STABLE.length){h+=`<div class="hsec">Ahır · ${STABLE.length} at${nh?'':' · değiştirmek için evine dön'}</div>`;
+    h+=STABLE.map((s,i)=>`<div class="logrow hrow"><span>${s.name}${s.rare?' ✦':''}</span><small>${s.coatN||''} · Hız ${hStars(s.spd||1,.9,1.12)}</small>${nh?`<button type="button" data-hsw="${i}">Seç</button>`:''}</div>`).join('');}
+  else h+=`<div class="hsec" style="opacity:.75">Yabani atları ıslıkla, yemle ve sevgiyle ehlileştirebilirsin</div>`;
+  return h;};
+function hSwap(i){const n=STABLE[i];if(!n)return;if(!nearHomeH()){note('Atları ancak evinin yanında değiştirebilirsin');return;}if(HZ.mounted){note('Önce attan in');return;}
+  STABLE[i]=hzSnap();HZD=Object.assign({},n);delete HZD.food;delete HZD.bond;applyHZD();HZ.food=Number.isFinite(n.food)?n.food:70;HZ.bond=Number.isFinite(n.bond)?n.bond:30;
+  const a=P.rot+Math.PI/2;HZ.x=P.x+Math.sin(a)*2.2;HZ.z=P.z+Math.cos(a)*2.2;HZ.by=undefined;HZ.y=G(HZ.x,HZ.z);HZ.mode='idle';neigh(.8);toast('Ahır',HZD.name+' artık seninle');refreshPanel();save();}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-hsw]');if(!b)return;e.preventDefault();e.stopPropagation();hSwap(+b.dataset.hsw);},true);
+// save / load
+const _v63sv=v52Save;v52Save=function(){const o=_v63sv();o.v63={hz:HZD,st:STABLE};return o;};
+const _v63ld=v52Load;v52Load=function(o){_v63ld(o);try{const v=o&&o.v63;if(!v)return;const ok=d=>d&&typeof d==='object'&&typeof d.coat==='string'&&/^#[0-9a-f]{6}$/i.test(d.coat)&&typeof d.mane==='string'&&/^#[0-9a-f]{6}$/i.test(d.mane);
+  const cl=d=>({name:String(d.name||'At').slice(0,20),coat:d.coat,mane:d.mane,blaze:!!d.blaze,rare:!!d.rare,coatN:String(d.coatN||'').slice(0,12),spd:Math.max(.8,Math.min(1.3,+d.spd||1)),end:Math.max(.7,Math.min(1.4,+d.end||1)),cour:Math.max(0,Math.min(1,Number.isFinite(+d.cour)?+d.cour:.6)),wild:+d.wild||1,food:Number.isFinite(+d.food)?+d.food:undefined,bond:Number.isFinite(+d.bond)?+d.bond:undefined});
+  if(ok(v.hz)){HZD=cl(v.hz);delete HZD.food;delete HZD.bond;applyHZD();}if(Array.isArray(v.st))STABLE=v.st.filter(ok).slice(0,6).map(cl);}catch(e){console.warn('v63load',e);}};
+// season tick hook
+const _v63ss=updateStats;updateStats=function(dt){_v63ss(dt);try{sznTick(dt);}catch(e){console.warn('season',e);}};
+
+window.__yb={SZN,sznSet,sznTick,iceTick,TM,get HZD(){return HZD},get STABLE(){return STABLE},spawnWildHorse,tameRideStart,tameRideEnd,hSwap,horseSkin,MM,mmZoom,miniOvTick,MINI,miniMeTick,CAMO,BM,bmDown,bmMove,bmUp,LMSCALE,SHOPBUY,sndLevels,sndTest,SND,BAN,spawnBandit,spawnBeast,banTick,beastTick,v57Stall,BDEF,get HOURS(){return HOURS},SKC,spawnSkel,skelTick,skTick,skZones,skSafeAt,v52Sandbox,menuDraw,V52,WSDEF,v52Sit,wsCraft,v52FarmTick,v52BuyAnimal,v52Cands,VIS,get PIXD(){return PIXD},get RW(){return RW},menuClose,get vh(){return viewHT},CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
   setWeather:t=>{WX.type=t;const d=WDEF[t];[WX.cloud,WX.rain,WX.storm,WX.fog]=d;[WX.tc,WX.tr,WX.ts,WX.tf]=d;WX.wet=d[1];WX.t=0;WX.dur=999;},setYaw:v=>{yaw=yawT=v}};
 try{if(window.claude&&window.claude.hot&&typeof window.claude.hot.snapshot==='function')window.claude.hot.snapshot(()=>{save();return{v:4,px:P.x,pz:P.z,hx:HZ.x,hz:HZ.z,clock,day};});}catch(_){}
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
