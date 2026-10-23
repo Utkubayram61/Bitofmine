@@ -1544,7 +1544,7 @@ for(let i=0;i<RN;i++){rainD[i*3]=(Math.random()-.5)*58;rainD[i*3+1]=Math.random(
 const rain=new T.LineSegments(rainGeo,new T.LineBasicMaterial({color:'#b8cde6',transparent:true,opacity:0,depthWrite:false}));rain.layers.set(1);rain.frustumCulled=false;rain.renderOrder=7;rain.visible=false;scene.add(rain);
 const boltGeo=new T.BufferGeometry();boltGeo.setAttribute('position',new T.BufferAttribute(new Float32Array(80*6),3));
 const bolt=new T.LineSegments(boltGeo,new T.LineBasicMaterial({color:'#f2f6ff'}));bolt.layers.set(1);bolt.frustumCulled=false;bolt.visible=false;bolt.renderOrder=8;scene.add(bolt);
-var SZN={len:3,idx:0,f:0,yr:0,snow:0,aut:0,win:0,dry:0,snowy:false,ice:false,last:-1,snap:0,iceT:0,ices:new Map(),snowingPrev:false};
+var SZN={len:35,idx:0,f:0,yr:0,snow:0,aut:0,win:0,dry:0,snowy:false,ice:false,last:-1,snap:0,iceT:0,ices:new Map(),snowingPrev:false};
 function isSnowyBase(){return P.y>13||P.biome===7;}
 function isSnowy(){return isSnowyBase()||(!CAVE&&SZN.snowy);}
 function nextWeather(){const r=Math.random();let acc=0,pick='clear';WX.zw=Math.random()<.35;for(const[k,w]of sznWeights()){acc+=w;if(r<acc){pick=k;break;}}
@@ -3395,7 +3395,7 @@ function menuAct(btn){const m=btn.dataset.m,i=+btn.dataset.i;initAudio();sfx('pi
   if(m==='del'){if(MENU.arm!=='d'+i){MENU.arm='d'+i;menuDraw();return;}try{localStorage.removeItem(slotKey(i));}catch(_){}MENU.arm=null;if(i===CURSLOT&&MENU.mode==='pause')NOSAVE=true;menuDraw();return;}
   if(m==='mus'){initAudio();musSetVol(MUS.vol>=1?.5:MUS.vol>0?0:1);menuDraw();return;}
   if(m==='goal'){GOAL.off=!GOAL.off;try{localStorage.setItem('yb_goal',GOAL.off?'0':'1');}catch(_){}menuDraw();return;}
-  if(m==='seas'){const L=[2,3,5];SZN.len=L[(L.indexOf(SZN.len)+1)%3];try{localStorage.setItem('yb_seas',String(SZN.len));}catch(_){}SZN.snap=1;menuDraw();return;}
+  if(m==='seas'){const L=[10,20,35];SZN.len=L[(L.indexOf(SZN.len)+1)%3];try{localStorage.setItem('yb_seas',String(SZN.len));}catch(_){}SZN.snap=1;menuDraw();return;}
   if(m==='enm'){SKC.mode=(SKC.mode+1)%3;try{localStorage.setItem('yb_enm',String(SKC.mode));}catch(_){}menuDraw();return;}
   if(m==='vis'){VIS.smooth=!VIS.smooth;try{localStorage.setItem('yb_smooth',VIS.smooth?'1':'0');}catch(_){}resize();setGfx(GQ.lvl);menuDraw();return;}
   if(m==='snd'){toggleSound();menuDraw();return;}
@@ -5890,7 +5890,7 @@ miniMeTick=function(){miniOvTick();};
 
 /* ================= v63: wild horse taming + seasons ================= */
 /* ---------- seasons ---------- */
-SZN.len=(()=>{try{const v=+localStorage.getItem('yb_seas');return [2,3,5].includes(v)?v:3;}catch(_){return 3;}})();
+SZN.len=(()=>{try{const v=+localStorage.getItem('yb_seas');return [10,20,35].includes(v)?v:35;}catch(_){return 3;}})();
 const SZNN=['İlkbahar','Yaz','Sonbahar','Kış'],SZNI=['🌱','☀','🍂','❄'];
 const SZNMSG=['Karlar eriyor · ekim zamanı geldi','Uzun sıcak günler · su ihtiyacın artar','Yapraklar sararıyor · kış için yiyecek ve odun biriktir','Kar ve ayaz · sıcak giysi ve ateş şart · tarlalar büyümez (sera hariç) · göller donar'];
 function sznWeights(){const i=SZN.idx;
@@ -6710,28 +6710,28 @@ function projTick(dt){if(!NPC.ready)return;if(!PJ.init)projInit();PJ.t-=dt;
   // hammer sounds near active work
   for(const n of NPC.list){if(n.role!=='usta'||n.act!=='chop'||n.d>32)continue;n.hamT=(n.hamT||0)-dt;if(n.hamT<=0){n.hamT=.55+Math.random()*.25;try{tn({f:220+Math.random()*60,type:'square',d:.06,g:.035*(1-n.d/32),lp:900});nz({f:1800,d:.05,g:.03*(1-n.d/32),q:2});}catch(_){}}}
   if(PJ.t>0)return;PJ.t=2;const gh=gameHour();PJ.lastGh=PJ.lastGh??gh;const dh=Math.max(0,Math.min(48,gh-PJ.lastGh));PJ.lastGh=gh;if(!dh)return;
-  for(const p of PJ.list){if(p.done)continue;const work=clock>7&&clock<18&&WX.storm<.4&&SZN.idx!==3?1:SZN.idx===3?.3:0;const before=Math.floor(p.stage);p.stage=Math.min(5,p.stage+dh*work/11*(p.boost?1.6:1));if(p.boost)p.boost=Math.max(0,p.boost-dh/24);
+  for(const p of PJ.list){if(p.done)continue;const work=clock>7&&clock<18&&WX.storm<.4&&SZN.idx!==3?1:SZN.idx===3?.3:0;const before=Math.floor(p.stage);if(!p.dur)p.dur=6+Math.random()*2;p.stage=Math.min(5,p.stage+dh*work/(11*p.dur)*(p.boost?1.6:1));if(p.boost)p.boost=Math.max(0,p.boost-dh/24);if(p.stage>=4.999&&!p.done)p.stage=5;
     const after=Math.floor(p.stage);if(after!==before){projBuild(p);const Hm=NPC.ham[p.hi],d=Math.hypot(Hm.x-P.x,Hm.z-P.z);
       if(after>=5){p.done=true;p.doneDay=day;projResident(p);socLog(`${Hm.name} köyünde yeni bir ${PTN[p.type]} tamamlandı`);if(d<220){toast(Hm.name+' Köyü',`Yeni ${PTN[p.type]} tamamlandı!`+(p.type==='ev'?' Yeni bir aile taşındı.':''));chime();}}
       else if(d<90)note(`${Hm.name}: ${PTN[p.type]} inşaatı · ${PSN[after]} aşamasına geçti`);}}
   // start new projects some days after completion
-  NPC.ham.forEach((Hm,hi)=>{if(PJ.list.some(p=>p.hi===hi&&!p.done))return;const dn=PJ.list.filter(p=>p.hi===hi&&p.done);const last=dn.reduce((a,p)=>Math.max(a,p.doneDay||0),0);if(day-last<2)return;const sl=projSlots(Hm),si=PJ.list.filter(p=>p.hi===hi).length;if(si>=sl.length)return;
-    const p={hi,si,type:PK(['ev','ev','ambar','kule','ahir']),stage:0,prog:0,done:false};PJ.list.push(p);projClaim(p);projBuild(p);if(Math.hypot(Hm.x-P.x,Hm.z-P.z)<200)note(`${Hm.name} köyünde yeni bir ${PTN[p.type]} için temel atılıyor`);});}
+  NPC.ham.forEach((Hm,hi)=>{if(PJ.list.some(p=>p.hi===hi&&!p.done))return;const dn=PJ.list.filter(p=>p.hi===hi&&p.done);const last=dn.reduce((a,p)=>Math.max(a,p.doneDay||0),0);if(day-last<5)return;const sl=projSlots(Hm),si=PJ.list.filter(p=>p.hi===hi).length;if(si>=sl.length)return;
+    const p={hi,si,type:PK(['ev','ev','ambar','kule','ahir']),stage:0,prog:0,done:false,dur:6+Math.random()*2};PJ.list.push(p);projClaim(p);projBuild(p);if(Math.hypot(Hm.x-P.x,Hm.z-P.z)<200)note(`${Hm.name} köyünde yeni bir ${PTN[p.type]} için temel atılıyor`);});}
 function projCands(cand){for(const p of PJ.list){if(p.done||!p.workPts)continue;const s=projSlots(NPC.ham[p.hi])[p.si],d=Math.hypot(s.x-P.x,s.z-P.z);const D=PDIM[p.type];if(d<Math.max(D[0],D[1])+2.6)cand(d-1,{k:'projinfo',p});}}
 function tProject(n){const p=projOf(n.ham);if(!p){talkMenu(n,'Şu an bir iş yok. Ama yakında yeni bir şey başlarız.');return;}projDialog(n,p);}
-function projDialog(n,p){const st=Math.floor(p.stage),pct=Math.round(p.stage/5*100),Hm=NPC.ham[p.hi];const txt=`${Hm.name} için yeni bir ${PTN[p.type]} yapıyoruz. Şu an ${PSN[st]} aşamasındayız (%${pct}). ${st<2?'Taş ve odun lazım, temel sağlam olmalı.':st<4?'Duvarlar yükseliyor; odun yetişirse çatıya geçeriz.':'Az kaldı, çatıyı kapatınca bitiyor.'}`;
+function projDialog(n,p){const st=Math.floor(p.stage),pct=Math.round(p.stage/5*100),Hm=NPC.ham[p.hi];const txt=`${Hm.name} için yeni bir ${PTN[p.type]} yapıyoruz. Şu an ${PSN[st]} aşamasındayız (%${pct}). ${st<2?'Taş ve odun lazım, temel sağlam olmalı.':st<4?'Duvarlar yükseliyor; odun yetişirse çatıya geçeriz.':'Az kaldı, çatıyı kapatınca bitiyor.'} Böyle giderse ${Math.max(1,Math.round((5-p.stage)*(p.dur||7)))} gün içinde biter.`;
   const o=[];if((INV.wood||0)>=5)o.push({t:'5 odun bağışla',pri:1,f:()=>{INV.wood-=5;projDonate(p,n);}});if((INV.stone||0)>=5)o.push({t:'5 taş bağışla',f:()=>{INV.stone-=5;projDonate(p,n);}});o.push({t:n.role==='usta'?'Geri':'Kolay gelsin',f:()=>n.role==='usta'?talkMenu(n,'Başka?'):dlgClose()});dlgSay(n,txt,o);}
-function projDonate(p,n){refreshPanel();p.stage=Math.min(4.99,p.stage+.35);p.boost=(p.boost||0)+.5;addRep(2);if(n&&n.role!=='evt')addFr(n,6);const Hm=NPC.ham[p.hi];NPC.list.filter(q=>q.ham===Hm).forEach(q=>addFr(q,1));projBuild(p);sfx('chop');toast('İnşaat',`Bağışın için teşekkürler · %${Math.round(p.stage/5*100)}`);socLog(`${Hm.name} köyündeki inşaata bağış yaptın`);if(n)projDialog(n,p);}
+function projDonate(p,n){refreshPanel();p.stage=Math.min(4.99,p.stage+.12);p.boost=(p.boost||0)+1.5;addRep(2);if(n&&n.role!=='evt')addFr(n,6);const Hm=NPC.ham[p.hi];NPC.list.filter(q=>q.ham===Hm).forEach(q=>addFr(q,1));projBuild(p);sfx('chop');toast('İnşaat',`Bağışın için teşekkürler · %${Math.round(p.stage/5*100)}`);socLog(`${Hm.name} köyündeki inşaata bağış yaptın`);if(n)projDialog(n,p);}
 const _v66cc=v52Cands;v52Cands=function(cand){_v66cc(cand);projCands(cand);};
 const _v66ck=v52ActK;v52ActK=function(a){if(a.k==='projinfo'){const p=a.p,Hm=NPC.ham[p.hi];const us=NPC.list.find(q=>q.role==='usta'&&q.ham===Hm&&q.d<20&&q.act!=='inside');if(us){P.rot=Math.atan2(us.x-P.x,us.z-P.z);projDialog(us,p);}else{const st=Math.floor(p.stage);note(`İnşaat · ${PTN[p.type]} · ${PSN[st]} (%${Math.round(p.stage/5*100)})`+((INV.wood||0)>=5?' · ustayı bul, bağış yap':''));}return true;}return _v66ck(a);};
 // projinfo prompt text
 const _v66sa=scanAction;scanAction=function(){_v66sa();if(curAction&&curAction.k==='projinfo'){const p=curAction.p;curAction.txt=`İnşaat · ${PTN[p.type]} · ${PSN[Math.floor(p.stage)]} %${Math.round(p.stage/5*100)}`;}};
 // ---- save / load ----
 const _v66sv=v52Save;v52Save=function(){const o=_v66sv();const mem={};for(const k in SOC.mem){const m=SOC.mem[k];mem[k]={fr:m.fr,met:m.met,last:m.last,days:m.days,dert:m.dert,ds:m.dsolved,gift:m.gift,heard:m.heard,tier:m.tier,deep:m.asked&&m.asked.deep?1:0};}
-  o.v66={rep:SOC.rep,mem,log:SOC.evlog.slice(-30),elog:EVLOG.slice(-30),pj:PJ.init?PJ.list.map(p=>({hi:p.hi,si:p.si,type:p.type,stage:+p.stage.toFixed(3),done:!!p.done,doneDay:p.doneDay||0})):PJ.save};return o;};
+  o.v66={rep:SOC.rep,mem,log:SOC.evlog.slice(-30),elog:EVLOG.slice(-30),pj:PJ.init?PJ.list.map(p=>({hi:p.hi,si:p.si,type:p.type,stage:+p.stage.toFixed(4),done:!!p.done,doneDay:p.doneDay||0,dur:+(p.dur||7).toFixed(2)})):PJ.save};return o;};
 const _v66ld=v52Load;v52Load=function(o){_v66ld(o);try{const v=o&&o.v66;if(!v)return;SOC.rep=Math.max(-100,Math.min(100,+v.rep||0));if(v.mem&&typeof v.mem==='object')for(const k in v.mem){const m=v.mem[k];if(!m||typeof m!=='object')continue;SOC.mem[k]={fr:+m.fr||0,met:m.met?1:0,last:Number.isFinite(+m.last)?+m.last:-1,days:+m.days||0,dert:typeof m.dert==='string'?m.dert:null,dsolved:m.ds?1:0,gift:Number.isFinite(+m.gift)?+m.gift:-1,heard:+m.heard||0,tier:+m.tier||0,asked:{deep:m.deep?1:0}};}
   if(Array.isArray(v.log))SOC.evlog=v.log.filter(e=>e&&typeof e.t==='string').slice(-40);if(Array.isArray(v.elog))v.elog.forEach(e=>{if(e&&typeof e.t==='string')EVLOG.push(e);});
-  if(Array.isArray(v.pj))PJ.save=v.pj.filter(p=>p&&Number.isFinite(p.hi)&&Number.isFinite(p.si)&&PDIM[p.type]).map(p=>({hi:p.hi|0,si:p.si|0,type:p.type,stage:Math.max(0,Math.min(5,+p.stage||0)),done:!!p.done,doneDay:+p.doneDay||0}));}catch(e){console.warn('v66load',e);}};
+  if(Array.isArray(v.pj))PJ.save=v.pj.filter(p=>p&&Number.isFinite(p.hi)&&Number.isFinite(p.si)&&PDIM[p.type]).map(p=>({hi:p.hi|0,si:p.si|0,type:p.type,stage:Math.max(0,Math.min(5,+p.stage||0)),done:!!p.done,doneDay:+p.doneDay||0,dur:Math.max(4,Math.min(10,+p.dur||7))}));}catch(e){console.warn('v66load',e);}};
 // ---- journal: reputation, friends, event log ----
 const _v66lh=logHtml;logHtml=function(){let h=_v66lh();h+=`<div class="sec">Ün <span class="ct">${repName()}</span></div><div class="repbar"><i style="left:${50+SOC.rep/2}%"></i></div>`;
   const fr=Object.entries(SOC.mem).filter(([k,m])=>m.met).sort((a,b)=>b[1].fr-a[1].fr).slice(0,10);if(fr.length)h+=`<div class="sec">Tanıdıkların</div>`+fr.map(([k,m])=>`<div class="logrow"><span>${k}</span><small>${FRN[frTier(m.fr)]} ${'♥'.repeat(frTier(m.fr)+(m.fr>0?1:0))}</small></div>`).join('');
