@@ -1163,7 +1163,8 @@ function buildPatch(px,pz){const R=rng((px*92821)^(pz*68917)^7),bl=[],fl=[],ld=[
       if((b===3||b===4||b===5||mk>.3)&&r<(b===5?.06:.045))gp(1+(R2()<.3?1:0),2,'herb',.3);
       else if((b===5||mk>.3)&&r<.15)gp(1+((R2()*3)|0),1.6,'mush',.3);
       else if((b===1||b===6||b===2||rv>.35)&&r<.2)gp(1,2.4,'stone',.15);
-      else if(r>.965&&b!==7)gp(1,2.4,'stone',.2);}
+      else if(r>.965&&b!==7)gp(1,2.4,'stone',.2);
+      {const hr=hash2((cxp*3)|0,(czp*3)|0,557),wl0=WLAT(cxp,czp),bank=h0>wl0&&h0-wl0<1.1;if(b!==7&&b!==2&&(((rv>.3||mk>.25||bank)&&hr<.13)||((b===3||b===4)&&hr<.02))){const nn=1+(hr<.05?1:0);for(let i=0;i<nn;i++){const x=cxp+(hash2(i,(cxp*5)|0,(czp*5)|0)-.5)*1.8,z=czp+(hash2(i+7,(czp*5)|0,(cxp*5)|0)-.5)*1.8,h=HQ(x,z);if(h>WLAT(x,z)+.04&&slopeAt(x,z)<1)pk.push(['lif',x,h,z]);}}}}
     let dens=b===4?1:b===3?1.1:b===5?.55:b===2?.05:b===1?.08:b===6?.1+pl*.9:0;if(mk>.3)dens=.8;if(pl>.4&&b!==7)dens=Math.max(dens,1.1);if(!dens)continue;
     const tall=pl>.4?1.7:b===3?1.5:b===5?.75:mk>.3?1.3:1;
     const dry=(b===3||b===6)?smooth(.18,.55,fbm(cxp*.045+17,czp*.045-9,2,61))*.28:0,lush=smooth(.2,.6,fbm(cxp*.06-40,czp*.06+21,2,63))*.25;
@@ -1182,7 +1183,7 @@ function buildPatch(px,pz){const R=rng((px*92821)^(pz*68917)^7),bl=[],fl=[],ld=[
   if(bl.length){const im=new T.InstancedMesh(GEO.blade,MAT.grass,bl.length);const m4=new T.Matrix4(),q=new T.Quaternion(),e=new T.Euler();bl.forEach((b,i)=>{e.set((R()-.5)*.3,b[4],(R()-.5)*.3);q.setFromEuler(e);m4.compose(new V3(b[0],b[1],b[2]),q,new V3(.85+((i*7919)%13)/13*.4,b[3],.85+((i*7919)%13)/13*.4));im.setMatrixAt(i,m4);im.setColorAt(i,cc.setRGB(b[5]*1.04,b[6]*1.06,b[7]));});im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;im.computeBoundingSphere();im.receiveShadow=true;im.layers.set(1);g.add(im);}
   if(fl.length){const im=new T.InstancedMesh(GEO.flower,MAT.flower,fl.length);const m4=new T.Matrix4();fl.forEach((f,i)=>{m4.makeScale(1,f[4]||1,1).setPosition(f[0],f[1],f[2]);im.setMatrixAt(i,m4);im.setColorAt(i,VIS.smooth&&f[5]?cc.copy(f[3]).lerp(SOFTFL,.32):f[3]);});fl.forEach((f,i)=>{if(!f[5])return;const key=px+','+pz+'f'+i;if(pickedRecent(key))im.setMatrixAt(i,ZERO);else picks.push({t:'flower',x:f[0],y:f[1],z:f[2],im,idx:i,key,col:f[3]});});im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;im.computeBoundingSphere();im.receiveShadow=true;im.layers.set(1);g.add(im);}
   if(ld.length){const im=new T.InstancedMesh(GEO.lily,MAT.lily,ld.length);const m4=new T.Matrix4(),q=new T.Quaternion();ld.forEach((l,i)=>{q.setFromAxisAngle(new V3(0,1,0),l[3]);m4.compose(new V3(l[0],l[1],l[2]),q,new V3(l[4],1,l[4]));im.setMatrixAt(i,m4);im.setColorAt(i,l[5]);});im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;im.computeBoundingSphere();im.receiveShadow=true;im.layers.set(1);g.add(im);}
-  const PKG={herb:[GEO_HERB,MAT.vcol,NM.plain],mush:[GEO_MUSH,MAT.vcol,NM.plain],stone:[GEO_PEB,MAT.vcolF,NM.flat]},m5=new T.Matrix4(),q5=new T.Quaternion();
+  const PKG={herb:[GEO_HERB,MAT.vcol,NM.plain],lif:[geoReed(),MAT.vcol,NM.plain],mush:[GEO_MUSH,MAT.vcol,NM.plain],stone:[GEO_PEB,MAT.vcolF,NM.flat]},m5=new T.Matrix4(),q5=new T.Quaternion();
   for(const t in PKG){const arr=pk.filter(p=>p[0]===t);if(!arr.length)continue;const im=newInst(PKG[t][0],PKG[t][1],PKG[t][2],arr.length);
     arr.forEach((p,i)=>{const key=px+','+pz+t[0]+i,gone=pickedRecent(key);q5.setFromAxisAngle(_up,(p[1]*7.3+p[3]*3.1)%6.28);m5.compose(_pv.set(p[1],p[2]-.03,p[3]),q5,_ps.setScalar(.9+Math.abs(Math.sin(p[1]*13.1+p[3]))*.35));im.setMatrixAt(i,gone?ZERO:m5);if(!gone)picks.push({t,x:p[1],y:p[2],z:p[3],im,idx:i,key});});
     im.count=arr.length;im.instanceMatrix.needsUpdate=true;im.computeBoundingSphere();g.add(im);}
@@ -9362,6 +9363,82 @@ const _v77qh=questHtml;questHtml=function(){const a=QST.act,keep=a.slice();QST.a
 const _v77sv2=v52Save;v52Save=function(){const o=_v77sv2();try{o.v77q={giver:BOSS.giver||{},ack:BOSS.ack||{}};}catch(e){}return o;};
 const _v77ld2=v52Load;v52Load=function(o){_v77ld2(o);const v=o&&o.v77q;if(!v)return;try{BOSS.giver=v.giver&&typeof v.giver==='object'?v.giver:{};BOSS.ack=v.ack&&typeof v.ack==='object'?v.ack:{};}catch(e){}};
 const _v77us2=updateStats;updateStats=function(dt){_v77us2(dt);try{BOSS.gT=(BOSS.gT||0)-dt;if(BOSS.gT<=0){BOSS.gT=3;bqGivers();}}catch(e){}};
+
+/* ================= v78: crafting that makes sense — fibre & straw, honest recipes, the right people sell the right things ================= */
+// ---- new materials ----
+Object.assign(ITEMS,{lif:{n:'Lif',c:'#c8b878'},saman:{n:'Saman',c:'#e0c060'}});
+['lif','saman'].forEach(k=>{if(!ORDER.includes(k))ORDER.push(k);if(INV[k]===undefined)INV[k]=0;});
+Object.assign(ICONDEF,{
+  lif:[["..a...a...",".ab..ab..a","..ab.ab.ab","..ab.ab.ab","...abab.ab","...abab.a.","....abab..","....aba...","...ccccc..","....aba..."],{a:'#7a6a3a',b:'#d8c888',c:'#8a5a2a'}],
+  saman:[["..a.a.a...",".abababa..","abbbbbbba.",".abbbbba..","..accca...",".abbbbba..","abbbbbbba.",".abababa..","..a.a.a..."],{a:'#9a7a2a',b:'#ecd070',c:'#8a5a2a'}]});
+Object.assign(ICOMAP,{lif:['lif'],saman:['saman']});
+Object.assign(ITEMD,{lif:['Kaynak','Bitki lifi. Su kıyısındaki sazlıktan ve uzun otlardan toplanır. Misina, halat, sepet, keten için. Dokumacılar ve bakkallar da satar.'],
+  saman:['Kaynak','Buğday saplarının kurusu. Saman çatı ve ahır için. Buğday hasadında çıkar, çiftçiler de satar.']});
+try{const c=ICAT.find(x=>x[0]==='Kaynaklar');if(c){for(const k of['lif','saman'])if(!c[1].includes(k))c[1].push(k);}}catch(_){}
+Object.assign(TSELL,{lif:[6,1],saman:[6,1]});TSELL0.lif=TSELL.lif.slice();TSELL0.saman=TSELL.saman.slice();
+// ---- reeds in the world: where there is water there is fibre ----
+let GEO_REED=null;function geoReed(){if(GEO_REED)return GEO_REED;const parts=[];for(let i=0;i<7;i++){const h=.62+((i*37)%5)*.07,a=i/7*Math.PI*2,r=.07+(i%3)*.03;const b=prep(new T.BoxGeometry(.035,h,.035),i%2?'#9aae5a':'#c4b874');b.translate(0,h/2,0);b.rotateX(.12+(i%3)*.05);b.rotateY(a);b.translate(Math.cos(a)*r,0,Math.sin(a)*r);parts.push(b);
+    if(i%2===0){const hd=prep(new T.BoxGeometry(.06,.14,.06),'#7a5a32');hd.translate(0,h+.06,0);hd.rotateX(.12+(i%3)*.05);hd.rotateY(a);hd.translate(Math.cos(a)*r,0,Math.sin(a)*r);parts.push(hd);}}
+  return GEO_REED=merge(parts);}
+PICKTXT.lif='Lif topla · saz';
+const _v78pu=pickUp;pickUp=function(p){_v78pu(p);if(p&&p.t==='lif'&&Math.random()<.6)give('lif',1);};
+// ---- straw comes with the wheat ----
+const _v78gh=gdnHarvest;gdnHarvest=function(pl){const crop=pl&&pl.st&&pl.st.crop,ripe=pl&&pl.st&&pl.st.p>=1;_v78gh(pl);if(crop==='wheat'&&ripe)setTimeout(()=>give('saman',2+(Math.random()<.5?1:0)),500);};
+// ---- recipes that make sense ----
+function v78Need(o,need,d){if(!o)return;o.need=need;if(d)o.d=d;}
+v78Need(TOOLDEF.rod1,{wood:2,lif:2},'Esnek bir dal ve lif bükülerek yapılmış misina. Kıyıda ya da teknede balık tutmanı sağlar.');
+v78Need(TOOLDEF.rod2,{wood:2,iron:1,rope:1,feather:1},'Demir kanca, sağlam halat misina, tüy şamandıra. Misina daha zor kopar, balık daha çabuk yorulur.');
+v78Need(TOOLDEF.axe1,{wood:1,stone:2,lif:1},'Sivri bir taş, lifle tahta sapa sıkıca bağlanır. Ağaç kesmeni sağlar, paslı baltadan hızlıdır.');
+v78Need(TOOLDEF.bow1,{wood:2,resin:1,lif:2},'Reçineyle sertleştirilmiş yay, bükülmüş liften kiriş. 2 tuşuyla eline al, sol tıkla ger ve bırak. Gerili yayken sağ tık: iptal. Yaralı av kaçar ve kan izi bırakır.');
+v78Need(CLOTHES.linen,{lif:4,cloth:1},'Keten lifinden dokunmuş hafif gömlek. Çölde ve sıcakta ferahlatır.');
+v78Need(CLOTHES.miner,{iron:1,tleather:1,resin:1},'Deri başlık, alnında reçineyle yanan demir fener. Karanlığı aydınlatır, değerli taş bulma şansı artar.');
+v78Need(CLOTHES.explorer,{hide:1,wool:1,feather:1},'Geyik derisinden geniş kenarlı şapka. Kazı alanlarını uzaktan sezersin, nadir buluntu şansı artar.');
+v78Need(PCS.roof,{wood:1,saman:3});v78Need(PCS.basket,{lif:4});
+{const B=id=>BUILDS.find(b=>b.id===id);
+  v78Need(B('camp'),{wood:8,stone:4,lif:2},'Dal barınak, liften örülmüş döşek ve ateş çukuru. İçinde uyuyabilirsin.');
+  v78Need(B('lean'),{wood:4,lif:2},'Dallar liften bağlanıp çatılmış hızlı bir çardak. Yağmurdan korur, içinde uyunur. İki gün dayanır.');
+  v78Need(B('trap'),{wood:3,lif:1},'Liften ilmekli tuzak. Zamanla tavşan, tilki ya da su kenarında ördek yakalar. Ara sıra kontrol et.');
+  v78Need(B('sail'),{wood:16,resin:3,cloth:3,rope:2},'Kumaş yelkeni ve halatlarıyla kayıktan çok daha hızlı. Rüzgârda daha da hızlanır. Suda yerini sen seçersin.');}
+try{const r=WSDEF.wbench.rec.find(x=>x.id==='rope');if(r){r.need={lif:3};r.d='Üç demet liften örülmüş sağlam halat. Kümes, ağıl, avize ve yelken için.';}
+  if(!WSDEF.loom.rec.some(x=>x.id==='cloth'&&x.need.lif))WSDEF.loom.rec.push({id:'cloth',q:1,need:{lif:4},d:'Keten kumaş: 4 liften 1 kumaş.'});}catch(_){}
+// ---- who sells what: the woodcutter sells wood, the weaver sells cloth ----
+const SELLR={
+  oduncu:[{k:'wood',q:5,p:4,n:5},{k:'plank',q:2,p:3,n:3},{k:'resin',q:2,p:3,n:2}],
+  ciftci:[{k:'wheat',q:3,p:3,n:3},{k:'saman',q:5,p:2,n:4},{k:'lif',q:3,p:3,n:2},{k:'carrot',q:2,p:2,n:2},{k:'egg',q:2,p:2,n:2}],
+  coban:[{k:'wool',q:2,p:3,n:4},{k:'milk',q:2,p:2,n:3},{k:'cheese',q:1,p:3,n:2}],
+  otaci:[{k:'herb',q:2,p:3,n:4},{k:'lavender',q:2,p:3,n:2},{k:'tea',q:1,p:2,n:3},{k:'mtea',q:1,p:6,n:1}],
+  balikci:[{k:'fish',q:2,p:3,n:3},{k:'rope',q:1,p:4,n:2},{k:'feather',q:2,p:3,n:2},{k:'tool_rod1',q:1,p:5,n:1}],
+  avci:[{k:'hide',q:1,p:5,n:2},{k:'pelt',q:1,p:6,n:1},{k:'rfur',q:1,p:4,n:2},{k:'feather',q:2,p:3,n:3},{k:'arrow',q:10,p:4,n:3},{k:'meat',q:2,p:4,n:2}],
+  usta:[{k:'stone',q:5,p:3,n:4},{k:'brick',q:3,p:4,n:3},{k:'clay',q:3,p:3,n:3},{k:'plank',q:2,p:3,n:2}],
+  esnaf:[{k:'rope',q:1,p:4,n:3},{k:'lif',q:3,p:3,n:3},{k:'resin',q:2,p:3,n:3},{k:'clay',q:2,p:2,n:2},{k:'tea',q:1,p:2,n:2},{k:'egg',q:2,p:3,n:2},{k:'map',q:1,p:7,n:1}]};
+const WEAVE=[{k:'lif',q:4,p:3,n:5},{k:'rope',q:1,p:4,n:3},{k:'cloth',q:1,p:5,n:4},{k:'wool',q:2,p:3,n:3}];
+const SELLN={'Ayşe Teyze':WEAVE,'Emine Hanım':WEAVE};
+const SELLLBL={oduncu:['Oduncu','wood'],ciftci:['Çiftçi','wheat'],coban:['Çoban','wool'],otaci:['Otacı','herb'],balikci:['Balıkçı','fish'],avci:['Avcı','hide'],usta:['Usta','brick'],esnaf:['Bakkal','rope'],weave:['Dokumacı','cloth']};
+// the rod can be bought too
+if(TOOLDEF.rod1&&!ITEMS.tool_rod1){ITEMS.tool_rod1={n:TOOLDEF.rod1.n,c:'#c8a070'};ITEMD.tool_rod1=['Alet',TOOLDEF.rod1.d];ICOMAP.tool_rod1=ICOMAP.rod1||['rodi'];}
+// never sell for less than the trader would pay you back
+function v78Fair(list){return list.filter(s=>s.k==='map'||ITEMS[s.k]).map(s=>{const t=TSELL0[s.k]||TSELL[s.k];if(t&&!s.k.startsWith('tool_')){const unit=t[1]/t[0];s.p=Math.max(s.p,Math.ceil(unit*s.q*1.5));}return s;});}
+for(const r in SELLR)SELLR[r]=v78Fair(SELLR[r]);for(const k in SELLN)SELLN[k]=v78Fair(SELLN[k]);
+function v78Stock(n){if(!n)return null;if(SELLN[n.name])return SELLN[n.name];if(SHOPBUY[n.role])return null;return SELLR[n.role]||null;}
+function v78Seller(n){return!!v78Stock(n)||!!(n&&SHOPBUY[n.role]);}
+const _v78ss=shopStock;shopStock=function(){const n=UIX.ctxTrade,ro=v78Stock(n);if(ro){const key='v78:'+n.name;if(!SHOPST[key]||SHOPST[key].day!==day)SHOPST[key]={day,st:ro.map(s=>Object.assign({},s))};return SHOPST[key].st;}return _v78ss();};
+const _v78sr=shopRole;shopRole=function(n){if(n&&SELLN[n.name]){const L=SELLLBL.weave;return[L[0],(ICOMAP[L[1]]||[L[1]])[0]];}if(n&&!SHOPBUY[n.role]&&SELLLBL[n.role]){const L=SELLLBL[n.role];return[L[0],(ICOMAP[L[1]]||[L[1]])[0]];}return _v78sr(n);};
+// sellers who are not at a stall still sell from their hands — while they stand and talk
+const _v78os=openShop;openShop=function(n){const t=n||UIX.ctxTrade||NPC.tr;_v78os(n);if(t&&t.name&&SHOP.open){t.talkT=999;SHOP.hold=t;}};
+const _v78cs=closeShop;closeShop=function(){const t=SHOP.hold;_v78cs();if(t){t.talkT=1.5;SHOP.hold=null;}};
+const _v78tm=talkMenu;talkMenu=function(n,text){_v78tm(n,text);try{if(!DLG.open||DLG.n!==n||n.role==='evt'||n.act==='sleep')return;const o=DLG.opts;if(o.some(x=>x.t==='Alışveriş yapalım'))return;
+    if(!v78Stock(n))return;if(SOC.rep<=-40)return;const i=o.findIndex(x=>x.t==='Hoşça kal');o.splice(Math.max(0,i),0,{t:SELLN[n.name]?'Lif ya da kumaşın var mı?':'Satacak bir şeyin var mı?',f:()=>{dlgClose();openShop(n);}});el('dlgO').innerHTML=o.map((x,k)=>`<button type="button" data-o="${k}" class="${x.pri?'pri':''}${x.dim?' dim':''}"><kbd>${k+1}</kbd>${x.t}</button>`).join('');}catch(e){console.warn('v78 tm',e);}};
+// the travelling trader carries a bit of everything
+for(const s of[{k:'lif',q:3,p:4,n:2},{k:'rope',q:1,p:5,n:2},{k:'cloth',q:1,p:6,n:2},{k:'saman',q:5,p:3,n:2}])if(!TBUY.some(x=>x.k===s.k))TBUY.push(s);
+// villagers point you to the right people
+try{(NLINES.oduncu=NLINES.oduncu||[]).push('Odun lazımsa bana gel, kesilmiş kurumuş odunum hep hazırdır.','Reçine mi lazım? Çamların kabuğundan ben toplarım, satarım da.');
+  (NLINES.ciftci=NLINES.ciftci||[]).push('Buğdayı biçince samanı da bağlarız. Çatına saman lazımsa benden al.','Tarlanın kenarında keten de ekiyorum, lifi Ayşe Teyze dokur.');
+  (NLINES.coban=NLINES.coban||[]).push('Yün mü lazım? Bu bahar kırktığım yün tertemiz, gel bak.');
+  (NLINES.otaci=NLINES.otaci||[]).push('Şifalı ot ilaçtır, çaydır. Halat örmek için değil, lif için sazlığa git.');
+  (NLINES.balikci=NLINES.balikci||[]).push('Oltan yoksa ben satarım. Ama kendin yapmak istersen sazlıktan lif topla, misinayı bük.');
+  (NLINES.koylu=NLINES.koylu||[]).push('Kumaş lazımsa Ayşe Teyze\'ye git, onun tezgâhından iyisi çıkmaz.');}catch(_){}
+// a word for the weaver herself
+const _v78gr=greet;greet=function(n){const g=_v78gr(n);try{if(SELLN[n.name]&&memOf(n).met&&Math.random()<.25)return g+' '+PK(['Tezgâhta yeni kumaş var, bakmak ister misin?','Bu sabah bir demet lif büktüm, halat lazımsa söyle.']);}catch(_){}return g;};
 
 window.__yb={SOC,DLG,EV,EVDEF,evStart,PJ,projOf,projTick,npcDialog,dlgPick,memOf,persOf,MUS,musStart,musStop,musMood,compose,GOAL,goalTick,PERF,lmValid,think,THK,reel3,fishTap,GFXASK,SZN,sznSet,sznTick,iceTick,TM,get HZD(){return HZD},get STABLE(){return STABLE},spawnWildHorse,tameRideStart,tameRideEnd,hSwap,horseSkin,MM,mmZoom,miniOvTick,MINI,miniMeTick,CAMO,BM,bmDown,bmMove,bmUp,LMSCALE,SHOPBUY,sndLevels,sndTest,SND,BAN,spawnBandit,spawnBeast,banTick,beastTick,v57Stall,BDEF,get HOURS(){return HOURS},SKC,spawnSkel,skelTick,skTick,skZones,skSafeAt,v52Sandbox,menuDraw,V52,WSDEF,v52Sit,wsCraft,v52FarmTick,v52BuyAnimal,v52Cands,VIS,get PIXD(){return PIXD},get RW(){return RW},menuClose,get vh(){return viewHT},CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
   setWeather:t=>{WX.type=t;const d=WDEF[t];[WX.cloud,WX.rain,WX.storm,WX.fog]=d;[WX.tc,WX.tr,WX.ts,WX.tf]=d;WX.wet=d[1];WX.t=0;WX.dur=999;},setYaw:v=>{yaw=yawT=v}};
