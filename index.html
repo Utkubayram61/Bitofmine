@@ -2262,9 +2262,9 @@ function landGhost(id,x,z,r,mt){const o={t:id,x,z,r,fuel:8,id:'__ghost',ghost:1}
   ar.position.set(Math.sin(fd)*dd,HQ(x,z)+.15,Math.cos(fd)*dd);ar.rotation.y=fd;b.g.add(ar);return b.g;}
 // ---- sleeping
 function sleep(){if(P.sleeping)return;if(skNearThreat()){note('Yakında düşman var · uyuyamazsın');return;}LASTBED={x:P.x,z:P.z};closePanel();P.sleeping=true;setSit(false);ACT.mode=null;FISH.state='idle';const f=el('fade');f.classList.add('on');
-  setTimeout(()=>{let hrs=(6.5-clock+24)%24;if(hrs<1)hrs+=24;clock+=hrs;while(clock>=24){clock-=24;day++;}ST.en=100;ST.hp=100;if(nearBed()){ST.temp=Math.max(ST.temp,72);ST.wet=0;setTimeout(()=>note('Kendi yatağında deliksiz uyudun'),2700);}ST.food=Math.max(0,ST.food-hrs*.33);ST.water=Math.max(0,ST.water-hrs*.5);ST.temp=Math.max(ST.temp,48);ST.sick=Math.max(0,(ST.sick||0)-hrs);WX.t+=hrs*20;
+  setTimeout(()=>{let hrs=8;clock+=hrs;while(clock>=24){clock-=24;day++;}ST.en=100;ST.hp=100;if(nearBed()){ST.temp=Math.max(ST.temp,72);ST.wet=0;setTimeout(()=>note('Kendi yatağında deliksiz uyudun'),2700);}ST.food=Math.max(0,ST.food-hrs*.33);ST.water=Math.max(0,ST.water-hrs*.5);ST.temp=Math.max(ST.temp,48);ST.sick=Math.max(0,(ST.sick||0)-hrs);WX.t+=hrs*20;
     for(const b of built.values())if(b.placed)for(const e of b.em)if(e.fuel!==undefined){e.fuel=Math.max(0,e.fuel-hrs);e.obj.fuel=e.fuel;}save();
-    setTimeout(()=>{f.classList.remove('on');P.sleeping=false;toast(`Gün ${day} · 06:30`,'Günaydın, enerjin yenilendi');},900);},1400);}
+    setTimeout(()=>{f.classList.remove('on');P.sleeping=false;{const hh=Math.floor(clock),mm=Math.floor((clock-hh)*60),tt=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');toast(`Gün ${day} · ${tt}`,(clock>=5&&clock<11?'Günaydın':clock<17?'İyi uyudun':clock<21?'İyi akşamlar':'Gece yarısı uyandın')+' · 8 saat dinlendin, enerjin yenilendi');}},900);},1400);}
 // ---- stats
 let lowFoodShown=false,lowEnShown=false;
 let wetShown=false;
