@@ -784,7 +784,7 @@ function Hb(x,z){const b=fbm(x*.0055,z*.0055,4,0),d=fbm(x*.028,z*.028,3,7),mk=mt
   return h;}
 function riverMask(x,z){return (1-smooth(0,.04,Math.abs(fbm(x*.0035+11,z*.0035-23,3,61))))*(1-smooth(-.3,-.45,x/WR))*(1-smooth(.8,.9,rbound(x,z)));}
 function roadMask(x,z){return 1-smooth(.0035,.0075,Math.abs(fbm(x*.0021-140,z*.0021+77,2,81)));}
-function canyonMask(x,z){return (1-smooth(0,.045,Math.abs(fbm(x*.005-71,z*.005+44,2,63))))*mtK(x,z);}
+function canyonMask(x,z){return 0;}
 function plateauMask(x,z){return smooth(.2,.34,fbm(x*.007+150,z*.007+70,2,67));}
 function cliffMask(x,z){return smooth(.18,.36,fbm(x*.006-300,z*.006+120,2,51))*smooth(.35,.6,x/WR)*smooth(.7,.82,rbound(x,z));}
 function autumnMask(x,z){return pocket(x,z,.52,-.08,.2);}
@@ -796,7 +796,7 @@ function Hpre(x,z){const m=M(x,z);let h=Hb(x,z);
   if(h>7){const st=2.4,f=h/st,fl=Math.floor(f),tt=fl+smooth(.55,.95,f-fl),k=smooth(7,10,h)*.7;h=h*(1-k)+tt*st*k;}
   const cm=cliffMask(x,z);if(cm>0)h+=smooth(.1,.7,h)*cm*5.5;
   if(h<-1.2){const isl=smooth(.62,.74,SN(x*.032+5,z*.032-9)*.5+.5);if(isl>0)h+=(1.4-h)*isl*smooth(-1.2,-2.6,h);}
-  const rc=riverMask(x,z);if(rc>0)h-=rc*rc*(3.4+rc*.8)*(1-smooth(9,13,h));
+  const rc=riverMask(x,z);if(rc>0)h-=rc*rc*(3.4+rc*.8)*(1-smooth(3.5,6,h));
   if(h>3){const cy=canyonMask(x,z);if(cy>0)h-=cy*(h-1.6)*.88;}
   if(h>6&&h<14){const pl=plateauMask(x,z)*smooth(6,8,h)*(1-smooth(12,14,h));if(pl>0)h+=(9.6+SN(x*.05,z*.05)*.5-h)*pl;}
   if(m>.6&&h>-.6&&h<2.4){const mk=marshMask(m,h);if(mk>0)h=h*(1-mk)+mk*(.05+SN(x*.19,z*.19)*.32+SN(x*.06,z*.06)*.12);}
@@ -8225,6 +8225,36 @@ function cineSkip(){if(!CINE.on||ACT.mode!=='poi')return;ACT.t=ACT.dur;}
 function cineOff(){if(!CINE.on)return;CINE.on=false;document.body.classList.remove('cine');el('cineCap').classList.remove('on');yawT=CINE.yaw0;pitchT=CINE.pitch0;CAMO.x=0;CAMO.z=0;}
 const _v71ae=actExtra;actExtra=function(dt){if(ACT.mode==='poi')cineTick();return _v71ae(dt);};
 const _v71pe=poiEnd;poiEnd=function(cancel){const v0=CINE.on?CINE.view0:null;cineOff();_v71pe(cancel);if(v0!==null)viewHT=v0;};
+
+/* ================= v72: quiet nights (only people in need), passengers on horseback ================= */
+// ---- at night only people in trouble appear ----
+const NIGHTEV=new Set(['yolcu','cocuk','asker','donan','hasta','yildiz','isik','ebe']);
+{const d=EVDEF.find(e=>e.id==='cocuk');if(d)d.cond=()=>NPC.ham.length>0;}
+const _v72ep=evPick;evPick=function(){if(!isNight())return _v72ep();const keep=EVDEF.slice();const c=EVDEF.filter(d=>NIGHTEV.has(d.id));EVDEF.length=0;EVDEF.push(...c);try{return _v72ep();}finally{EVDEF.length=0;EVDEF.push(...keep);}};
+const WANDER=new Set(['gezgin','tuccar','kesis']);
+const _v72np=npcPlan;npcPlan=function(n){if(isNight()&&WANDER.has(n.role)&&!n.follow&&n.d>12)return npcTask(n,'inside',n.x,n.z,40);return _v72np(n);};
+// a midwife who must reach a village tonight
+EVD({id:'ebe',title:'Gecenin Ebesi',w:1.1,cond:()=>isNight()&&NPC.ham.length>0,start(){const s=evSpot(18,26,{front:1});if(!s)return null;const hs=NPC.ham.slice().sort((a,b)=>Math.hypot(a.x-s[0],a.z-s[1])-Math.hypot(b.x-s[0],b.z-s[1])),nh=hs.find(h=>Math.hypot(h.x-s[0],h.z-s[1])>60)||hs[hs.length-1];if(!nh)return null;const ev={};
+  const n=evNpc(ev,'Ebe Hatun',{f:1,shirt:'#7a4a5a',skirt:'#3a2a3a',pants:'#3a3028',hat:'band',hatC:'#e8dcc0',hair:'#9a9a9a',bigpack:1},s[0],s[1]);n.evAct='scan';evMark(n,'Yolcu! Bekle!');
+  ev.talk=n2=>{if(ev.st==='go'){dlgSay(n2,HZ.mounted?'Sıkı tutundum, sür hadi!':'Atın varsa çağır, yürüyerek yetişemeyiz!',[{t:'Tamam',f:dlgClose}]);return;}if(ev.over){dlgSay(n2,'Bebek de anne de iyi. Allah senden razı olsun.',[{t:'Hayırlı olsun',f:dlgClose}]);return;}
+    dlgSay(n2,`${nh.name} köyünde bir kadın doğuruyor, beni çağırdılar. Karanlıkta yolu şaşırdım, kurtlar uluyor… Beni oraya götürür müsün? Atın varsa terkine binerim.`,[{t:'Atla, seni götürürüm',pri:1,f:()=>{ev.st='go';n2.evAct='idle';follow(n2,true);addMark(nh.x,nh.z);dlgSay(n2,'Çabuk olalım!',[{t:'Hadi',f:dlgClose}]);think('ebe',HZ.mounted?'Arkama bindi. Köye sürmeliyim!':'Atımı çağırırsam (G) terkime alabilirim.',30,true);}},{t:'Şu tarafta, dümdüz git',f:()=>{n2.goTo=[nh.x,nh.z];dlgSay(n2,'Allah yardımcın olsun…',[{t:'…',f:dlgClose}]);evEnd(ev,0,'Ebeye yol tarif ettin',1);}}]);};
+  ev.tick=()=>{if(ev.st==='go'&&Math.hypot(n.x-nh.x,n.z-nh.z)<16){ev.st='done';follow(n,false);n.goTo=[nh.x,nh.z];coin(20);addRep(5);toast('Gecenin Ebesi','Ebeyi zamanında yetiştirdin · +20 sikke');npcSay(n,'Tam zamanında! Sen burada bekle, müjdeyi ben getiririm.',5);evEnd(ev,1,`Gece bir ebeyi ${nh.name} köyüne yetiştirdin`,8);chime();}};return ev;}});
+// ---- passengers: anyone following you climbs up behind you on the horse ----
+const PAX={n:null};
+function paxOn(n){if(PAX.n&&PAX.n!==n)paxOff();PAX.n=n;n.riding=true;n.task=null;npcSay(n,PK(['Tutundum!','Hadi gidelim!','Ayy, ne yüksek!','Sıkı tutunuyorum, merak etme.']),2.5);sfx('pick');}
+function paxOff(){const n=PAX.n;if(!n)return;PAX.n=null;n.riding=false;const px=Math.cos(HZ.rot),pz=-Math.sin(HZ.rot);let x=HZ.x+px*1.1,z=HZ.z+pz*1.1;if(HQ(x,z)<WLAT(x,z)+.1){x=HZ.x-px*1.1;z=HZ.z-pz*1.1;}n.x=x;n.z=z;n.task=null;}
+function paxSeat(n){const hb=HORSE.p&&HORSE.p.body?HORSE.p.body.position.y:.9,sc=n.g.scale.y||1,back=.62,sx=HZ.x-Math.sin(HZ.rot)*back,sz=HZ.z-Math.cos(HZ.rot)*back;
+  n.x=sx;n.z=sz;n.rot=HZ.rot;n.g.visible=true;n.g.position.set(sx,HZ.y+hb+.5-.78*sc,sz);n.g.rotation.y=HZ.rot;const p=n.p,q=n.pose,set=(k,v)=>{q[k]=v;};
+  p.hips.position.y=.78;p.legL.rotation.x=-1.25;p.legR.rotation.x=-1.25;p.legL.rotation.z=.72;p.legR.rotation.z=-.72;p.shinL.rotation.x=1.25;p.shinR.rotation.x=1.25;p.armL.rotation.x=-.95;p.armR.rotation.x=-.95;p.armL.rotation.z=.25;p.armR.rotation.z=-.25;p.body.rotation.x=.12+Math.sin(tnow*9)*.02*Math.min(1,HZ.speed/6);p.rig.rotation.x=0;p.rig.position.y=0;
+  set('hy',.78);set('lL',-1.25);set('lR',-1.25);set('lz',.72);set('sL',1.25);set('sR',1.25);set('aLx',-.95);set('aRx',-.95);set('aLz',.25);set('aRz',-.25);set('brx',.12);set('rx',0);set('ry2',0);if(n.bub)n.bub.style.display='';}
+const _v72nt=npcTick;npcTick=function(dt){_v72nt(dt);if(!NPC.ready)return;
+  const fol=NPC.list.find(n=>n.follow&&n.role==='evt');
+  if(PAX.n&&(!NPC.list.includes(PAX.n)||!PAX.n.follow||!HZ.mounted)){if(NPC.list.includes(PAX.n))paxOff();else PAX.n=null;}
+  if(!PAX.n&&fol&&HZ.mounted&&!HZ.swim&&Math.hypot(fol.x-HZ.x,fol.z-HZ.z)<12)paxOn(fol);
+  if(PAX.n)paxSeat(PAX.n);
+  if(fol&&!HZ.mounted&&!fol.hintT&&Math.hypot(HZ.x-P.x,HZ.z-P.z)<200){fol.hintT=1;setTimeout(()=>think('paxh','Atımı çağırsam (G) onu terkime alırım, daha çabuk varırız.',300,true),2500);}};
+// a follower keeps up when you ride off before it climbs on
+const _v72fp=followPlan;followPlan=function(n){if(n.riding)return npcTask(n,'idle',n.x,n.z,.5);return _v72fp(n);};
 
 window.__yb={SOC,DLG,EV,EVDEF,evStart,PJ,projOf,projTick,npcDialog,dlgPick,memOf,persOf,MUS,musStart,musStop,musMood,compose,GOAL,goalTick,PERF,lmValid,think,THK,reel3,fishTap,GFXASK,SZN,sznSet,sznTick,iceTick,TM,get HZD(){return HZD},get STABLE(){return STABLE},spawnWildHorse,tameRideStart,tameRideEnd,hSwap,horseSkin,MM,mmZoom,miniOvTick,MINI,miniMeTick,CAMO,BM,bmDown,bmMove,bmUp,LMSCALE,SHOPBUY,sndLevels,sndTest,SND,BAN,spawnBandit,spawnBeast,banTick,beastTick,v57Stall,BDEF,get HOURS(){return HOURS},SKC,spawnSkel,skelTick,skTick,skZones,skSafeAt,v52Sandbox,menuDraw,V52,WSDEF,v52Sit,wsCraft,v52FarmTick,v52BuyAnimal,v52Cands,VIS,get PIXD(){return PIXD},get RW(){return RW},menuClose,get vh(){return viewHT},CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
   setWeather:t=>{WX.type=t;const d=WDEF[t];[WX.cloud,WX.rain,WX.storm,WX.fog]=d;[WX.tc,WX.tr,WX.ts,WX.tf]=d;WX.wet=d[1];WX.t=0;WX.dur=999;},setYaw:v=>{yaw=yawT=v}};
