@@ -9298,6 +9298,71 @@ const _v77us=updateStats;updateStats=function(dt){_v77us(dt);try{bossSpawnTick(d
 const BOSS_TESTMARK=true;
 const _v77bi=bossInit;bossInit=function(){const was=BOSS.ready;_v77bi();if(!was&&BOSS.ready&&BOSS_TESTMARK)for(const id in BOSSD)bossMark(id,false);};
 
+/* ================= v77d: the bosses are the main quests — someone asks, but the beasts are there either way ================= */
+const BQD={
+  boru:{t:'Ana Görev · Kurtların Atası',roles:['avci','oduncu','coban','koylu'],rw:{coin:120,item:['arrow',15],fr:15,rep:10},
+    opt:'Kurt ulumalarını sormak',
+    ask:'Ormandaki ulumaları duydun mu? O sıradan bir kurt değil. Börü Han dedikleri, kurtların atası. Ağıllarımızı boşaltıyor, avcılarımızı yaraladı. Postuna kılıç işlemiyor; dönerek kesen yener onu derler. Ateşten de korkar. Bu işi bir tek sen yapabilirsin.',
+    yes:'Allah yardımcın olsun. Gece git, gündüz in yerinde bulamazsın onu. Yarası ağırlaşınca kaçar ama geri döner, pes etme.',
+    no:'Anlıyorum… kimse o ormana gece gitmek istemez. Fikrin değişirse buradayım.',
+    done:'Börü Han öldü mü? Gerçekten mi? Bu gece köyde ateş yakıp türkü söyleyeceğiz. Al, bunlar bir avcının verebileceği en iyi şeyler.',
+    known:'Dur, söyleme… biliyorum. Börü Han\'ı sen öldürdün. Avcılar postunu gördü, bütün köy konuşuyor. Ben sana yalvaracaktım, sen sormadan halletmişsin. Bunları al, hakkındır.'},
+  tepe:{t:'Ana Görev · Yayladaki Dev',roles:['coban','ciftci','yasli','koylu'],rw:{coin:180,item:['wool',8],fr:15,rep:12},
+    opt:'Yayladaki devi sormak',
+    ask:'Sürüyü yaylaya çıkaramıyoruz artık. Tepegöz iniyor geceleri; kayaları yuvarlıyor, koyunları eziyor. Derisi taş gibi, kılıç işlemez. Dedem derdi ki tek zaafı gözü; kükrediğinde açar o gözü. Ona karşı çıkacak yürek sende var mı?',
+    yes:'Yumruğunu yere vurunca yana sıçra, kayasından kaç. Gözünü unutma. Allah seni korusun.',
+    no:'Haklısın, o dev bir orduya bedel. Ama sürü aç, bunu unutma.',
+    done:'Tepegöz yerle bir mi oldu? Yayla yeniden bizim! Al bunları, sürünün en iyi yünü senin.',
+    known:'Biliyorum, Tepegöz\'ü sen devirdin. Yaylaya çıkan çoban yerde yatan devi görmüş, ağzı açık kalmış. Senden bir şey isteyecektim ama sen benden önce davranmışsın. Bunları kabul et.',
+    stuck:'Tepegöz\'ün yarası kapanıyorsa… dedemin anlattığı doğruymuş. O devi insan eli öldürmez. Eski türküler gökten inen bir ejderden bahseder. Belki bir gün…'},
+  alb:{t:'Ana Görev · Bataklıktaki Ağıt',roles:['otaci','yasli','koylu','firinci'],rw:{coin:100,item:['tea',4],fr:15,rep:10},
+    opt:'Bataklıktaki ağlamayı sormak',
+    ask:'Geceleri bataklıktan bir kadın ağlaması geliyor. Albastı o. Lohusalarımızı korkutuyor, atların yelesini örüyor, bir çocuğu az kalsın sulara çekiyordu. Uzaktan vurulmaz, gölgedir. Ancak yanına sokulup ışık altında demirle vurursan… Gider misin?',
+    yes:'Feneri yanından ayırma, demir de taşı. Ona bakarken gözünü kırpma. Allah\'a emanet ol.',
+    no:'Korkmakta haklısın. Ben de korkuyorum. Ama o ağlama her gece biraz daha yaklaşıyor.',
+    done:'Ağlama sustu… dün gece ilk kez lohusamız rahat uyudu. Sana ne versem az. Bu çaylar bizim ocağın en iyisi.',
+    known:'Sen… biliyorum. Albastı\'yı sen kovdun. O gece ağlama kesilince anladım, sonra kızıl saçını taşıdığını gördüler. Ben gidip sana yalvaracaktım. Al, bunları sana ayırdım.'},
+  kemik:{t:'Ana Görev · Mezarlıktaki Atlı',roles:['kesis','bekci','yasli','demirci'],rw:{coin:150,item:['iron',3],fr:15,rep:12},
+    opt:'Mezarlıktaki nal seslerini sormak',
+    ask:'Eski mezarlıktan gece yarısı nal sesleri geliyor. Kemik Atlı çıkmış, ölüleri de kaldırıyor. Atın üstündeyken ona kimse dokunamaz. Ama hücuma kalktığı an kılıcını karşısına koyabilen onu atından düşürür, derler. Ölülerimizi rahat bırakması için ona son bir kez ölüm lazım.',
+    yes:'Hücumu beklerken sakın kaçma, tam vaktinde karşıla. Düşünce yukarıdan indir kılıcını. Ruhların sana dua edecek.',
+    no:'Anlıyorum. Ölülerle uğraşmak kimsenin işi değil. Ama ben her gece o nal seslerini dinliyorum.',
+    done:'Nal sesleri kesildi. Bu sabah mezarlığa gittim; toprak yine sessiz. Ölülerimiz sana minnettar, ben de. Bu demir benden sana.',
+    known:'Biliyorum, Kemik Atlı\'yı sen yendin. Mezarlık sessizleşti, bekçiler paslı mızrağı senin taşıdığını söyledi. Bunu senden isteyecektim. Al, hakkındır.'}};
+const BACC={boru:'Börü Han\'ı',tepe:'Tepegöz\'ü',alb:'Albastı\'yı',kemik:'Kemik Atlı\'yı'};
+function bqDef(id){const D=BQD[id];return{id:'boss_'+id,t:D.t,main:1,boss:id,ask:D.ask,yes:D.yes,no:D.no,done:D.done,rw:D.rw,
+  steps:[{k:'boss',id,d:BACC[id]+' yen'},{k:'ret',d:'Haberi götür'}]};}
+// who asks: someone from the village nearest the lair whose life the beast touches
+function bqGivers(){if(!NPC.ready||!BOSS.ready)return;BOSS.giver=BOSS.giver||{};const used=new Set(Object.values(BOSS.giver));
+  for(const id in BQD){const S=BOSS.st[id];if(BOSS.giver[id]&&npcByName(BOSS.giver[id]))continue;if(!S||S.lx===undefined)continue;let best=null,bs=1e9;
+    for(const n of NPC.list){if(!n.ham||n.role==='evt'||n.role==='cocuk'||used.has(n.name))continue;const ri=BQD[id].roles.indexOf(n.role),sc=Math.hypot(n.ham.x-S.lx,n.ham.z-S.lz)+(ri<0?260:ri*70)+(id==='alb'&&n.lk&&n.lk.f?-40:0);if(sc<bs){bs=sc;best=n;}}
+    if(best){BOSS.giver[id]=best.name;used.add(best.name);}}}
+function bqFor(n){if(!BOSS.giver)return null;for(const id in BOSS.giver)if(BOSS.giver[id]===n.name)return id;return null;}
+function bqActive(id){return QST.act.find(q=>q.id==='boss_'+id)||null;}
+// a villager offers it, but the beast is out there whether you listen or not
+const _v77mf=qMarkFor;qMarkFor=function(n){const id=bqFor(n);if(id&&!bqActive(id)&&!QST.done['boss_'+id]){const S=BOSS.st[id];if(!S.dead)return'ex';if(!(BOSS.ack||{})[id])return'qu';}return _v77mf(n);};
+const _v77to=qTalkOpts;qTalkOpts=function(n){const o=_v77to(n);const id=bqFor(n);if(!id)return o;const S=BOSS.st[id],D=BQD[id],q=bqActive(id);
+  if(!q&&!S.dead&&!QST.done['boss_'+id])o.unshift({t:'⚔ '+D.opt,pri:1,f:()=>bqOffer(n,id)});
+  if(q&&id==='tepe'&&tepeImmortal())o.push({t:'⚔ Tepegöz ölmüyor…',dim:1,f:()=>dlgSay(n,D.stuck,[{t:'Ejderha mı…',f:()=>talkMenu(n,'Başka?')}])});
+  return o;};
+function bqOffer(n,id){const D=BQD[id];dlgSay(n,D.ask,[{t:'Bu işi ben hallederim',pri:1,f:()=>{qAccept(n,bqDef(id));QST.track='boss_'+id;bossMark(id,false);addFr(n,4);dlgSay(n,D.yes,[{t:'Görüşürüz',f:()=>talkMenu(n,'Başka?')}]);}},{t:'Şimdi olmaz',f:()=>talkMenu(n,D.no)}]);}
+// killed before anyone asked: the one who would have asked already knows
+const _v77nd=npcDialog;npcDialog=function(n){_v77nd(n);try{const id=bqFor(n);if(!id||!DLG.open||DLG.n!==n)return;const S=BOSS.st[id];BOSS.ack=BOSS.ack||{};
+  if(S.dead&&!bqActive(id)&&!QST.done['boss_'+id]&&!BOSS.ack[id]){BOSS.ack[id]=day;const rw=BQD[id].rw;dlgSay(n,BQD[id].known,[{t:'Elimden geleni yaptım',pri:1,f:()=>{bqGift(n,id);talkMenu(n,PK(['Seni bu köyde kimse unutmayacak.','Ne zaman istersen kapım sana açık.']));}}]);}}catch(e){console.warn('bq',e);}};
+function bqGift(n,id){const rw=BQD[id].rw;coin(rw.coin);if(rw.item&&ITEMS[rw.item[0]])giveI(rw.item[0],rw.item[1]);addFr(n,rw.fr);addRep(rw.rep);toast(n.short+'’ın hediyesi',rw.coin+' sikke'+(rw.item&&ITEMS[rw.item[0]]?' · '+rw.item[1]+' '+ITEMS[rw.item[0]].n:''));chime();
+  QST.log=(QST.log||[]).concat([{t:BQD[id].t,g:n.short,day}]).slice(-40);qMarkers(true);}
+// the quest follows the beast
+const _v77qt=qTarget;qTarget=function(q){const s=qStep(q);if(s&&s.k==='boss'){const S=BOSS.st[s.id];return S&&S.lx!==undefined?{x:S.lx,z:S.lz,name:BOSSD[s.id].lair}:null;}return _v77qt(q);};
+const _v77st=qStepTxt;qStepTxt=function(q){const s=qStep(q);if(s&&s.k==='boss'){if(s.id==='tepe'&&tepeImmortal())return'Tepegöz\'ü yenmenin bir yolunu bul';return s.d+' · geceleri '+BOSSD[s.id].lair;}if(s&&s.k==='ret'&&q.def.boss)return'Haberi götür: '+q.gshort;return _v77st(q);};
+const _v77qk=qTick;qTick=function(){for(const q of QST.act.slice()){const s=qStep(q);if(s&&s.k==='boss'&&BOSS.st[s.id]&&BOSS.st[s.id].dead){qAdvance(q,true);toast('Ana görev',BOSSD[s.id].n+' yenildi · '+q.gshort+' haberini bekliyor');}}return _v77qk();};
+// saved quests come back with their definition
+const _v77qr=qRestore;qRestore=function(){if(QST.pend)for(const s of QST.pend){if(typeof s.id==='string'&&s.id.startsWith('boss_')&&BQD[s.id.slice(5)])s.gen=bqDef(s.id.slice(5));}return _v77qr();};
+// main quests sit at the top of the journal
+const _v77qh=questHtml;questHtml=function(){const a=QST.act,keep=a.slice();QST.act=a.filter(q=>q.def.main).concat(a.filter(q=>!q.def.main));try{return _v77qh();}finally{QST.act=keep;}};
+const _v77sv2=v52Save;v52Save=function(){const o=_v77sv2();try{o.v77q={giver:BOSS.giver||{},ack:BOSS.ack||{}};}catch(e){}return o;};
+const _v77ld2=v52Load;v52Load=function(o){_v77ld2(o);const v=o&&o.v77q;if(!v)return;try{BOSS.giver=v.giver&&typeof v.giver==='object'?v.giver:{};BOSS.ack=v.ack&&typeof v.ack==='object'?v.ack:{};}catch(e){}};
+const _v77us2=updateStats;updateStats=function(dt){_v77us2(dt);try{BOSS.gT=(BOSS.gT||0)-dt;if(BOSS.gT<=0){BOSS.gT=3;bqGivers();}}catch(e){}};
+
 window.__yb={SOC,DLG,EV,EVDEF,evStart,PJ,projOf,projTick,npcDialog,dlgPick,memOf,persOf,MUS,musStart,musStop,musMood,compose,GOAL,goalTick,PERF,lmValid,think,THK,reel3,fishTap,GFXASK,SZN,sznSet,sznTick,iceTick,TM,get HZD(){return HZD},get STABLE(){return STABLE},spawnWildHorse,tameRideStart,tameRideEnd,hSwap,horseSkin,MM,mmZoom,miniOvTick,MINI,miniMeTick,CAMO,BM,bmDown,bmMove,bmUp,LMSCALE,SHOPBUY,sndLevels,sndTest,SND,BAN,spawnBandit,spawnBeast,banTick,beastTick,v57Stall,BDEF,get HOURS(){return HOURS},SKC,spawnSkel,skelTick,skTick,skZones,skSafeAt,v52Sandbox,menuDraw,V52,WSDEF,v52Sit,wsCraft,v52FarmTick,v52BuyAnimal,v52Cands,VIS,get PIXD(){return PIXD},get RW(){return RW},menuClose,get vh(){return viewHT},CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
   setWeather:t=>{WX.type=t;const d=WDEF[t];[WX.cloud,WX.rain,WX.storm,WX.fog]=d;[WX.tc,WX.tr,WX.ts,WX.tf]=d;WX.wet=d[1];WX.t=0;WX.dur=999;},setYaw:v=>{yaw=yawT=v}};
 try{if(window.claude&&window.claude.hot&&typeof window.claude.hot.snapshot==='function')window.claude.hot.snapshot(()=>{save();return{v:4,px:P.x,pz:P.z,hx:HZ.x,hz:HZ.z,clock,day};});}catch(_){}
