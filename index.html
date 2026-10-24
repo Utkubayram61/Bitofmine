@@ -490,6 +490,19 @@ body.mob #mHud.mc{display:grid!important;grid-template-columns:repeat(5,1fr);col
 .mst .sk b{font-size:12.5px;color:#8a7aa8}.mst .sk span{font-size:11px;line-height:1.3}.mst .sk em{font-style:normal;font-size:10px;color:#a89ac0;margin-top:2px}
 .mst .sk.on{border:1px solid #6a5a80;background:#2a2236;color:#d8cce8}.mst .sk.on b{color:#ffe08a}
 #tabs{overflow-x:auto;scrollbar-width:none}#tabs::-webkit-scrollbar{display:none}#tabs .tab:not(.on) span{display:none}#tabs .tab{flex:none}
+#cineBars{position:fixed;inset:0;z-index:11;pointer-events:none}
+#cineBars i{position:absolute;left:0;right:0;height:0;background:#07050b;transition:height .9s cubic-bezier(.6,0,.2,1)}
+#cineBars i.t{top:0}#cineBars i.b{bottom:0}
+body.cine #cineBars{pointer-events:auto;cursor:pointer}
+body.cine #cineBars i{height:11vh}
+#cineCap{position:absolute;left:0;right:0;bottom:calc(11vh + 4vh);text-align:center;opacity:0;transform:translateY(8px);transition:opacity 1.4s ease,transform 1.8s ease;pointer-events:none}
+#cineCap.on{opacity:1;transform:none}
+#cineCap b{display:block;font-size:clamp(20px,3.2vw,38px);letter-spacing:.32em;color:#f4e6c4;text-shadow:0 2px 0 #000,0 0 18px rgba(0,0,0,.6);font-weight:700}
+#cineCap small{display:block;margin-top:6px;font-size:clamp(11px,1.2vw,14px);letter-spacing:.24em;color:#d8c49a;text-transform:uppercase;text-shadow:0 1px 0 #000}
+#cineSkip{position:absolute;right:18px;bottom:calc(11vh - 30px);font-size:11px;letter-spacing:.12em;color:rgba(241,228,196,.55);opacity:0;transition:opacity .6s}
+body.cine #cineSkip{opacity:1}
+body.cine #hud,body.cine #mHud,body.cine .btns,body.cine #mapWrap,body.cine #goal,body.cine #qtrack,body.cine #prompt,body.cine #prompt2,body.cine #mPad,body.cine #nbubs,body.cine #mFsB,body.cine #mMenuB,body.cine #cbtn,body.cine #help,body.cine #toast,body.cine #track{opacity:0!important;pointer-events:none!important;transition:opacity .6s}
+body.mob #cineSkip{right:12px}
 #hud.hx{width:262px;min-width:0;padding:10px 12px 9px;gap:6px}
 #hud.hx .hx-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 #hud.hx .name{font-size:15px;letter-spacing:.16em}
@@ -8020,7 +8033,7 @@ function blessUI(){const act=Object.keys(BLESSD).filter(blessOn);const html=act.
   const m=el('mBless');if(m)m.innerHTML=act.slice(0,3).map(id=>ico2(BLESSD[id].ic,12)).join('');}
 // ---------- card ----------
 (function(){const d=document.createElement('div');d.id='poiCard';d.className='plate';d.hidden=true;d.innerHTML='<div class="pch"><img class="ii" alt=""><b></b></div><div class="pct"></div><div class="pctag"></div><div class="pcf">E / dokun · kapat</div>';document.body.appendChild(d);d.addEventListener('click',()=>poiCardClose());
-  addEventListener('keydown',e=>{if(!POIX.card)return;if(e.code==='KeyE'||e.code==='Space'||e.code==='Escape'||e.code==='Enter'){e.stopPropagation();e.preventDefault();poiCardClose();}},true);})();
+  addEventListener('keydown',e=>{if(!POIX.card)return;if(e.code==='KeyE'||e.code==='Space'||e.code==='Escape'||e.code==='Enter'){e.stopImmediatePropagation();e.preventDefault();poiCardClose();}},true);})();
 function poiCard(title,txt,tags,icon){const d=el('poiCard');d.querySelector('img').src=iconURL(icon||'star');d.querySelector('b').textContent=title;const t=d.querySelector('.pct');t.textContent='';let i=0;clearInterval(POIX.tt);POIX.tt=setInterval(()=>{i+=2;t.textContent=txt.slice(0,i);if(i>=txt.length)clearInterval(POIX.tt);},18);
   d.querySelector('.pctag').innerHTML=(tags||[]).filter(Boolean).map(x=>`<span>${x}</span>`).join('');d.hidden=false;POIX.card=true;POIX.cardP=[P.x,P.z];document.body.classList.add('poicard');}
 function poiCardClose(){if(!POIX.card)return;clearInterval(POIX.tt);el('poiCard').hidden=true;POIX.card=false;document.body.classList.remove('poicard');scanT=0;if(POIX.pendLore!==undefined&&POIX.pendLore!==null){const i=POIX.pendLore;POIX.pendLore=null;setTimeout(()=>poiCard('Devlerin Hikâyesi · '+LORE[i].t,LORE[i].x,[`${POIX.lore.length}/${LORE.length} parça`],'tablet'),250);}}
@@ -8179,6 +8192,39 @@ const _v70rp=refreshPanel;refreshPanel=function(){if(panelKind==='usta'){if(BLD.
 // ---------- save / load ----------
 const _v70sv=v52Save;v52Save=function(){const o=_v70sv();o.v70={sw:MST.sw,bow:MST.bow,use:MST.use,st:MST.st};return o;};
 const _v70ld=v52Load;v52Load=function(o){_v70ld(o);const v=o&&o.v70;if(!v)return;try{Object.assign(MST.sw,v.sw||{});Object.assign(MST.bow,v.bow||{});MST.use=v.use||{};Object.assign(MST.st,v.st||{});}catch(e){}};
+
+/* ================= v71: cinematic points of interest ================= */
+// drop places that don't suit a cinematic moment
+for(const k of['oldmill','barn','shelter','rope','dock','hut','orchard','cave'])delete KDEF[k];
+KDEF.sunken=KDEF.sunken.filter(a=>a.id!=='open');
+{const t=NPT.find(x=>x[0]==='trail');if(t)t[1]=0;}
+const _v71kd=kdefOf;kdefOf=function(kind){const d=KDEF[kind];if(d===undefined&&!NATK.has(kind))return[];return _v71kd(kind);};
+const GIANTS=new Set(['stoneking','watchers','sleeper','starpointer','kneeler','guardians','raisearms','lonestat','faces','hands','sunkstat']);
+const CINE={on:false};
+(function(){const b=document.createElement('div');b.id='cineBars';b.innerHTML='<i class="t"></i><i class="b"></i><div id="cineCap"><b></b><small></small></div><span id="cineSkip">E · geç</span>';document.body.appendChild(b);b.addEventListener('pointerdown',e=>{if(CINE.on){e.stopPropagation();cineSkip();}});
+  addEventListener('keydown',e=>{if(!CINE.on)return;if(e.code==='KeyE'||e.code==='Space'||e.code==='Escape'||e.code==='Enter'){e.stopImmediatePropagation();e.preventDefault();cineSkip();}},true);})();
+function cineProfile(S,a){const big=S.L&&GIANTS.has(S.kind),r=S.r||8,an=a.an;
+  if(an==='meditate'||an==='rest'||an==='bathe')return{dur:8,v0:8,v1:30,p0:.5,p1:1.05,orb:2.2,fc:.25};
+  if(an==='gaze')return{dur:7,v0:10,v1:36,p0:.62,p1:.24,orb:1.1,fc:0};
+  if(an==='listen')return{dur:6.5,v0:15,v1:8,p0:.75,p1:.36,orb:.55,fc:.15};
+  if(an==='open'||an==='dig')return{dur:4.6,v0:8,v1:13,p0:.55,p1:.7,orb:.6,fc:.5};
+  if(big){const dd=Math.hypot(S.x-P.x,S.z-P.z);return{dur:7.5,v0:13,v1:Math.max(22,Math.min(32,dd*1.8+r+6)),p0:.55,p1:.4,orb:1.45,fc:.5};}
+  if(an==='kneel'||an==='pray'||an==='offer'||an==='wish')return{dur:6,v0:9,v1:22,p0:.4,p1:.78,orb:1.05,fc:.5};
+  return{dur:5.5,v0:9,v1:S.L?Math.max(18,Math.min(30,r*1.8+8)):16,p0:.42,p1:.62,orb:.85,fc:.45};}
+const _v71st=poiStart;poiStart=function(S,a){_v71st(S,a);if(ACT.mode!=='poi'||ACT.poi.a!==a)return;const pr=cineProfile(S,a);ACT.dur=Math.max(ACT.dur,pr.dur);
+  Object.assign(CINE,{on:true,S,a,pr,yaw0:yawT,pitch0:pitchT,view0:POIX.cam!==null?POIX.cam:viewHT,dir:Math.random()<.5?-1:1,cap:false});
+  document.body.classList.add('cine');const c=el('cineCap');c.querySelector('b').textContent=S.name.toLocaleUpperCase('tr');c.querySelector('small').textContent=a.t;c.classList.remove('on');
+  try{if(GIANTS.has(S.kind)||a.an==='gaze'||a.an==='meditate')musMood&&musMood('found');}catch(_){}};
+function cineEase(k){return k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;}
+function cineTick(){if(!CINE.on)return;const k=Math.min(1,ACT.t/ACT.dur),pr=CINE.pr,e=cineEase(Math.min(1,Math.max(0,(k-.08)/.92))),S=CINE.S;
+  yawT=CINE.yaw0+CINE.dir*pr.orb*e;pitchT=pr.p0+(pr.p1-pr.p0)*e;viewHT=pr.v0+(pr.v1-pr.v0)*e;
+  const ef=cineEase(Math.min(1,k*1.6)),fx=(S.x-P.x)*pr.fc*ef,fz=(S.z-P.z)*pr.fc*ef;CAMO.x=fx;CAMO.z=fz;
+  const cap=el('cineCap');if(!CINE.cap&&k>.14){CINE.cap=true;cap.classList.add('on');}if(CINE.cap&&k>.86)cap.classList.remove('on');
+  if(Math.random()<.25)addP({k:'mote',x:P.x+(Math.random()-.5)*6,y:P.y+.5+Math.random()*2,z:P.z+(Math.random()-.5)*6,ph:Math.random()*9,life:0,max:2.2,c:[1,.92,.7],s:2});}
+function cineSkip(){if(!CINE.on||ACT.mode!=='poi')return;ACT.t=ACT.dur;}
+function cineOff(){if(!CINE.on)return;CINE.on=false;document.body.classList.remove('cine');el('cineCap').classList.remove('on');yawT=CINE.yaw0;pitchT=CINE.pitch0;CAMO.x=0;CAMO.z=0;}
+const _v71ae=actExtra;actExtra=function(dt){if(ACT.mode==='poi')cineTick();return _v71ae(dt);};
+const _v71pe=poiEnd;poiEnd=function(cancel){const v0=CINE.on?CINE.view0:null;cineOff();_v71pe(cancel);if(v0!==null)viewHT=v0;};
 
 window.__yb={SOC,DLG,EV,EVDEF,evStart,PJ,projOf,projTick,npcDialog,dlgPick,memOf,persOf,MUS,musStart,musStop,musMood,compose,GOAL,goalTick,PERF,lmValid,think,THK,reel3,fishTap,GFXASK,SZN,sznSet,sznTick,iceTick,TM,get HZD(){return HZD},get STABLE(){return STABLE},spawnWildHorse,tameRideStart,tameRideEnd,hSwap,horseSkin,MM,mmZoom,miniOvTick,MINI,miniMeTick,CAMO,BM,bmDown,bmMove,bmUp,LMSCALE,SHOPBUY,sndLevels,sndTest,SND,BAN,spawnBandit,spawnBeast,banTick,beastTick,v57Stall,BDEF,get HOURS(){return HOURS},SKC,spawnSkel,skelTick,skTick,skZones,skSafeAt,v52Sandbox,menuDraw,V52,WSDEF,v52Sit,wsCraft,v52FarmTick,v52BuyAnimal,v52Cands,VIS,get PIXD(){return PIXD},get RW(){return RW},menuClose,get vh(){return viewHT},CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
   setWeather:t=>{WX.type=t;const d=WDEF[t];[WX.cloud,WX.rain,WX.storm,WX.fog]=d;[WX.tc,WX.tr,WX.ts,WX.tf]=d;WX.wet=d[1];WX.t=0;WX.dur=999;},setYaw:v=>{yaw=yawT=v}};
