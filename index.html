@@ -481,6 +481,15 @@ body.mob #mHud.mc{display:grid!important;grid-template-columns:repeat(5,1fr);col
 #mHud.mc .mb .ii{width:13px;height:13px}
 #mHud.mc .mb span{width:100%;min-width:0;height:4px;border-radius:2px;flex:none}
 #mapList .ml.mldn{opacity:.55}#mapList .mlp{color:#f4c64a;font-style:normal}#mapList .mld{color:#8fd07a;font-style:normal}
+.mst{background:#231c31;border:1px solid #4d4160;border-radius:7px;padding:10px 11px;margin-bottom:9px}
+.mst .mh{display:flex;align-items:center;gap:10px}.mst .mh b{display:block;color:#f4c64a;font-size:14px}.mst .mh small{color:var(--dim);font-size:11px}
+.mst .mbar{height:7px;border-radius:4px;background:#1a1426;margin:8px 0 2px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}.mst .mbar i{display:block;height:100%;background:linear-gradient(90deg,#c8843a,#f4c64a)}
+.mst>small{font-size:10.5px;color:var(--dim)}
+.mst .msk{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:5px;margin-top:8px}
+.mst .sk{display:flex;flex-direction:column;gap:1px;padding:6px 8px;border-radius:5px;background:#1d1729;border:1px dashed #43385a;color:var(--dim)}
+.mst .sk b{font-size:12.5px;color:#8a7aa8}.mst .sk span{font-size:11px;line-height:1.3}.mst .sk em{font-style:normal;font-size:10px;color:#a89ac0;margin-top:2px}
+.mst .sk.on{border:1px solid #6a5a80;background:#2a2236;color:#d8cce8}.mst .sk.on b{color:#ffe08a}
+#tabs{overflow-x:auto;scrollbar-width:none}#tabs::-webkit-scrollbar{display:none}#tabs .tab:not(.on) span{display:none}#tabs .tab{flex:none}
 #hud.hx{width:262px;min-width:0;padding:10px 12px 9px;gap:6px}
 #hud.hx .hx-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 #hud.hx .name{font-size:15px;letter-spacing:.16em}
@@ -4477,7 +4486,7 @@ function wolfTick(dt){const night=SKYS.night>.6,inArea=!CAVE&&(P.biome===5||P.bi
         if(w.t<=0&&!CB.attacker&&!fire&&!swim&&!P.sleeping&&d<10){w.state='wind';w.t=.7;CB.attacker=w;growl(d);}else if(w.t<=0)w.t=.6;break;}
       case'wind':{w.rot=Math.atan2(dx,dz);w.speed=0;if(w.t<=0){w.state='lunge';w.t=.42;const l=Math.max(.01,d);w.ldx=dx/l;w.ldz=dz/l;w.lungeHit=false;}break;}
       case'lunge':{const nx=w.x+w.ldx*12*dt,nz=w.z+w.ldz*12*dt;if(HQ(nx,nz)>WLAT(nx,nz)-.25){w.x=nx;w.z=nz;}w.speed=12;
-        if(!w.lungeHit&&Math.hypot(P.x-w.x,P.z-w.z)<1.25){w.lungeHit=true;if(CB.parry<.24&&TOOLS.weapon>=0&&!HZ.mounted)parryOK(w);else if(CB.iframe>0||CB.roll>0){}else if(CB.block&&!HZ.mounted&&((w.x-P.x)*Math.sin(P.rot)+(w.z-P.z)*Math.cos(P.rot))>-.2)blockHit(w);else hurtPlayer(14*(HZ.mounted?.6:1),w);}
+        if(!w.lungeHit&&Math.hypot(P.x-w.x,P.z-w.z)<1.25){w.lungeHit=true;if(CB.parry<PWIN()&&TOOLS.weapon>=0&&!HZ.mounted)parryOK(w);else if(CB.iframe>0||CB.roll>0){}else if(CB.block&&!HZ.mounted&&((w.x-P.x)*Math.sin(P.rot)+(w.z-P.z)*Math.cos(P.rot))>-.2)blockHit(w);else hurtPlayer(14*(HZ.mounted?.6:1),w);}
         if(w.t<=0&&w.state==='lunge'){w.state='recover';w.t=.9;if(CB.attacker===w)CB.attacker=null;}break;}
       case'recover':{wolfMove(w,w.x-dx/Math.max(d,.1)*3,w.z-dz/Math.max(d,.1)*3,3,dt);if(w.t<=0){w.state='circle';w.t=1.4+Math.random()*2.2;}break;}
       case'stagger':{w.speed=0;if(w.t<=0){w.state='recover';w.t=.6;}break;}
@@ -4537,7 +4546,7 @@ function c5Mid(k){return CB.combo===5&&!CB.hit2&&k>=.78;}
 function dealHits2(){CB.hit2=true;dealHits(.6);}
 function dealHits(mulX){const c=CB.combo,dmg=WDMG[TOOLS.weapon]*(CMUL[c]||1)*(mulX||1),fx=Math.sin(P.rot),fz=Math.cos(P.rot);let hit=false;
   if(c===8)slamFx();
-  for(const w of WOLVES){if(w.state==='dead'||w.state==='flee')continue;const dx=w.x-P.x,dz=w.z-P.z,d=Math.hypot(dx,dz);if(d>(CRNG[c]||2.2)||(dx*fx+dz*fz)/Math.max(d,.01)<(CARC[c]??.15))continue;hit=true;SND.hw=w;CB.hits++;hap(16);CB.hitT=2.2;
+  for(const w of WOLVES){if(w.state==='dead'||(w.state==='flee'&&!w.ban))continue;const dx=w.x-P.x,dz=w.z-P.z,d=Math.hypot(dx,dz);if(d>(CRNG[c]||2.2)||(dx*fx+dz*fz)/Math.max(d,.01)<(CARC[c]??.15))continue;hit=true;SND.hw=w;CB.hits++;hap(16);CB.hitT=2.2;
     const m0=skelHitMul(w,c,dx,dz);if(m0<0)continue;const m=(w.state==='stagger'?1.6:1)*m0;w.hp-=dmg*m;w.flash=1;const kb=c===8?2.6:c===4?2.3:c===5?1.8:c===6?1.4:c===7?2:c===3?1.5:.55;w.x+=dx/Math.max(d,.01)*kb;w.z+=dz/Math.max(d,.01)*kb;sparks(w.x,HQ(w.x,w.z)+.7,w.z,c>=4?16:c===3?10:5);
     if(w.hp<=0)wolfDie(w);
     else if(c===4||c===8||c===7||c===5){w.state='stagger';w.t=c===8?1.6:1.2;if(CB.attacker===w)CB.attacker=null;}else if(c===6){w.state='recover';w.t=.8;if(CB.attacker===w)CB.attacker=null;}
@@ -5405,7 +5414,7 @@ function skMoan(d){if(!AC||!AU.master||!soundOn)return;const t=AC.currentTime,o=
 function skMove(w,tx,tz,sp,dt){const dx=tx-w.x,dz=tz-w.z,l=Math.hypot(dx,dz);if(l<.05){w.speed*=.8;return false;}const s=Math.min(sp*dt,l),nx=w.x+dx/l*s,nz=w.z+dz/l*s;
   if(HQ(nx,nz)<WLAT(nx,nz)-.25||skSafeAt(nx,nz)){w.speed*=.5;return false;}w.x=nx;w.z=nz;w.speed=sp;const ta=Math.atan2(dx,dz);w.rot+=Math.atan2(Math.sin(ta-w.rot),Math.cos(ta-w.rot))*Math.min(1,dt*7);return true;}
 function skFace(w,dt,k){const ta=Math.atan2(P.x-w.x,P.z-w.z);w.rot+=Math.atan2(Math.sin(ta-w.rot),Math.cos(ta-w.rot))*Math.min(1,dt*(k||8));}
-function skHitPlayer(w,dmg){if(CB.parry<.24&&!HZ.mounted){parryOK(w);return'parry';}if(CB.iframe>0||CB.roll>0)return'miss';
+function skHitPlayer(w,dmg){if(CB.parry<PWIN()&&!HZ.mounted){parryOK(w);return'parry';}if(CB.iframe>0||CB.roll>0)return'miss';
   if(CB.block&&!HZ.mounted&&((w.x-P.x)*Math.sin(P.rot)+(w.z-P.z)*Math.cos(P.rot))>-.2){blockHit(w);return'block';}hurtPlayer(dmg*(HZ.mounted?.6:1),w);return'hit';}
 // ---- per-skeleton AI & pose
 function skelTick(w,dt,dx,dz,d){const D=SKDEF[w.kind],y0=Math.max(HQ(w.x,w.z),WLAT(w.x,w.z)-.3),pSafe=!!skSafeAt(P.x,P.z,-.5),busy=P.sleeping||BOAT||P.swim||DRG.ride||INTRO.on||MENU.on;
@@ -5463,14 +5472,14 @@ function skShoot(w){const fl=Math.max(4,Math.hypot(P.x-w.x,P.z-w.z))/20,tx=P.x+S
   const m=new T.Mesh(SKARRG,SKARRM);m.layers.set(1);scene.add(m);const p=new V3(w.x+dx/l*.5,sy,w.z+dz/l*.5),v=new V3(dx/T2,(ty-sy)/T2+6*T2,dz/T2);SKC.arr.push({m,p,v,t:0,w});sfx('twang',{x:w.x,z:w.z});}
 function skArrowTick(dt){for(let i=SKC.arr.length-1;i>=0;i--){const a=SKC.arr[i];a.t+=dt;a.v.y-=12*dt;a.p.addScaledVector(a.v,dt);a.m.position.copy(a.p);a.m.lookAt(a.p.x+a.v.x,a.p.y+a.v.y,a.p.z+a.v.z);let done=a.t>3||a.p.y<HQ(a.p.x,a.p.z);
     if(!done&&!a.hit&&Math.hypot(a.p.x-P.x,a.p.z-P.z)<.55&&a.p.y>P.y+.2&&a.p.y<P.y+1.9){a.hit=true;const l=Math.hypot(a.v.x,a.v.z)||1,fake={x:a.p.x-a.v.x/l,z:a.p.z-a.v.z/l,ldx:a.v.x/l,ldz:a.v.z/l,state:'',t:0,flash:0};
-      if(CB.parry<.24&&!HZ.mounted){sparks(a.p.x,a.p.y,a.p.z,10);clink();CB.ripT=.6;note('Oku savuşturdun!');}else if(CB.iframe>0||CB.roll>0){a.hit=false;}
+      if(CB.parry<PWIN()&&!HZ.mounted){sparks(a.p.x,a.p.y,a.p.z,10);clink();CB.ripT=.6;note('Oku savuşturdun!');}else if(CB.iframe>0||CB.roll>0){a.hit=false;}
       else if(CB.block&&!HZ.mounted&&((fake.x-P.x)*Math.sin(P.rot)+(fake.z-P.z)*Math.cos(P.rot))>-.2){clink();sparks(a.p.x,a.p.y,a.p.z,6);ST.hp=Math.max(0,ST.hp-2);if(ST.hp<=0)faint();}
       else hurtPlayer(SKDEF.ska.dmg*(HZ.mounted?.6:1),fake);if(a.hit)done=true;}
     if(done){scene.remove(a.m);SKC.arr.splice(i,1);}}}
 // ---- shield / hit reactions (called from dealHits & arrows)
 function skFront(w,ox,oz){const l=Math.hypot(ox,oz)||1;return(ox*Math.sin(w.rot)+oz*Math.cos(w.rot))/l>.35;}
 function skelHitMul(w,c,dx,dz){if(!w.kind)return 1;if(w.ban)return banHitMul(w,c,dx,dz);if(w.beast){w.passive=false;w.prov=1;return 1;}const front=skFront(w,-dx,-dz);
-  if(w.shield&&front&&w.state!=='stagger'&&w.state!=='strike'){if(c===4||c===5||c===7||c===8){w.shield=false;skDropShield(w);note('Kalkanı kırdın!');return .5;}clink();sparks(w.x-dx*.3,HQ(w.x,w.z)+1.1,w.z-dz*.3,7);w.flash=.4;if(c<3&&!CB.shieldTip){CB.shieldTip=1;note('Kalkanlı · arkasına dolan ya da ağır saldırı (basılı tut)');}return .1;}
+  if(w.shield&&front&&w.state!=='stagger'&&w.state!=='strike'){if(c===4||c===5||c===7||c===8||(c>=11&&c!==12)){w.shield=false;skDropShield(w);note('Kalkanı kırdın!');return .5;}clink();sparks(w.x-dx*.3,HQ(w.x,w.z)+1.1,w.z-dz*.3,7);w.flash=.4;if(c<3&&!CB.shieldTip){CB.shieldTip=1;note('Kalkanlı · arkasına dolan ya da ağır saldırı (basılı tut)');}return .1;}
   skBoneFx(w,c>=4?14:7);skRattle(4);return 1;}
 function skArrowMul(w,vx,vz){if(!w.kind)return 1;if(w.beast){w.passive=false;w.prov=1;return 1;}if(w.ban){if(w.state==='stalk'){w.state='chase';}return 1;}if(w.shield&&skFront(w,-vx,-vz)&&w.state!=='stagger'){clink();return .08;}skBoneFx(w,6);return 1;}
 function skBoneFx(w,n){const y=HQ(w.x,w.z)+(w.kind==='skd'?.5:1.1);for(let j=0;j<n;j++)addP({k:'spray',lit:1,x:w.x+(Math.random()-.5)*.3,y:y+(Math.random()-.5)*.4,z:w.z+(Math.random()-.5)*.3,vx:(Math.random()-.5)*3.5,vy:1+Math.random()*2.5,vz:(Math.random()-.5)*3.5,ph:0,life:0,max:.45+Math.random()*.3,c:[.92,.89,.8],s:2});}
@@ -8075,6 +8084,101 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-lore]');if
 // ---------- save / load ----------
 const _v69sv=v52Save;v52Save=function(){const o=_v69sv();try{o.v69={known:[...POIX.known.entries()].slice(-600).map(([id,k])=>[id,Math.round(k.x),Math.round(k.z),k.name]),done:POIX.done,cd:POIX.cd,lore:POIX.lore,bless:POIX.bless,flag:POIX.flag,counts:POIX.counts,dyn:POIX.dyn.map(d=>({id:d.id,kind:d.kind,x:d.x,z:d.z,state:d.state,loot:d.loot,lore:d.lore,nm:d.nm,flag:d.flag}))};}catch(e){console.warn('v69 save',e);}return o;};
 const _v69ld=v52Load;v52Load=function(o){_v69ld(o);const v=o&&o.v69;if(!v)return;try{POIX.known=new Map((v.known||[]).map(([id,x,z,name])=>[id,{x,z,name}]));Object.assign(POIX.done,v.done||{});Object.assign(POIX.cd,v.cd||{});POIX.lore=v.lore||[];POIX.bless=v.bless||{};POIX.flag=v.flag||{};POIX.counts=v.counts||{};POIX.dyn=(v.dyn||[]);}catch(e){console.warn('v69 load',e);}};
+
+/* ================= v70: weapon mastery, techniques woven into combat, parry glint & rallies, bandit fixes ================= */
+const SWSK=[{c:11,lv:1,n:'Yukarıdan Kesme',d:'Kılıcı başının üstüne kaldırıp tüm ağırlığınla indirirsin. Savunmayı kırar.'},{c:17,lv:2,n:'Kabza Darbesi',d:'Kabzayla yüze kısa bir darbe. Savunmadaki düşmanı sersemletir.'},{c:12,lv:3,n:'Kılıç Salvosu',d:'Göz açıp kapayıncaya kadar üç kesik.'},{c:14,lv:4,n:'Dönerek Kesme',d:'Topuğun üstünde dönüp etrafındaki herkesi biçersin.'},{c:16,lv:5,n:'Diz Kırma',d:'Eğilip bacaklara savrulan alçak kesik. Düşmanı uzun süre sendeletir.'},{c:13,lv:6,n:'Çapraz Kesme',d:'Çaprazlama iki ağır kesik.'},{c:15,lv:7,n:'Atılarak Saplama',d:'İleri atılıp kılıcı dümdüz saplarsın.'},{c:18,lv:8,n:'Yükselen Kesik',d:'Aşağıdan yukarı savrulan, düşmanı geriye savuran kesik.'},{c:19,lv:9,n:'Son Darbe',d:'Yaralı düşmana iki elle indirilen ölümcül darbe.'},{c:20,lv:10,n:'Fırtına Kesişi',d:'Ustaların tekniği: iki tam dönüş, dört kesik.'}];
+const BWSK=[{id:'draw',lv:1,n:'Hızlı Çekiş',d:'Yayı daha çabuk gerersin.',pas:1},{id:'steady',lv:2,n:'Sabit El',d:'Oklar daha hızlı ve dümdüz gider.',pas:1},{id:'crit',lv:3,n:'Nişancı Atışı',d:'Bazen ok tam zayıf noktaya gelir: iki kat hasar.'},{id:'double',lv:4,n:'Çift Ok',d:'Bazen ilk okun ardından ikinci oku da bırakırsın.'},{id:'quick',lv:5,n:'Seri Atış',d:'İsabetten hemen sonra yay kendiliğinden gerili gelir.',pas:1},{id:'volley',lv:6,n:'Yelpaze Atış',d:'Bazen üç oku birden yelpaze gibi salarsın.'}];
+const SWXP=[0,40,110,210,340,500,700,950,1250,1600,2000],BWXP=[0,35,95,180,290,430,600];
+const MST={sw:{xp:0,lv:0},bow:{xp:0,lv:0},use:{},st:{parry:0,rally:0,rmax:0,kills:0},rally:0,rT:-9,last:-9,quick:-9};
+Object.assign(CDUR,{11:.62,12:.66,13:.6,14:.56,15:.46,16:.5,17:.32,18:.5,19:.8,20:.95});
+Object.assign(CMUL,{11:2.5,12:1,13:1.3,14:1.4,15:2.2,16:1.6,17:1,18:2,19:3.4,20:1.2});
+Object.assign(CRNG,{11:2.5,12:2.3,13:2.4,14:2.8,15:3,16:2.5,17:1.9,18:2.4,19:2.6,20:3});
+Object.assign(CARC,{11:.1,12:.1,13:0,14:-1.1,15:.6,16:-.2,17:.3,18:.1,19:.2,20:-1.1});
+Object.assign(CCOST,{11:4,12:4,13:4,14:5,15:3,16:3,17:1,18:4,19:5,20:7});
+const SKH={12:[[.18,.9],[.78,1]],13:[[.88,1.4]],14:[[.78,1.2]],20:[[.2,1],[.62,1],[.86,1.6]]};
+for(const s of SWSK)COMBOS[s.c]=[s.n,s.d];
+function swLv(){return MST.sw.lv;}function bwLv(){return MST.bow.lv;}
+function PWIN(){return .24+(typeof MST!=='undefined'?MST.sw.lv*.012:0);}
+// ---------- xp & levels ----------
+function mstXp(k,v){const M=MST[k],T2=k==='sw'?SWXP:BWXP,L=k==='sw'?SWSK:BWSK;M.xp+=v;while(M.lv<T2.length-1&&M.xp>=T2[M.lv+1]){M.lv++;const sk=L.find(s=>s.lv===M.lv);const nm=k==='sw'?'Kılıç':'Okçuluk';
+    setTimeout(()=>{toast(`${nm} ustalığı · ${M.lv}. seviye`,sk?'Yeni teknik: '+sk.n:'Daha güçlüsün');chime();think('mst'+k+M.lv,sk?PK([`${sk.n}… vücudum artık bunu kendiliğinden yapıyor.`,`Bir şey değişti. ${sk.n} — ellerim öğrendi.`]):'Her dövüşte biraz daha ustalaşıyorum.',999,true);},500);}if(panelKind==='usta')refreshPanel();}
+// ---------- techniques woven into ordinary attacks ----------
+function skillPick(c){const lv=swLv();if(!lv||TOOLS.weapon<=0)return null;if(tnow-MST.last<1.3)return null;
+  const tg=liveWolf(CB.tgt)&&Math.hypot(CB.tgt.x-P.x,CB.tgt.z-P.z)<4?CB.tgt:pickTarget(3.6,2.4);if(!tg)return null;
+  const p=.1+.02*lv+(c===3?.08:0)+(c===4?.12:0);if(Math.random()>p)return null;
+  const near=WOLVES.filter(w=>liveWolf(w)&&Math.hypot(w.x-P.x,w.z-P.z)<3.6).length,low=tg.hp/(tg.max||tg.hp||1)<.35,guard=tg.state==='guard'||tg.shield;
+  const pool=[];for(const s of SWSK){if(s.lv>lv)continue;let w=1;if(s.c===19)w=low?6:0;if((s.c===14||s.c===20)&&near>=2)w*=3.5;if(s.c===17&&guard)w*=3;if((s.c===11||s.c===13)&&guard)w*=1.8;if(s.c===16&&tg.beast)w*=2;if(c===4&&!(s.c===11||s.c===18||s.c===19||s.c===13))w*=.3;if(w>0)pool.push([s,w]);}
+  if(!pool.length)return null;let r=Math.random()*pool.reduce((a,b)=>a+b[1],0);for(const[s,w]of pool){if(r<w)return s;r-=w;}return pool[0][0];}
+const _v70ss=startSwing;startSwing=function(c){let sk=null;if(c<=4&&c!==0)sk=skillPick(c);if(sk){c=sk.c;MST.last=tnow;MST.use[c]=(MST.use[c]||0)+1;}_v70ss(c);
+  if(c>=11){CB.skH=0;if(c===15){const tg=pickTarget(7,2.4);CB.lv=tg?Math.min(9,Math.max(4,(Math.hypot(tg.x-P.x,tg.z-P.z)-1)/(CB.dur*.55))):6;}if(c===19){TSLOW=Math.max(TSLOW,.25);}if(c===14||c===20)setTimeout(swingSnd,120);if(c===12)[90,190].forEach(t=>setTimeout(swingSnd,t));}};
+// extra hits inside a technique
+const _v70ct=combatTick;combatTick=function(dt){_v70ct(dt);
+  if(CB.atk>0&&SKH[CB.combo]){const k=CB.atk/CB.dur,L=SKH[CB.combo];while(CB.skH<L.length&&k>=L[CB.skH][0]){const m=L[CB.skH][1];CB.skH++;dealHits(m/(CMUL[CB.combo]||1));}}
+  if(CB.drawing&&bwLv()>=1){CB.draw=Math.min(1,CB.draw+dt*.45);if(bwLv()>=5&&tnow-MST.quick<1.6)CB.draw=Math.max(CB.draw,.95);}
+  parryGlints(dt);};
+// damage, effects & xp from melee
+const _v70dh=dealHits;dealHits=function(mulX){const c=CB.combo,before=new Map(WOLVES.map(w=>[w,w.hp]));let m=(mulX||1)*(1+.04*swLv());if(CB.ripT>0&&MST.rally>1)m*=1+Math.min(1,.25*(MST.rally-1));_v70dh(m);
+  for(const[w,hp0]of before){if(w.hp>=hp0)continue;mstXp('sw',c>=11?3:2);if(w.state==='dead'){mstXp('sw',10);MST.st.kills++;continue;}
+    if(c===11||c===18){w.state='stagger';w.t=1.3;if(CB.attacker===w)CB.attacker=null;if(c===18){w.x+=Math.sin(P.rot)*1.2;w.z+=Math.cos(P.rot)*1.2;}}
+    else if(c===16){w.state='stagger';w.t=2.2;if(CB.attacker===w)CB.attacker=null;}
+    else if(c===17){w.state='stagger';w.t=1.1;if(w.shield&&w.kind==='sks'&&Math.random()<.5){w.shield=false;skDropShield(w);}if(CB.attacker===w)CB.attacker=null;}
+    else if(c===19&&w.hp<w.max*.35){w.hp=0;wolfDie(w);sparks(w.x,HQ(w.x,w.z)+1,w.z,26);SHAKE=Math.max(SHAKE,.45);mstXp('sw',10);MST.st.kills++;}
+    else if(c>=11&&w.state!=='dead'&&w.state!=='stagger'){w.state='stagger';w.t=.8;if(CB.attacker===w)CB.attacker=null;}}};
+const _v70bh=banHitMul;banHitMul=function(w,c,dx,dz){return _v70bh(w,c>=11?(c===12?1:4):c,dx,dz);};
+// ---------- bow ----------
+const _v70sa=shootArrow;shootArrow=function(pw){_v70sa(pw);const a=HUNT.arrows[HUNT.arrows.length-1];if(!a)return;const lv=bwLv();
+  if(lv>=2)a.v.multiplyScalar(1.18);if(lv>=3&&Math.random()<.18){a.pw*=1.9;a.crit=1;note('Nişancı atışı!');}
+  if(!MST.extra){if(lv>=6&&Math.random()<.12&&(INV.arrow||0)>=2){MST.extra=1;for(const ang of[-.12,.12]){_v70sa(pw);const b=HUNT.arrows[HUNT.arrows.length-1];if(b){b.v.applyAxisAngle(_up,ang);if(lv>=2)b.v.multiplyScalar(1.18);}}MST.extra=0;note('Yelpaze atış!');}
+    else if(lv>=4&&Math.random()<.18&&(INV.arrow||0)>=1){setTimeout(()=>{if((INV.arrow||0)<1)return;MST.extra=1;_v70sa(pw);const b=HUNT.arrows[HUNT.arrows.length-1];if(b){b.v.applyAxisAngle(_up,(Math.random()-.5)*.06);if(lv>=2)b.v.multiplyScalar(1.18);}MST.extra=0;},110);}}};
+const _v70at=arrowTick;arrowTick=function(dt){const before=new Map(WOLVES.map(w=>[w,w.hp]));_v70at(dt);for(const[w,hp0]of before){if(w.hp>=hp0)continue;mstXp('bow',3);MST.quick=tnow;if(w.state==='dead'){mstXp('bow',10);MST.st.kills++;}}};
+const _v70ha=hitAnimal;hitAnimal=function(A,a){const was=A.dead;_v70ha(A,a);mstXp('bow',2);if(!was&&A.dead)mstXp('bow',5);MST.quick=tnow;};
+// ---------- parry: glint in the window, wider window with mastery, rallies ----------
+const GLINTTEX=(()=>{const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');x.fillStyle='#ff3a2a';x.fillRect(7,1,2,14);x.fillRect(1,7,14,2);x.fillStyle='#fff2e0';x.fillRect(6,6,4,4);x.fillStyle='#ff6a4a';x.fillRect(5,7,6,2);x.fillRect(7,5,2,6);const t=new T.CanvasTexture(c);t.magFilter=t.minFilter=T.NearestFilter;return t;})();
+function glintOf(w){if(w.pg)return w.pg;const m=new T.Sprite(new T.SpriteMaterial({map:GLINTTEX,depthTest:false,transparent:true}));m.scale.set(.32,.32,1);m.renderOrder=12;m.layers.set(1);m.visible=false;scene.add(m);w.pg=m;return m;}
+function tthOf(w,d){const s=w.state;if(w.ban){if(s==='wind')return w.t+.12;if(s==='strike'&&!w.lungeHit)return w.t-.16;return null;}
+  if(w.beast){if(w.type==='bear'){if(s==='wind')return w.t+.14;if(s==='strike'&&!w.lungeHit)return w.t-.2;return null;}if(s==='wind')return w.t+Math.max(0,d-1.3)/11;if(s==='lunge'&&!w.lungeHit)return Math.max(0,d-1.3)/11;return null;}
+  if(w.kind){if(w.kind==='ska')return null;if(w.kind==='skd'){if(s==='wind')return w.t+Math.max(0,d-1.2)/11;if(s==='lunge'&&!w.lungeHit)return Math.max(0,d-1.2)/11;return null;}if(s==='wind')return w.t+.12;if(s==='strike'&&!w.lungeHit)return w.t-.18;return null;}
+  if(s==='wind')return w.t+Math.max(0,d-1.25)/12;if(s==='lunge'&&!w.lungeHit)return Math.max(0,d-1.25)/12;return null;}
+const GLH={wolf:.85,skd:.8,boar:1,bear:2.1};
+function parryGlints(dt){const win=PWIN()+.02;for(const w of WOLVES){if(w.state==='dead'){if(w.pg)w.pg.visible=false;continue;}const dx=w.x-P.x,dz=w.z-P.z,d=Math.hypot(dx,dz);if(d>9){if(w.pg)w.pg.visible=false;continue;}
+    const t=tthOf(w,d),on=t!==null&&t>=-.02&&t<=win&&d<4.2&&canFight();if(!on&&!w.pg)continue;const g=glintOf(w);g.visible=on;if(!on)continue;
+    const h=w.ban?1.75:w.beast?GLH[w.type]||1:w.kind==='skd'?GLH.skd:w.kind?1.7:GLH.wolf,l=Math.max(.01,d),side=w.ban||(w.kind&&w.kind!=='skd')?.35:0;g.position.set(w.x-dx/l*.35+Math.cos(w.rot)*side,HQ(w.x,w.z)+h,w.z-dz/l*.35-Math.sin(w.rot)*side);const pu=.8+.35*Math.sin(tnow*60);g.scale.set(.3*pu,.3*pu,1);}}
+const _v70rw=removeWolf;removeWolf=function(w){if(w.pg){scene.remove(w.pg);w.pg.material.dispose();w.pg=null;}return _v70rw(w);};
+v57Warn=function(w,y,h,on,cue){if(w.warn)w.warn.visible=false;};
+const _v70po=parryOK;parryOK=function(w){_v70po(w);MST.st.parry++;mstXp('sw',6);if(tnow-MST.rT<3.2)MST.rally++;else MST.rally=1;MST.rT=tnow;MST.st.rmax=Math.max(MST.st.rmax,MST.rally);
+  if(MST.rally>=2){const cc=el('comboC');cc.textContent='Savuşturma ×'+MST.rally;cc.classList.remove('pop');void cc.offsetWidth;cc.classList.add('pop');CB.hitT=2.4;try{tn({f:880+MST.rally*90,type:'triangle',d:.12,g:.03});}catch(_){}if(MST.rally>=3)mstXp('sw',4);}
+  if(w.ban&&(w.lead||Math.random()<.45)){w.t=w.lead?.45:.6;w.counter=1;}};
+const _v70bt=banTick;banTick=function(w,dt,dx,dz,d){if(w.state==='flee'){w.fleeT=(w.fleeT||0)+dt;if(w.fleeT>12){if(Object.keys(w.loot||{}).length)note('Haydut ganimetle kaçtı…');removeWolf(w);return;}}else w.fleeT=0;
+  if(w.counter&&w.state==='recover'&&WOLVES.includes(w)){w.counter=0;w.state='wind';w.t=.34;CB.attacker=w;w.chain=0;}
+  if(w.state!=='dead'&&!(w.hp>0)){wolfDie(w);return;}return _v70bt(w,dt,dx,dz,d);};
+// let fleeing bandits be hit (they used to become untouchable)
+liveWolf=function(w){return!!w&&w.state!=='dead'&&(w.state!=='flee'||!!w.ban)&&WOLVES.includes(w);};
+// ---------- technique poses ----------
+function cl01(x){return Math.max(0,Math.min(1,x));}
+const _v70ca=combatAnim;combatAnim=function(p,lerp){if(CB.roll<=0&&CB.atk>0&&CB.combo>=11){const g=HERO.g;if(g.rotation.x||g.rotation.z){g.rotation.x=0;g.rotation.z=0;}p.body.rotation.z=0;skPose(p,lerp,CB.combo,Math.min(1,CB.atk/CB.dur));return true;}return _v70ca(p,lerp);};
+function skPose(p,lerp,c,k){const R=(o,ax,v)=>{o.rotation[ax]=lerp(o.rotation[ax],v);};const legs=(l,r)=>{R(p.legL,'x',l);R(p.legR,'x',r);};
+  switch(c){
+   case 11:{if(k<.42){const e=k/.42;p.armL.rotation.x=-.5-2.65*e;p.armR.rotation.x=-2.3*e;p.armL.rotation.z=0;p.body.rotation.x=-.22*e;p.hips.position.y=.78+.03*e;legs(-.2,.15);}else{const f=cl01((k-.42)/.18);p.armL.rotation.x=-3.15+2.6*f;p.armR.rotation.x=-2.3+1.8*f;p.body.rotation.x=-.22+.7*f;p.hips.position.y=.78-.14*f;legs(-.65,.45);}p.body.rotation.y=lerp(p.body.rotation.y,0);break;}
+   case 12:{const n=Math.min(2,Math.floor(k*3)),ph=k*3-n,s=n%2?1:-1;p.armL.rotation.x=-2.1+1.5*Math.sin(Math.min(1,ph)*Math.PI);p.armL.rotation.z=s*(.75-1.5*ph);p.body.rotation.y=s*(.35-.7*ph);R(p.body,'x',.2);legs(-.45,.3);p.hips.position.y=.74;break;}
+   case 13:{const h=k<.5,ph=h?k/.5:(k-.5)/.5,e=ph*ph*(3-2*ph);p.armL.rotation.x=-2.6+2.1*e;p.armL.rotation.z=h?-.95+1.8*e:.95-1.8*e;p.body.rotation.y=h?.45-.9*e:-.45+.9*e;R(p.body,'x',.22);legs(-.5,.35);break;}
+   case 14:{const sp=cl01((k-.08)/.8);p.armL.rotation.x=-1.5;p.armL.rotation.z=-1.35;p.body.rotation.y=-.5+sp*Math.PI*2;R(p.body,'x',.12);p.hips.position.y=.73;legs(.4,-.3);break;}
+   case 15:{if(k<.3){R(p.armL,'x',-1.0);R(p.armL,'z',.35);R(p.body,'x',-.12);legs(.2,-.2);}else{p.armL.rotation.x=-1.57;p.armL.rotation.z=0;p.armR.rotation.x=.35;R(p.body,'x',.42);p.hips.position.y=.66;legs(-.95,.75);}p.body.rotation.y=lerp(p.body.rotation.y,-.2);break;}
+   case 16:{const e=cl01(k/.7);p.hips.position.y=lerp(p.hips.position.y,.5);R(p.body,'x',.55);legs(-1.2,.6);p.armL.rotation.x=-1.0;p.armL.rotation.z=1.3-2.6*e;p.body.rotation.y=.6-1.2*e;break;}
+   case 17:{if(k<.35){R(p.armL,'x',-.6);R(p.armL,'z',.5);R(p.body,'x',-.05);}else{p.armL.rotation.x=-1.4;p.armL.rotation.z=-.2;R(p.body,'x',.32);legs(-.55,.3);}p.body.rotation.y=lerp(p.body.rotation.y,.15);break;}
+   case 18:{if(k<.35){p.hips.position.y=lerp(p.hips.position.y,.62);R(p.armL,'x',-.2);R(p.armL,'z',.4);R(p.body,'x',.45);legs(-.8,.4);}else{const e=cl01((k-.35)/.25);p.armL.rotation.x=-.2-2.9*e;p.armL.rotation.z=.4-.4*e;p.armR.rotation.x=-1.5*e;p.body.rotation.x=.45-.75*e;p.hips.position.y=.62+.22*e;legs(-.3,.2);}break;}
+   case 19:{if(k<.55){const e=k/.55;p.armL.rotation.x=-3.15*e;p.armR.rotation.x=-3.05*e;p.body.rotation.x=-.28*e;p.hips.position.y=.78+.02*e;legs(-.3,.25);}else{const f=cl01((k-.55)/.12);p.armL.rotation.x=-3.15+2.85*f;p.armR.rotation.x=-3.05+2.7*f;p.body.rotation.x=-.28+.95*f;p.hips.position.y=.78-.16*f;legs(-.8,.55);}p.armL.rotation.z=0;p.body.rotation.y=lerp(p.body.rotation.y,0);break;}
+   case 20:{const sp=cl01((k-.05)/.85);p.body.rotation.y=sp*Math.PI*4;p.armL.rotation.x=-1.5+Math.sin(k*28)*.35;p.armL.rotation.z=-1.3;R(p.body,'x',.15);p.hips.position.y=.72;legs(.4,-.35);break;}}}
+// ---------- mastery panel ----------
+const _v70th=tabsHtml;tabsHtml=function(){let h=_v70th().replace(/<button type="button" class="tab([^"]*)" data-tab="(\w+)">([\s\S]*?)<span>([^<]*)<\/span>/g,(m,c,t,ic,lb)=>`<button type="button" class="tab${c}" data-tab="${t}" title="${lb}">${ic}<span>${lb}</span>`);const tb=`<button type="button" class="tab ${panelKind==='usta'?'on':''}" data-tab="usta">${ico2('sword',20)}<span>Ustalık</span></button>`;const i=h.indexOf('data-tab="kesif"');if(i<0)return h+tb;const e=h.indexOf('</button>',i)+9;return h.slice(0,e)+tb+h.slice(e);};
+function mstBar(M,T2){const nx=T2[Math.min(T2.length-1,M.lv+1)],pv=T2[M.lv],full=M.lv>=T2.length-1,k=full?1:(M.xp-pv)/Math.max(1,nx-pv);return`<div class="mbar"><i style="width:${Math.round(k*100)}%"></i></div><small>${full?'En üst seviye':`${Math.floor(M.xp-pv)} / ${nx-pv} deneyim`}</small>`;}
+function ustaHtml(){let h=`<div class="qhead"><b>Silah Ustalığı</b><small>Silahını kullandıkça teknikler kendiliğinden açılır ve dövüşte yeri gelince kendiliğinden yapılır.</small></div>`;
+  h+=`<div class="mst"><div class="mh">${ico2('sword',30)}<div><b>Kılıç · ${MST.sw.lv}/10</b><small>Hasar +${MST.sw.lv*4}% · savuşturma penceresi +${Math.round(MST.sw.lv*12)} ms</small></div></div>${mstBar(MST.sw,SWXP)}<div class="msk">`+SWSK.map(s=>s.lv<=MST.sw.lv?`<div class="sk on"><b>${s.n}</b><span>${s.d}</span><em>${MST.use[s.c]||0} kez</em></div>`:`<div class="sk"><b>${MST.sw.lv+1===s.lv?s.n:'???'}</b><span>${s.lv}. seviyede açılır</span></div>`).join('')+'</div></div>';
+  h+=`<div class="mst"><div class="mh">${ico2('bowi',30)}<div><b>Okçuluk · ${MST.bow.lv}/6</b><small>${TOOLS.bow?'Yayınla avlandıkça ve dövüştükçe gelişir':'Önce bir yay yap'}</small></div></div>${mstBar(MST.bow,BWXP)}<div class="msk">`+BWSK.map(s=>s.lv<=MST.bow.lv?`<div class="sk on"><b>${s.n}</b><span>${s.d}</span><em>${s.pas?'sürekli':'şans eseri'}</em></div>`:`<div class="sk"><b>${MST.bow.lv+1===s.lv?s.n:'???'}</b><span>${s.lv}. seviyede açılır</span></div>`).join('')+'</div></div>';
+  h+=`<div class="sec">Savuşturma</div><div class="qhint"><span>Toplam savuşturma · ${MST.st.parry}</span><span>En uzun karşılıklı zincir · ×${MST.st.rmax}</span><span>Yenilen düşman · ${MST.st.kills}</span></div><p class="hint">Düşman vurmak üzereyken silahında küçük kırmızı bir ışık parlar: tam o anda savuştur. Karşılıklı savuşturmalar zinciri büyüttükçe karşı darbelerin daha sert olur.</p>`;return h;}
+const _v70rp=refreshPanel;refreshPanel=function(){if(panelKind==='usta'){if(BLD.on)updBldUI();el('tabs').innerHTML=tabsHtml();const pb=el('panelBody'),sc=pb.scrollTop;pb.innerHTML=ustaHtml();pb.scrollTop=sc;return;}_v70rp();};
+// ---------- save / load ----------
+const _v70sv=v52Save;v52Save=function(){const o=_v70sv();o.v70={sw:MST.sw,bow:MST.bow,use:MST.use,st:MST.st};return o;};
+const _v70ld=v52Load;v52Load=function(o){_v70ld(o);const v=o&&o.v70;if(!v)return;try{Object.assign(MST.sw,v.sw||{});Object.assign(MST.bow,v.bow||{});MST.use=v.use||{};Object.assign(MST.st,v.st||{});}catch(e){}};
 
 window.__yb={SOC,DLG,EV,EVDEF,evStart,PJ,projOf,projTick,npcDialog,dlgPick,memOf,persOf,MUS,musStart,musStop,musMood,compose,GOAL,goalTick,PERF,lmValid,think,THK,reel3,fishTap,GFXASK,SZN,sznSet,sznTick,iceTick,TM,get HZD(){return HZD},get STABLE(){return STABLE},spawnWildHorse,tameRideStart,tameRideEnd,hSwap,horseSkin,MM,mmZoom,miniOvTick,MINI,miniMeTick,CAMO,BM,bmDown,bmMove,bmUp,LMSCALE,SHOPBUY,sndLevels,sndTest,SND,BAN,spawnBandit,spawnBeast,banTick,beastTick,v57Stall,BDEF,get HOURS(){return HOURS},SKC,spawnSkel,skelTick,skTick,skZones,skSafeAt,v52Sandbox,menuDraw,V52,WSDEF,v52Sit,wsCraft,v52FarmTick,v52BuyAnimal,v52Cands,VIS,get PIXD(){return PIXD},get RW(){return RW},menuClose,get vh(){return viewHT},CLOUD,cloudCheck,cloudPush,MENU,menuOpen,menuClose,slotInfo,setSlot,get CURSLOT(){return CURSLOT},get PLAYT(){return PLAYT},KIT,INTRO,get WRECK(){return WRECK},introEnd,findWreck,MOB,mobSet,NPC,npcBlock,NSCHED,npcTalk,npcPlan,npcInit,tradeBuy,tradeSell,tradeStock,wolfDie,nearCarcass,hitAnimal,shootArrow,wndF,BOWG,NOCKA,QUIVER,BLOODS,dieAnim,set yaw(v){yaw=yawT=v},get yaw(){return yaw},get rotDrag(){return rotDrag},cbMouseDown,HUNT,bowSet,bowDown,bowUp,animalDie,get animalsL(){return animals},makeAnimal,huntTick,trapTick,GDN,CROPS,gdnTick,gdnVis,nearPlot,gdnPlant,gdnHarvest,gdnWater,placeBuild,get PLACED(){return PLACED},waterU,cbRoll,parryOK,COMBOS,UIX,iconURL,closePanel,refreshPanel,ITEMS,ORDER,CLOTHES,TOOLDEF,BUILDS,PCS,ARTS,HORSE,GAITS,wkJob,WK,FAR,FARU,get CR(){return CR},get HS(){return heroScreen},weaponLook,AP,SMEAR,animPolish,get HEROP(){return HERO.parts},atkDown,atkUp,parryDown,parryUp,toggleLock,cycleTarget,cbActive,get MOUSE(){return MOUSE},get LOCKM(){return LOCKM},get WONDERS(){return WONDERS},get HOMEP(){return HOME},rbound,coastR,migrateWorld,setGfx,GQ,newJob,stepJob,finishChunk,buildPatch,CB,WOLVES,spawnPack,cbAttack,cbRoll,cbParry,faint,get DROPBAG(){return DROPBAG},takeDropBag,unboard,WEV,DRG,SEA,GAZ,dragonMount,dragonLand,initWorldEvents,NATK,KINDS,buildLandmark,inWarm,nearPool,PLC,enterPlace,plcPlace,plcTick,exitPlace,placePier,placeBoat,pierFit,postU,brightU,set pitch(v){PITCH=pitchT=v},CANT,sipCanteen,nearSpring,waterRisk,get SICK(){return ST.sick},startLevel,applyFlatten,get FLATS(){return FLATS},TOOLS,WEAR,OWN,BLD,get HOUSE(){return HOUSE},enterBuilder,exitBuilder,bClick,bTick,buildHouse,moonPhase,moonIllum,nearRock,nearDig,finishMine,finishDig,GEMLOG,ARTLOG,MINED,STORE,applyWear,LILIES,climbGain,slotAt,pValid,get day(){return day},set day(v){day=v},set viewH(v){viewH=viewHT=v},HQ,WLAT,SEEN,envTemp,get HZstate(){return HZ},startPet,M,biome,regionName,PRINTS,enterCave,exitCave,get CAVE(){return CAVE},MARKS,addMark,openMap,closeMap,drawMap,FOUNDPOS,startJump,pathMask,hookFish,FISHLOG,EXPL,stepMap,ST,boardBoat,save,landmarkNear,INV,BOATS,PLACED,FISH,ACT,chunks,patches,built,interact,scanAction,openPanel,placeBuild,sleep,cook,get BOAT(){return BOAT},get curAction(){return curAction},makeAnimal,mistAt,animals,H,P,HZ,WX,get clock(){return clock},set clock(v){clock=v},keys,update,render,landmarkCell,streamWorld,focus,toggleMount,lightning,
   setWeather:t=>{WX.type=t;const d=WDEF[t];[WX.cloud,WX.rain,WX.storm,WX.fog]=d;[WX.tc,WX.tr,WX.ts,WX.tf]=d;WX.wet=d[1];WX.t=0;WX.dur=999;},setYaw:v=>{yaw=yawT=v}};
