@@ -446,8 +446,6 @@ body.mob.bmob #mPad,body.mob.bmob #mJoyHint,body.mob.bmob #joy{display:none!impo
 #miniMe{display:none!important}
 
 /* ---- v68 HUD ---- */
-body.mob #mHud{min-width:230px;gap:4px}
-body.mob #mHud .mt{font-size:11.5px;gap:8px}#mHud #mWd{color:#f4d9a0;font-weight:600}
 #mHud .mx{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px;color:#f1e4c4}
 #mHud .mxs{display:flex;align-items:center;gap:4px;padding:1px 6px 1px 3px;border-radius:4px;background:var(--sb,rgba(255,255,255,.06));border-left:2px solid var(--sc,#7ac44a)}#mHud .mxs b{color:var(--sc,#7ac44a);font-size:11px}#mHud .mxs .ii{width:16px;height:16px}
 #mHud .mxt b{font-size:12.5px;color:#fff;margin-right:3px}#mHud .mxt small{color:var(--dim);font-size:10px}
@@ -469,6 +467,19 @@ body.poicard #qtrack,body.poicard #goal,body.poicard #prompt{display:none!import
 .blist{display:flex;flex-direction:column;gap:5px}.blist div{display:flex;align-items:center;gap:8px}.blist b{color:#ffe08a;font-size:13px}.blist small{color:var(--dim);font-size:11px}
 @media (max-width:640px){.lore{grid-template-columns:repeat(2,1fr)}}
 body.mob #poiCard{bottom:calc(env(safe-area-inset-bottom,0px) + 10px);padding:10px 12px 8px}body.mob #poiCard .pct{font-size:13px}
+body.mob #mHud.mc{width:150px;min-width:0;max-width:150px;padding:5px 7px 6px;gap:5px;box-sizing:border-box}
+#mHud.mc .mt{display:flex;align-items:center;gap:4px;height:16px;overflow:hidden;white-space:nowrap;font-size:11px}
+#mHud.mc .mt .ii{width:15px;height:15px;flex:none}
+#mHud.mc #mTime{font-size:13px;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.02em;width:38px}
+#mHud.mc #mDay{font-size:10px;color:var(--dim);width:28px;overflow:hidden}
+#mHud.mc #mBless{display:flex;gap:1px;flex:1;min-width:0;overflow:hidden}#mHud.mc #mBless .ii{width:12px;height:12px}
+#mHud.mc #mWx{margin-left:auto}
+#mHud.mc .mx{display:none!important}
+body.mob #mHud.mc{display:grid!important;grid-template-columns:repeat(5,1fr);column-gap:4px;row-gap:4px}
+#mHud.mc .mt{grid-column:1/-1}
+#mHud.mc .mb{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+#mHud.mc .mb .ii{width:13px;height:13px}
+#mHud.mc .mb span{width:100%;min-width:0;height:4px;border-radius:2px;flex:none}
 #hud.hx{width:262px;min-width:0;padding:10px 12px 9px;gap:6px}
 #hud.hx .hx-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 #hud.hx .name{font-size:15px;letter-spacing:.16em}
@@ -3370,7 +3381,7 @@ function mobTick(dt){if(!MOB.on)return;MOB.t-=dt;
   mobIco(el('mAtk').firstChild,CB.bow?'bowi':'sword');mobIco(el('mWep').firstChild,CB.bow?'sword':'bowi');const wv=TOOLS.bow?'':'none';if(el('mWep').style.display!==wv)el('mWep').style.display=wv;
   {const v=!BOAT&&!CAVE;if(v!==MOB.hv){MOB.hv=v;el('mHorse').style.display=v?'':'none';}}
   if(MOB.t<=0){MOB.t=.3;const st=[['hp',ST.hp],['food',ST.food],['wat',ST.water],['en',ST.en],['tmp',Math.max(0,Math.min(100,(ST.temp-5)/30*100))]];for(const[k,v]of st){const i=el('m_'+k);if(i)i.style.width=Math.max(0,Math.min(100,v))+'%';}
-    const c=el('clock');el('mClock').textContent=c?c.textContent:'';const w=el('wxI'),mw=el('mWx');if(w&&w.src&&mw.src!==w.src)mw.src=w.src;}
+    const c=el('clock'),mc=el('mClock');if(mc)mc.textContent=c?c.textContent:'';const w=el('wxI'),mw=el('mWx');if(w&&w.src&&mw&&mw.src!==w.src)mw.src=w.src;}
   document.body.classList.toggle('joying',ptr.active&&ptr.type!=='mouse');document.body.classList.toggle('busy',!!ACT.mode||FISH.state!=='idle');}
 // touch camera: right half drag rotates, two fingers pinch zoom
 // touch gestures: left = joystick, right = camera; zoom ONLY when two fingers land together, close to each other, around the screen centre
@@ -7776,10 +7787,11 @@ let hxT=0;function hudTick(dt){hxT-=dt;if(hxT>0)return;hxT=.25;const hh=Math.flo
   const val=(id,v,t)=>{const e=el(id);if(e)e.textContent=t!==undefined?t:Math.round(v);};val('hpVal',ST.hp);val('foodVal',ST.food);val('watVal',ST.water);val('enVal',ST.en);val('tmpVal',0,tempName(ST.temp));}
 function dirName(dx,dz){const a=(Math.atan2(dx,-dz)*180/Math.PI+360)%360,N=['kuzeyde','kuzeydoğuda','doğuda','güneydoğuda','güneyde','güneybatıda','batıda','kuzeybatıda'];return N[Math.round(a/45)%8];}
 
-function mHudX(){const m=el('mHud');if(!m)return;if(!el('mSzn')){const t=m.querySelector('.mt');const d=document.createElement('div');d.className='mx';d.innerHTML='<span class="mxs"><img class="ii" id="mSznI" alt=""><b id="mSzn"></b></span><span class="mxt"><b id="mTime"></b><small id="mPod"></small></span><span class="mxl" id="mLoc"></span>';t.after(d);const c=el('mClock');if(c)c.style.display='none';const wd=document.createElement('span');wd.id='mWd';t.insertBefore(wd,c);}
-  const c=sznCalc(),S2=SZNUI[c.idx];const sz=el('mSzn');if(sz.dataset.i!==String(c.idx)){sz.dataset.i=c.idx;el('mSznI').src=iconURL(S2.ic);sz.parentNode.style.setProperty('--sc',S2.c);sz.parentNode.style.setProperty('--sb',S2.bg);}
-  sz.textContent=S2.n+' '+(Math.floor(c.f*SZN.len)+1)+'/'+SZN.len;el('mTime').textContent=el('hxTime').textContent;el('mPod').textContent=partOfDay(clock);el('mWd').textContent=(typeof GUNN!=='undefined'?GUNN[weekday()]+' · ':'')+day+'. gün';
-  const nn=el('hxNear').textContent;el('mLoc').textContent=(el('biome').textContent||'')+(nn?' · '+nn:'');}
+function mHudX(){const m=el('mHud');if(!m)return;const t=m.querySelector('.mt');if(!t)return;
+  if(!el('mTime')){t.innerHTML='<img class="ii" id="mSznI" alt=""><b id="mTime"></b><small id="mDay"></small><span id="mBless"></span><img class="ii" id="mWx" alt="">';m.classList.add('mc');}
+  const c=sznCalc(),S2=SZNUI[c.idx],si=el('mSznI');if(si.dataset.i!==String(c.idx)){si.dataset.i=c.idx;si.src=iconURL(S2.ic);si.title=S2.n;}
+  const hh=Math.floor(clock),mm=Math.floor((clock-hh)*60);el('mTime').textContent=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');el('mDay').textContent=day+'.g';
+  const w=el('wxI'),mw=el('mWx');if(w&&w.src&&mw&&mw.src!==w.src)mw.src=w.src;}
 let mhxT=0;const _v68ht=hudTick;hudTick=function(dt){_v68ht(dt);mhxT-=dt;if(mhxT<=0&&MOB.on){mhxT=.3;try{mHudX();}catch(e){}}};
 /* ================= v68f: wiring ================= */
 try{mapExtraInit();}catch(e){console.warn('map init',e);}
@@ -7992,7 +8004,7 @@ const _v69us=updateStats;updateStats=function(dt){const e0=ST.en,f0=ST.food,w0=S
 let poiT=0;function poiTick(dt){poiT-=dt;if(poiT>0)return;poiT=.7;npTick();blessUI();if(POIX.card&&Math.hypot(P.x-POIX.cardP[0],P.z-POIX.cardP[1])>4)poiCardClose();}
 function blessUI(){const act=Object.keys(BLESSD).filter(blessOn);const html=act.map(id=>{const d=BLESSD[id],left=id==='dev'?'∞':Math.max(1,Math.ceil(POIX.bless[id]-gameHour()))+' sa';return`<span class="bl" title="${d.n}: ${d.d}">${ico2(d.ic,18)}<em>${left}</em></span>`;}).join('');
   let e=el('hxBless');if(!e){const h=el('hud');if(h){e=document.createElement('div');e.id='hxBless';const m=h.querySelector('.hx-meta');h.insertBefore(e,m);}}if(e){e.innerHTML=html?'<small>Lütuflar</small>'+html:'';e.hidden=!html;}
-  let m=el('mBless');if(!m&&el('mHud')&&el('mLoc')){m=document.createElement('span');m.id='mBless';el('mLoc').before(m);}if(m)m.innerHTML=act.map(id=>ico2(BLESSD[id].ic,14)).join('');}
+  const m=el('mBless');if(m)m.innerHTML=act.slice(0,3).map(id=>ico2(BLESSD[id].ic,12)).join('');}
 // ---------- card ----------
 (function(){const d=document.createElement('div');d.id='poiCard';d.className='plate';d.hidden=true;d.innerHTML='<div class="pch"><img class="ii" alt=""><b></b></div><div class="pct"></div><div class="pctag"></div><div class="pcf">E / dokun · kapat</div>';document.body.appendChild(d);d.addEventListener('click',()=>poiCardClose());
   addEventListener('keydown',e=>{if(!POIX.card)return;if(e.code==='KeyE'||e.code==='Space'||e.code==='Escape'||e.code==='Enter'){e.stopPropagation();e.preventDefault();poiCardClose();}},true);})();
