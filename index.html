@@ -8767,7 +8767,7 @@ const _v76tm=toggleMount;toggleMount=function(){if(AN.mnt)return;
 function mntPose(p,o){for(const k in o){const[part,ax]=k.split('.');p[part].rotation[ax]=o[k];}}
 function mntTick(dt,p,g){const M=AN.mnt;M.t+=dt;const T2=M.t,hb=HORSE.p.body.position.y,seatY=HZ.y+hb+.5-.78,gy=G(HZ.x,HZ.z),ss=t=>t<=0?0:t>=1?1:t*t*(3-2*t);
   const near=M.sd>0?'R':'L',far=M.sd>0?'L':'R',sgn=M.sd>0?1:-1;   // the leg next to the horse goes in the stirrup, the far one swings over
-  AP.off.length=0;AP.offP.length=0;
+  apUndo();p.hips.rotation.set(0,0,0);p.hips.position.x=0;p.hips.position.z=0;p.body.rotation.y=0;p.head.rotation.y=0;p.head.rotation.z=0;
   if(M.on){HZ.mode='idle';HZ.speed=0;const sx=HZ.x+M.px*M.sd*.62-Math.sin(HZ.rot)*.15,sz=HZ.z+M.pz*M.sd*.62-Math.cos(HZ.rot)*.15,cx=HZ.x-Math.sin(HZ.rot)*.08,cz=HZ.z-Math.cos(HZ.rot)*.08,face=HZ.rot-sgn*.35;
     let x,y,z,rot;const pose={'legL.x':0,'legR.x':0,'legL.z':0,'legR.z':0,'shinL.x':.05,'shinR.x':.05,'armL.x':0,'armR.x':0,'armL.z':.05,'armR.z':-.05,'body.x':0,'body.z':0,'head.x':0};
     if(T2<.3){const k=ss(T2/.3);x=M.x0+(sx-M.x0)*k;z=M.z0+(sz-M.z0)*k;y=G(x,z);rot=M.r0+Math.atan2(Math.sin(face-M.r0),Math.cos(face-M.r0))*k;const w=Math.sin(T2*18);pose['legL.x']=w*.45;pose['legR.x']=-w*.45;pose['shinL.x']=.1+Math.max(0,-w)*.5;pose['shinR.x']=.1+Math.max(0,w)*.5;}
@@ -8776,7 +8776,7 @@ function mntTick(dt,p,g){const M=AN.mnt;M.t+=dt;const T2=M.t,hb=HORSE.p.body.pos
     else{const k=ss((T2-.78)/.32);x=sx+(cx-sx)*k;z=sz+(cz-sz)*k;y=seatY+.32-(.32)*k+Math.sin(k*Math.PI)*.08;rot=face+sgn*.2+(HZ.rot-(face+sgn*.2))*k;
       pose['leg'+far+'.x']=.9*Math.sin(k*Math.PI)-.55*k;pose['leg'+far+'.z']=(far==='L'?1:-1)*(1.25*Math.sin(k*Math.PI)+.62*k);pose['shin'+far+'.x']=.3+.7*k;pose['leg'+near+'.x']=-.55*k;pose['leg'+near+'.z']=(near==='L'?1:-1)*.62*k;pose['shin'+near+'.x']=.1+.9*k;pose['armL.x']=-1.3+.45*k;pose['armR.x']=-1.3+.6*k;pose['body.x']=.3*(1-k)+.08*k;pose['body.z']=-sgn*.12*(1-k);}
     P.x=x;P.z=z;P.rot=rot;P.y=y;g.position.set(x,y,z);g.rotation.y=rot;p.hips.position.y=.78;mntPose(p,pose);
-    if(T2>=1.1){AN.mnt=null;P.x=HZ.x;P.z=HZ.z;_v76tm();if(!HZ.mounted){P.x=sx;P.z=sz;}else sfx('thud');}}
+    if(T2>=1.1){AN.mnt=null;p.body.rotation.z=0;P.x=HZ.x;P.z=HZ.z;_v76tm();if(!HZ.mounted){P.x=sx;P.z=sz;}else sfx('thud');}}
   else{const lx=M.lx,lz=M.lz,hr=M.hr,sx=HZ.x+M.px*M.sd*.62,sz=HZ.z+M.pz*M.sd*.62,face=hr-sgn*.35;let x,y,z,rot;
     const pose={'legL.x':-.55,'legR.x':-.55,'legL.z':.62,'legR.z':-.62,'shinL.x':1,'shinR.x':1,'armL.x':-.85,'armR.x':-.7,'armL.z':.05,'armR.z':-.05,'body.x':.08,'body.z':0,'head.x':0};
     if(T2<.35){const k=ss(T2/.35);x=M.sx+(sx-M.sx)*k*.35;z=M.sz+(sz-M.sz)*k*.35;y=M.sy+.3*Math.sin(k*Math.PI*.5);rot=hr+(face+sgn*.2-hr)*k;
@@ -8785,7 +8785,7 @@ function mntTick(dt,p,g){const M=AN.mnt;M.t+=dt;const T2=M.t,hb=HORSE.p.body.pos
       pose['leg'+near+'.x']=-1.4*(1-k*.7);pose['shin'+near+'.x']=1.6*(1-k*.6);pose['leg'+far+'.x']=.1;pose['leg'+far+'.z']=0;pose['shin'+far+'.x']=.1+.5*k;pose['leg'+near+'.z']=0;pose['armL.x']=-2.2+.4*k;pose['armR.x']=-2.2+.4*k;pose['body.x']=.38-.2*k;pose['body.z']=-sgn*.12;}
     else{const k=ss((T2-.75)/.3);x=sx+(lx-sx)*k;z=sz+(lz-sz)*k;y=G(x,z);rot=face+sgn*.2;const w=Math.sin(T2*18)*(1-k);pose['legL.x']=w*.4;pose['legR.x']=-w*.4;pose['legL.z']=0;pose['legR.z']=0;pose['shinL.x']=.1+.6*(1-k)*.5;pose['shinR.x']=.1;pose['armL.x']=-.6*(1-k);pose['armR.x']=-.6*(1-k);pose['body.x']=.12*(1-k);}
     P.x=lx;P.z=lz;P.rot=rot;HZ.mode='idle';HZ.speed=0;g.position.set(x,y,z);g.rotation.y=rot;p.hips.position.y=.78;mntPose(p,pose);
-    if(T2>=1.05){AN.mnt=null;P.x=lx;P.z=lz;P.y=G(lx,lz);}}}
+    if(T2>=1.05){AN.mnt=null;p.body.rotation.z=0;P.x=lx;P.z=lz;P.y=G(lx,lz);}}}
 // ---- crouching to fill the canteen ----
 const _v76fc=fillCanteen;fillCanteen=function(q){_v76fc(q);AN.fill=1.05;};
 function anCalm(){return !P.moving&&!P.sit&&!ACT.mode&&FISH.state==='idle'&&CB.atk<=0&&!CB.block&&!CB.alert&&!CB.tgt&&!BLD.on&&!PLC.on&&!(AP&&AP.idle);}
