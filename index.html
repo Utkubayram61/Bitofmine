@@ -480,6 +480,7 @@ body.mob #mHud.mc{display:grid!important;grid-template-columns:repeat(5,1fr);col
 #mHud.mc .mb{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
 #mHud.mc .mb .ii{width:13px;height:13px}
 #mHud.mc .mb span{width:100%;min-width:0;height:4px;border-radius:2px;flex:none}
+#mapList .ml.mldn{opacity:.55}#mapList .mlp{color:#f4c64a;font-style:normal}#mapList .mld{color:#8fd07a;font-style:normal}
 #hud.hx{width:262px;min-width:0;padding:10px 12px 9px;gap:6px}
 #hud.hx .hx-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 #hud.hx .name{font-size:15px;letter-spacing:.16em}
@@ -2545,7 +2546,7 @@ const MAPICO={hamlet:['house'],village:['house'],cave:['stone',{a:'#5a5470',b:'#
 function mapIcon(id,f){if(id==='__house')return['house'];if(id==='__bag')return['bag'];if(id==='__drg')return['fire'];if(id==='__sea')return['drop'];if(id==='__gaz')return['paw'];if(NATK.has(f.kind))return['star'];return MAPICO[f.kind]||['stone',{a:'#e8d39a',b:'#b89a5a',c:'#fff0c0'}];}
 function mapListHtml(){const po=playerOut(),L=[...FOUNDPOS.entries()].map(([id,f])=>[id,f,Math.hypot(f.x-po.x,f.z-po.z)]).sort((a,b)=>a[2]-b[2]);
   const mk=MARKS.map(m=>`<button type="button" class="ml" data-mx="${m.x}" data-mz="${m.z}">${ico2('heart',20,{a:'#d8473f'})}<span>${m.n}. ${m.name}</span><small>${Math.round(Math.hypot(m.x-po.x,m.z-po.z))} m</small></button>`).join('');
-  return(mk?`<div class="mlh">İşaretlerin</div>${mk}`:'')+`<div class="mlh">Keşfedilen yerler · ${L.length}</div>`+(L.length?L.map(([id,f,d])=>{const ic=mapIcon(id,f);return`<button type="button" class="ml" data-mx="${f.x}" data-mz="${f.z}">${ico2(ic[0],20,ic[1])}<span>${f.name}</span><small>${Math.round(d)} m</small></button>`;}).join(''):'<p class="hint">Dolaştıkça keşfettiğin yerler burada listelenir.</p>');}
+  return(mk?`<div class="mlh">İşaretlerin</div>${mk}`:'')+`<div class="mlh">Keşfedilen yerler · ${L.length}</div>`+(L.length?L.map(([id,f,d])=>{const ic=mapIcon(id,f);const pd=typeof sitePending==='function'&&sitePending(id,f.kind),dn=typeof poiDoneSite==='function'&&poiDoneSite(id,f.kind);return`<button type="button" class="ml${dn?' mldn':''}" data-mx="${f.x}" data-mz="${f.z}">${ico2(ic[0],20,ic[1])}<span>${f.name}${pd?' <i class="mlp" title="Keşfedilecek bir şey var">✦</i>':dn?' <i class="mld" title="Tamamlandı">✓</i>':''}</span><small>${Math.round(d)} m</small></button>`;}).join(''):'<p class="hint">Dolaştıkça keşfettiğin yerler burada listelenir.</p>');}
 function openMap(){if(mapOpen)return;closePanel();mapOpen=true;el('mapList').innerHTML=mapListHtml();el('mapCount').textContent=`· ${FOUNDPOS.size} yer`;el('setPop').hidden=true;const po=playerOut();MAPV.cx=po.x;MAPV.cz=po.z;el('mapOv').hidden=false;mapSel=null;updMapSel();stepMap(30);drawMap();}
 function closeMap(){mapOpen=false;el('mapOv').hidden=true;}
 function mapUiInit(){el('mapLeg').innerHTML=[['tent','Kamp'],['house','Köy / evin'],['star','Doğal güzellik'],['stone','Mağara',{a:'#5a5470',b:'#3a3450',c:'#8a84a0'}],['pwall','Yapı',{a:'#6e6b7a',b:'#9a97a6'}],['heart','İşaret',{a:'#d8473f'}]].map(q=>`<span>${ico2(q[0],16,q[2])}${q[1]}</span>`).join('');
@@ -6007,8 +6008,8 @@ function miniOvTick(){const ov=MM.ov,g2=MM.cx;if(!ov||!ov.width)return;const dp=
     const ext=Math.max(ww,wh)/2/k+LMC,lcx=Math.floor(cx/LMC),lcz=Math.floor(cz/LMC),R=Math.ceil(ext/LMC);
     for(let dz=-R;dz<=R;dz++)for(let dx=-R;dx<=R;dx++){const L=landmarkCell(lcx+dx,lcz+dz);if(!L||found.has(L.id)||FOUNDPOS.has(L.id))continue;const dd=Math.hypot(L.x-cx,L.z-cz);if(dd>110)continue;const p=S(L.x,L.z);if(!inV(p,4))continue;g2.globalAlpha=Math.min(.85,1.25-dd/110);g2.beginPath();g2.arc(p[0],p[1],1.9,0,7);g2.lineWidth=1.2;g2.strokeStyle='rgba(16,12,22,.8)';g2.stroke();g2.fillStyle='#f4ecd8';g2.fill();g2.globalAlpha=1;}
     // discovered places
-    const isz=MM.z===0?15:13;for(const[fid,f]of FOUNDPOS){const p=S(f.x,f.z);if(!inV(p,10))continue;const ic=mapIcon(fid,f),big=f.kind==='village'||fid[0]==='_',sz=big?isz+3:isz;
-      g2.fillStyle='rgba(16,12,22,.55)';g2.beginPath();g2.arc(p[0],p[1],sz*.52,0,7);g2.fill();g2.drawImage(iconCanvas(ic[0],ic[1]),Math.round(p[0]-sz/2),Math.round(p[1]-sz/2),sz,sz);}
+    const isz=MM.z===0?15:13;for(const[fid,f]of FOUNDPOS){const p=S(f.x,f.z);if(!inV(p,10))continue;const ic=mapIcon(fid,f),big=f.kind==='village'||fid[0]==='_',sz=big?isz+3:isz;const dn=typeof poiDoneSite==='function'&&poiDoneSite(fid,f.kind);g2.globalAlpha=dn?.45:1;
+      g2.fillStyle='rgba(16,12,22,.55)';g2.beginPath();g2.arc(p[0],p[1],sz*.52,0,7);g2.fill();g2.drawImage(iconCanvas(ic[0],ic[1]),Math.round(p[0]-sz/2),Math.round(p[1]-sz/2),sz,sz);g2.globalAlpha=1;if(!dn&&typeof sitePending==='function'&&sitePending(fid,f.kind)){g2.fillStyle='#f4c64a';g2.beginPath();g2.arc(p[0]+sz*.42,p[1]-sz*.42,2.2,0,7);g2.fill();}}
     if(HOME&&KIT.camp){const p=S(HOME.x,HOME.z);if(inV(p,10))g2.drawImage(iconCanvas('tent'),Math.round(p[0]-7),Math.round(p[1]-7),14,14);}
     if(typeof NPC!=='undefined'&&NPC.tr){const p=S(NPC.tr.x,NPC.tr.z);if(inV(p,8))g2.drawImage(iconCanvas('coin'),Math.round(p[0]-6),Math.round(p[1]-6),12,12);}
     for(const o of PLACED){const p=S(o.x,o.z);if(!inV(p,4))continue;g2.beginPath();g2.moveTo(p[0],p[1]-3.5);g2.lineTo(p[0]+3,p[1]+2.5);g2.lineTo(p[0]-3,p[1]+2.5);g2.closePath();out('#ffa040');}
@@ -7673,11 +7674,11 @@ drawMap=function(){const cv=el('mapCv'),r=cv.getBoundingClientRect();DPRm=Math.m
   const po=playerOut(),pp=w2m(po.x,po.z,X);
   if(trackMark){const tp=w2m(trackMark.x,trackMark.z,X);ctx.strokeStyle='rgba(244,181,74,.85)';ctx.lineWidth=2.5*u;ctx.setLineDash([7*u,6*u]);ctx.lineDashOffset=-tnow*20*u;ctx.beginPath();ctx.moveTo(pp[0],pp[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();ctx.setLineDash([]);}
   // places
-  for(const p0 of mapPOIs()){const p=w2m(p0.x,p0.z,X);if(!inV(p,40))continue;const sz=(p0.big?24:p0.small?14:18)*u;
+  for(const p0 of mapPOIs()){const p=w2m(p0.x,p0.z,X);if(!inV(p,40))continue;const sz=(p0.big?24:p0.small?14:18)*u;ctx.globalAlpha=p0.done?.42:1;
     ctx.fillStyle='rgba(28,20,14,.55)';ctx.beginPath();ctx.arc(p[0],p[1],sz*.62,0,7);ctx.fill();if(p0.alert){ctx.strokeStyle=`rgba(255,90,60,${.6+.4*Math.sin(tnow*6)})`;ctx.lineWidth=2.5*u;ctx.beginPath();ctx.arc(p[0],p[1],sz*.8,0,7);ctx.stroke();}
-    ctx.drawImage(iconCanvas(p0.ic[0],p0.ic[1]),p[0]-sz/2,p[1]-sz/2,sz,sz);MAPHITS.push({p,r:sz*.7,o:p0});if(p0.pend){ctx.fillStyle='#f4c64a';ctx.beginPath();ctx.arc(p[0]+sz*.42,p[1]-sz*.42,3.6*u,0,7);ctx.fill();ctx.strokeStyle='#2a1a08';ctx.lineWidth=1.2*u;ctx.stroke();}
+    ctx.drawImage(iconCanvas(p0.ic[0],p0.ic[1]),p[0]-sz/2,p[1]-sz/2,sz,sz);MAPHITS.push({p,r:sz*.7,o:p0});if(p0.pend){const pu=.75+.25*Math.sin(tnow*4+p0.x);ctx.fillStyle='#f4c64a';ctx.beginPath();ctx.arc(p[0]+sz*.42,p[1]-sz*.42,3.8*u*pu+1*u,0,7);ctx.fill();ctx.strokeStyle='#2a1a08';ctx.lineWidth=1.2*u;ctx.stroke();}if(p0.done){ctx.globalAlpha=.9;ctx.fillStyle='#4a8a3a';ctx.beginPath();ctx.arc(p[0]+sz*.42,p[1]-sz*.42,4.6*u,0,7);ctx.fill();ctx.strokeStyle='#e8f8d8';ctx.lineWidth=1.6*u;ctx.beginPath();ctx.moveTo(p[0]+sz*.42-2.2*u,p[1]-sz*.42);ctx.lineTo(p[0]+sz*.42-.5*u,p[1]-sz*.42+1.8*u);ctx.lineTo(p[0]+sz*.42+2.4*u,p[1]-sz*.42-1.8*u);ctx.stroke();ctx.globalAlpha=.42;}
     if(p0.cat==='vil'){plate(p0.name,p[0],p[1]-sz*.7-4*u,'#f4b54a',12);if(p0.sub&&MAPV.s>=.9)label(p0.sub,p[0],p[1]+sz*.7+12*u,'#ffe0a0',9.5);}
-    else if(p0.big||MAPV.s>=1.25||MAPHOV===p0.name||p0.alert)label(p0.name,p[0],p[1]-sz*.62-5*u,p0.col||'#f6ead0',10.5);}
+    else if(p0.big||MAPV.s>=1.25||MAPHOV===p0.name||p0.alert)label(p0.name,p[0],p[1]-sz*.62-5*u,p0.done?'#b8c8a8':p0.col||'#f6ead0',10.5);ctx.globalAlpha=1;}
   // marks
   if(MAPF.mark)for(const m of MARKS){const p=w2m(m.x,m.z,X),sel=mapSel===m,tr=trackMark===m;if(!inV(p,30))continue;ctx.fillStyle=tr?'#f4b54a':'#d8473f';ctx.beginPath();ctx.arc(p[0],p[1]-10*u,(sel?8.5:7)*u,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(p[0]-4*u,p[1]-5*u);ctx.lineTo(p[0]+4*u,p[1]-5*u);ctx.lineTo(p[0],p[1]);ctx.closePath();ctx.fill();
     ctx.lineWidth=(sel?2.5:1.5)*u;ctx.strokeStyle=sel?'#fff':'#1a1422';ctx.beginPath();ctx.arc(p[0],p[1]-10*u,(sel?8.5:7)*u,0,7);ctx.stroke();ctx.font=font(9.5,1);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.fillText(String(m.n),p[0],p[1]-6.5*u);if(sel||MAPV.s>=1.4)label(m.name,p[0],p[1]-22*u,'#ffd0c8',10);}
@@ -8001,7 +8002,10 @@ const _v69us=updateStats;updateStats=function(dt){const e0=ST.en,f0=ST.food,w0=S
   if(blessOn('huzur'))ref('en',e0,.5);else if(blessOn('yol'))ref('en',e0,.3);if(blessOn('tok')){ref('food',f0,.5);ref('water',w0,.5);}if(dev){ref('en',e0,.25);ref('food',f0,.25);ref('water',w0,.25);}
   if(blessOn('sifa'))ST.hp=Math.min(100,ST.hp+dt*.08);if(blessOn('sicak')){ST.wet=Math.max(0,ST.wet-dt*.06);if(ST.temp<58)ST.temp+=(58-ST.temp)*Math.min(1,dt*.5);}
   try{poiTick(dt);}catch(e){if(!POIX.err2){POIX.err2=1;console.warn('poi tick',e);}}};
-let poiT=0;function poiTick(dt){poiT-=dt;if(poiT>0)return;poiT=.7;npTick();blessUI();if(POIX.card&&Math.hypot(P.x-POIX.cardP[0],P.z-POIX.cardP[1])>4)poiCardClose();}
+function poiHasActs(id,kind){const L=kdefOf(kind)||[];return L.some(a=>a.once);}
+function poiDoneSite(id,kind){return found.has(id)||FOUNDPOS.has(id)?(poiHasActs(id,kind)&&!sitePending(id,kind)):false;}
+function poiSparkle(){for(const S of sitesNear()){if(S.d>45)continue;const pend=S.dyn?true:sitePending(S.id,S.kind);if(!pend)continue;const hy=H(S.x,S.z)+(S.np||S.dyn?1.4:Math.min(14,(S.r||8)*.55));for(let i=0;i<3;i++)addP({k:'mote',x:S.x+(Math.random()-.5)*1.4,y:hy+Math.random()*1.2,z:S.z+(Math.random()-.5)*1.4,ph:Math.random()*9,life:0,max:1.6,c:[1,.85,.35],s:2});}}
+let poiT=0;function poiTick(dt){poiT-=dt;if(poiT>0)return;poiT=.7;npTick();blessUI();poiSparkle();if(POIX.card&&Math.hypot(P.x-POIX.cardP[0],P.z-POIX.cardP[1])>4)poiCardClose();}
 function blessUI(){const act=Object.keys(BLESSD).filter(blessOn);const html=act.map(id=>{const d=BLESSD[id],left=id==='dev'?'∞':Math.max(1,Math.ceil(POIX.bless[id]-gameHour()))+' sa';return`<span class="bl" title="${d.n}: ${d.d}">${ico2(d.ic,18)}<em>${left}</em></span>`;}).join('');
   let e=el('hxBless');if(!e){const h=el('hud');if(h){e=document.createElement('div');e.id='hxBless';const m=h.querySelector('.hx-meta');h.insertBefore(e,m);}}if(e){e.innerHTML=html?'<small>Lütuflar</small>'+html:'';e.hidden=!html;}
   const m=el('mBless');if(m)m.innerHTML=act.slice(0,3).map(id=>ico2(BLESSD[id].ic,12)).join('');}
@@ -8037,7 +8041,7 @@ function poiPose(p,lerp){const a=ACT.poi.a.an,t=ACT.t,k=ACT.t/ACT.dur,g=HERO.g,L
   }}
 // ---------- map integration ----------
 const _v69mp=mapPOIs;mapPOIs=function(){const L=_v69mp();if(MAPF.poi){
-    for(const[fid,f]of FOUNDPOS){const p0=L.find(q=>q.x===f.x&&q.z===f.z);if(p0&&sitePending(fid,f.kind))p0.pend=1;}
+    for(const[fid,f]of FOUNDPOS){const p0=L.find(q=>q.x===f.x&&q.z===f.z);if(!p0||p0.cat!=='poi')continue;if(sitePending(fid,f.kind))p0.pend=1;else if(poiHasActs(fid,f.kind))p0.done=1;}
     for(const[id,k]of POIX.known){if(found.has(id)||FOUNDPOS.has(id))continue;L.push({x:k.x,z:k.z,ic:['qmark'],name:'? '+k.name,cat:'poi',small:1});}
     for(const o of POIX.dyn)if(o.state<2)L.push({x:o.x,z:o.z,ic:['pchest'],name:o.nm||NPOIN[o.kind],cat:'poi',pend:1});}return L;};
 // ---------- rumors make places known ----------
@@ -8057,7 +8061,7 @@ const _v69tm=talkMenu;talkMenu=function(n,text){_v69tm(n,text);if(!DLG.open||DLG
 const _v69qm=qMarkFor;qMarkFor=function(n){const r=_v69qm(n);if(r)return r;for(const[nm,f]of POITALK)if(n.name===nm&&poiFlag(f)&&!POIX.flag['told_'+f])return'qu';return null;};
 // ---------- journal ----------
 const _v69th=tabsHtml;tabsHtml=function(){let h=_v69th();const tb=`<button type="button" class="tab ${panelKind==='kesif'?'on':''}" data-tab="kesif">${ico2('star',20)}<span>Keşif</span></button>`;const i=h.indexOf('data-tab="quest"');if(i<0)return h+tb;const e=h.indexOf('</button>',i)+9;return h.slice(0,e)+tb+h.slice(e);};
-function kesifHtml(){const po=playerOut();let h=`<div class="qhead"><b>Keşif Defteri</b><small>${FOUNDPOS.size} yer keşfedildi · ${[...POIX.known.keys()].filter(id=>!found.has(id)&&!FOUNDPOS.has(id)).length} yer “?” · ${POIX.lore.length}/${LORE.length} efsane parçası</small></div>`;
+function kesifHtml(){const po=playerOut();let h=`<div class="qhead"><b>Keşif Defteri</b><small>${FOUNDPOS.size} yer keşfedildi · ${[...FOUNDPOS.entries()].filter(([id,f])=>poiDoneSite(id,f.kind)).length} yerin tüm sırları çözüldü · ${[...POIX.known.keys()].filter(id=>!found.has(id)&&!FOUNDPOS.has(id)).length} yer “?” · ${POIX.lore.length}/${LORE.length} efsane parçası</small></div>`;
   h+='<div class="sec">Devlerin Hikâyesi</div><div class="lore">'+LORE.map((L,i)=>POIX.lore.includes(i)?`<button type="button" class="lr on" data-lore="${i}"><b>${L.t.split(' · ')[0]}</b><span>${L.t.split(' · ')[1]}</span></button>`:`<div class="lr"><b>${L.t.split(' · ')[0]}</b><span>???</span></div>`).join('')+'</div>';
   const bl=Object.keys(BLESSD).filter(blessOn);h+='<div class="sec">Lütuflar</div>'+(bl.length?'<div class="blist">'+bl.map(id=>`<div>${ico2(BLESSD[id].ic,22)}<b>${BLESSD[id].n}</b><small>${BLESSD[id].d}${id==='dev'?'':' · '+Math.max(1,Math.ceil(POIX.bless[id]-gameHour()))+' saat'}</small></div>`).join('')+'</div>':'<p class="hint">Meditasyon yap, adak bırak, kaplıcada yıkan, kutsal yerlerde diz çök: lütuf kazanırsın.</p>');
   const unk=[...POIX.known.entries()].filter(([id])=>!found.has(id)&&!FOUNDPOS.has(id)).map(([id,k])=>[k,Math.hypot(k.x-po.x,k.z-po.z)]).sort((a,b)=>a[1]-b[1]).slice(0,8);
