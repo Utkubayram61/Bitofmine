@@ -9196,7 +9196,7 @@ function bossRemove(w){const H2=w.horse;if(H2&&H2.g.parent===scene){scene.remove
 function bossFlee(w,why){if(w.state==='flee'||w.state==='dead')return;w.state='flee';w.fwhy=why;w.wind=w.cue=false;w.fdir=Math.atan2(w.x-P.x,w.z-P.z);w.lastSt='flee';if(CB.attacker===w)CB.attacker=null;if(CB.tgt===w)CB.tgt=null;
   if(w.id==='kemik'&&w.foot){w.fleeing=1;if(!w.hzRun){bossHorseBack(w);}}}
 function bossStage(w){const D=BOSSD[w.id],S=BOSS.st[w.id];S.stage++;S.hp=w.hp;S.fled=nightId();bossFlee(w,'stage');const left=D.stages-S.stage;
-  toast(D.n,'Ağır yaralandı ve kaçtı · '+(left>1?left+' gece daha':'bir gece daha')+' gelecek');sfx('thud');TSLOW=Math.max(TSLOW,.3);SHAKE=Math.max(SHAKE,.3);newsAdd({t:'bossfled',id:w.id});
+  setTimeout(()=>think('bfled'+w.id+S.stage,PK(BFLED[w.id]),30,true),900);sfx('thud');TSLOW=Math.max(TSLOW,.3);SHAKE=Math.max(SHAKE,.3);newsAdd({t:'bossfled',id:w.id});
   if(w.id==='boru')howl();else if(w.id==='kemik')bNeigh();else{try{growl(4);}catch(_){}}}
 function bossSpawnTick(dt){BOSS.t-=dt;if(BOSS.t>0)return;BOSS.t=1;bossInit();if(!BOSS.ready||INTRO.on)return;const live=WOLVES.filter(w=>w.boss);
   for(const id in BOSSD){const S=BOSS.st[id];if(S.lx===undefined)continue;const w=live.find(b=>b.id===id),dl=Math.hypot(P.x-S.lx,P.z-S.lz);
@@ -9229,7 +9229,7 @@ function bossTick(w,dt,dx,dz,d){const D=BOSSD[w.id],S=BOSS.st[w.id];
   if(d<w.hr*.8&&d>.01&&w.state!=='flee'){const r=slideMove(P.x,P.z,dx/d*(w.hr*.8-d),dz/d*(w.hr*.8-d),blocked);if(r){P.x=r[0];P.z=r[1];}}
   BPOSE[w.id](w,dt,y);v57Warn(w,y,D.hh+.35,w.wind&&d<22,w.cue&&d<5);
   w.lastSt=w.state;w.lastT=w.t;}
-function bossDie(w){const D=BOSSD[w.id],S=BOSS.st[w.id];if(S.stage<D.stages-1){w.hp=Math.max(1,D.hp*(1-(S.stage+1)/D.stages));bossStage(w);w.lastSt='flee';return;}
+function bossDie(w){const D=BOSSD[w.id],S=BOSS.st[w.id];if(w.id==='tepe'&&tepeImmortal()){w.hp=Math.max(1,w.hp);w.lastSt=w.state;return;}if(S.stage<D.stages-1){w.hp=Math.max(1,D.hp*(1-(S.stage+1)/D.stages));bossStage(w);w.lastSt='flee';return;}
   w.state='dead';w.lastSt='dead';w.dieT=0;w.speed=0;w.flash=0;w.hp=0;S.hp=0;S.dead=day;if(CB.attacker===w)CB.attacker=null;if(CB.tgt===w)CB.tgt=null;if(w.warn)w.warn.visible=false;
   TSLOW=Math.max(TSLOW,.7);SHAKE=Math.max(SHAKE,.5);sfx('thud');if(w.id==='boru'){try{whine();}catch(_){}}else if(w.id==='alb')bWail(w,true);else if(w.id==='kemik'){skRattle(2,true);if(!w.foot){bossUnhorse(w);w.state='dead';w.lastSt='dead';}}
   if(w.id==='boru'){w.g.rotation.z=0;}
@@ -9245,16 +9245,20 @@ function bossHitMul(w,c,dx,dz){const D=BOSSD[w.id];if(w.state==='flee'||w.state=
   if(TOOLS.weapon<2){clink();sparks(w.x,HQ(w.x,w.z)+1.2,w.z,5);bNote(w,'wpn','Bu silah ona işlemiyor · en az Taş Kılıç gerek');return .08;}
   let m=1;
   if(w.id==='boru'){m=c===14||c===20?3:c===5?1.4:.45;if(fireNear(w.x,w.z,9))m*=1.5;if(m<1){if(Math.random()<.5)clink();bNote(w,'tip',D.tip);}}
-  else if(w.id==='tepe'){if(w.state==='stun')m=2.6;else if(c===16){m=1.2;if(tnow>(w.kneeCd||0)){w.kneeCd=tnow+12;w.stunReq=1.9;note('Dizini kırdın! · Tepegöz sendeliyor');}}else{m=.25;clink();bNote(w,'tip',D.tip);}}
+  else if(w.id==='tepe'){if(tepeImmortal()){clink();sparks(w.x,HQ(w.x,w.z)+2.5,w.z,8);if(!BOSS.tepeKnow){BOSS.tepeKnow=1;setTimeout(()=>think('btepe3',PK(TEPE3),40,true),600);}else bNote(w,'imm','Kılıç işlemiyor… bir insan gücü yetmez buna.');return 0;}if(w.state==='stun')m=2.6;else if(c===16){m=1.2;if(tnow>(w.kneeCd||0)){w.kneeCd=tnow+12;w.stunReq=1.9;note('Dizini kırdın! · Tepegöz sendeliyor');}}else{m=.25;clink();bNote(w,'tip',D.tip);}}
   else if(w.id==='alb'){m=TOOLS.weapon>=3?1.5:.65;if(TOOLS.weapon<3)bNote(w,'iron','Taş ona zor işliyor… demir gerek.');}
   else if(w.id==='kemik'){if(!w.foot){clink();sparks(w.x,HQ(w.x,w.z)+2,w.z,6);bNote(w,'tip',D.tip);return .12;}m=c===11?1.7:c===19?1.35:.6;if(w.state==='fallen')m*=1.25;skBoneFx(w,c>=4?12:6);}
   return m;}
 function bossArrowMul(w,vx,vz,py){if(w.state==='flee'||w.state==='dead')return 0;const front=skFront(w,-vx,-vz);
-  if(w.id==='tepe'){if(w.state==='roar'&&w.eyeOpen&&front){w.stunReq=4.5;w.eyeOpen=false;toast('Tepegöz','Gözüne ok saplandı! · şimdi vur');sfx('hit');SHAKE=.4;TSLOW=Math.max(TSLOW,.3);return 3;}if(w.state==='stun')return 1.5;clink();bNote(w,'tip',D_tip('tepe'));return .2;}
+  if(w.id==='tepe'){if(w.state==='roar'&&w.eyeOpen&&front){w.stunReq=4.5;w.eyeOpen=false;if(tepeImmortal()){sfx('hit');note('Gözüne ok saplandı · sendeledi ama yarası anında kapandı');return 0;}toast('Tepegöz','Gözüne ok saplandı! · şimdi vur');sfx('hit');SHAKE=.4;TSLOW=Math.max(TSLOW,.3);return 3;}if(w.state==='stun')return 1.5;clink();bNote(w,'tip',D_tip('tepe'));return .2;}
   if(w.id==='alb'){if((w.vis||0)<.45)return 0;return .6;}
   if(w.id==='kemik')return w.foot?.5:(clink(),.1);
   if(w.id==='boru')return fireNear(w.x,w.z,9)?.8:.5;return 1;}
 function D_tip(id){return BOSSD[id].tip;}
+// Tepegöz's last form waits for the dragon quest
+function tepeImmortal(){const S=BOSS.st.tepe;return!!S&&S.stage>=BOSSD.tepe.stages-1&&!BOSS.dragonBane;}
+const TEPE3=['Ne kılıç ne ok… yarası gözümün önünde kapanıyor. Bunu bir insan yenemez.','Bu artık başka bir şey. Dağın kendisi gibi. Belki gökten gelen bir ateş…','Kaçmaktan başka çarem yok. Bu devi yenmek için benden büyük bir güç lazım.'];
+const BFLED={boru:['Kaçtı… ama o kurt yarasını yalayıp yarın gece yine gelecek.','Ormanın derinine çekildi. Bitmedi, yarın gece yine buradayım.'],tepe:['Dev yayla tarafına çekildi. Yarın gece yine iner, eminim.','Kaçtı ama yarası onu durdurmaz. Yarın gece hazır olmalıyım.'],alb:['Sis gibi dağıldı… yarın gece yine ağlar.'],kemik:['Mezarlığa geri döndü. Yarın gece nal sesleri yine gelecek.','Atını dörtnala sürüp gitti. Yarın gece hesaplaşırız.']};
 const _v77hm=skelHitMul;skelHitMul=function(w,c,dx,dz){if(w&&w.boss)return bossHitMul(w,c,dx,dz);return _v77hm(w,c,dx,dz);};
 const _v77am=skArrowMul;skArrowMul=function(w,vx,vz,py){if(w&&w.boss)return bossArrowMul(w,vx,vz,py);return _v77am(w,vx,vz);};
 const _v77po=parryOK;parryOK=function(w){if(!w||!w.boss)return _v77po(w);const st=w.state;w.allowStag=true;_v77po(w);w.allowStag=true;
@@ -9264,9 +9268,8 @@ const _v77tt=tthOf;tthOf=function(w,d){if(w&&w.boss)return w.cue&&w.tth!==undefi
 // ---- the boss bar ----
 function bossBarTick(dt){const B=BOSS.ui||(BOSS.ui={el:el('bossBar'),on:0,k:1,id:null});if(!B.el)return;let best=null,bd=1e9;for(const w of WOLVES){if(!w.boss)continue;const d=Math.hypot(w.x-P.x,w.z-P.z);if(d<bd&&(d<34||(w.state!=='flee'&&w.state!=='intro'&&d<48))){bd=d;best=w;}}
   const show=!!best&&!INTRO.on&&!MENU.on&&!mapOpen;if(show&&(best.state!=='dead'||best.dieT<3.5)){const D=BOSSD[best.id],S=BOSS.st[best.id];if(B.id!==best.id){B.id=best.id;el('bbN').textContent=D.n;B.k=best.hp/D.hp;
-      let pips='';for(let i=1;i<D.stages;i++)pips+=`<b style="left:${(100*i/D.stages).toFixed(2)}%"></b>`;el('bbM').innerHTML=pips;}
+      el('bbM').innerHTML='';el('bbS').textContent='';}
     const k=Math.max(0,best.hp/D.hp);B.k+=(k-B.k)*Math.min(1,dt*2.2);el('bbF').style.width=(k*100).toFixed(2)+'%';el('bbG').style.width=(B.k*100).toFixed(2)+'%';
-    el('bbS').textContent=best.state==='dead'?'yenildi':best.state==='flee'?'kaçıyor':D.stages>1?`${Math.min(S.stage+1,D.stages)}. gece / ${D.stages}`:'';
     if(!B.on){B.on=1;B.el.classList.add('on');document.body.classList.add('bossOn');}}
   else if(B.on){B.on=0;B.el.classList.remove('on');document.body.classList.remove('bossOn');B.id=null;}}
 // ---- what the villagers say ----
@@ -9279,6 +9282,7 @@ const BPRAISE={boru:[t=>`Börü Han'ı sen mi yendin? Koyunlar bu gece ilk kez r
 function bossLines(n){const r=[],Hm=n.ham;if(!BOSS.ready||!Hm)return r;const ids=Object.keys(BOSSD).filter(id=>BOSS.st[id]&&BOSS.st[id].lx!==undefined);
   const near=ids.filter(id=>!BOSS.st[id].dead).sort((a,b)=>Math.hypot(BOSS.st[a].lx-Hm.x,BOSS.st[a].lz-Hm.z)-Math.hypot(BOSS.st[b].lx-Hm.x,BOSS.st[b].lz-Hm.z)).slice(0,2);
   for(const id of near){const S=BOSS.st[id],dn=dirName(S.lx-Hm.x,S.lz-Hm.z);r.push(PK(BLINE[id])(dn));bossMark(id,true);}
+  if(BOSS.st.tepe&&!BOSS.st.tepe.dead&&tepeImmortal())r.push(PK(['Tepegöz'+"'"+'ü yaralamışsın ama öldüremezsin, evladım. Dedem derdi ki o devi ancak ejderha ateşi yakar.','Kılıç kesmez, ok delmez Tepegöz'+"'"+'ü artık. Eski türkülerde onu gökten inen bir ejder yakar.']));
   for(const e of NEWS){if(e.t==='bossfled'&&day-e.d<=3&&BOSSD[e.id]&&!BOSS.st[e.id].dead)r.push(PK([`Duydum ki ${BOSSD[e.id].n} ile dövüşmüşsün! Avcılar kan izini görmüş. Ama o geri gelir, gözünü dört aç.`,`${BOSSD[e.id].n} yaralıymış diyorlar, senin işinmiş. Yüreğine sağlık… bitir şu işi.`]));}
   for(const id of ids){const S=BOSS.st[id];if(!S.dead)continue;const age=day-S.dead;if(age<=12||Math.random()<.25)r.push(PK(BPRAISE[id])(BOSSD[id].title));}
   return r;}
