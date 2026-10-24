@@ -8756,18 +8756,41 @@ const _v75ec=evClean;evClean=function(ev){if(typeof WH!=='undefined'&&WH.fire&&W
 
 /* ================= v76: everything moves with a reason — hero, villagers, animals, world ================= */
 const AN={mnt:null,sitOff:0,fill:0,shake:0,shakeT:10,belly:0,bellyT:18,slip:0,lastS:0,thr:0};
-// ---- climbing on and off the horse ----
-const _v76tm=toggleMount;toggleMount=function(){const was=HZ.mounted,px=P.x,pz=P.z,py=P.y,g=HERO.g,sx=g.position.x,sy=g.position.y,sz=g.position.z;_v76tm();
-  if(!was&&HZ.mounted)AN.mnt={on:1,t:0,d:.62,x:px,y:py,z:pz};else if(was&&!HZ.mounted)AN.mnt={on:0,t:0,d:.5,x:sx,y:sy,z:sz};};
+// ---- climbing on and off the horse: step up to the side, foot in the stirrup, push up, swing the leg over ----
+function mntSide(){const px=Math.cos(HZ.rot),pz=-Math.sin(HZ.rot),sd=((P.x-HZ.x)*px+(P.z-HZ.z)*pz)>=0?1:-1;return{px,pz,sd};}
+const _v76tm=toggleMount;toggleMount=function(){if(AN.mnt)return;
+  const canOn=!HZ.mounted&&!DRG.ride&&!CAVE&&!BOAT&&!P.swim&&Math.hypot(P.x-HZ.x,P.z-HZ.z)<3.6;
+  if(canOn){initAudio();setSit(false);ACT.mode=null;FISH.state='idle';const{px,pz,sd}=mntSide();HZ.mode='idle';HZ.speed=0;
+    AN.mnt={on:1,t:0,d:1.2,sd,px,pz,x0:P.x,z0:P.z,r0:P.rot};return;}
+  const was=HZ.mounted,g=HERO.g,sx=g.position.x,sy=g.position.y,sz=g.position.z,hr=HZ.rot;_v76tm();
+  if(was&&!HZ.mounted){const px=Math.cos(hr),pz=-Math.sin(hr),sd=((P.x-HZ.x)*px+(P.z-HZ.z)*pz)>=0?1:-1;AN.mnt={on:0,t:0,d:1.05,sd,px,pz,sx,sy,sz,lx:P.x,lz:P.z,hr};}};
+function mntPose(p,o){for(const k in o){const[part,ax]=k.split('.');p[part].rotation[ax]=o[k];}}
+function mntTick(dt,p,g){const M=AN.mnt;M.t+=dt;const T2=M.t,hb=HORSE.p.body.position.y,seatY=HZ.y+hb+.5-.78,gy=G(HZ.x,HZ.z),ss=t=>t<=0?0:t>=1?1:t*t*(3-2*t);
+  const near=M.sd>0?'R':'L',far=M.sd>0?'L':'R',sgn=M.sd>0?1:-1;   // the leg next to the horse goes in the stirrup, the far one swings over
+  AP.off.length=0;AP.offP.length=0;
+  if(M.on){HZ.mode='idle';HZ.speed=0;const sx=HZ.x+M.px*M.sd*.62-Math.sin(HZ.rot)*.15,sz=HZ.z+M.pz*M.sd*.62-Math.cos(HZ.rot)*.15,cx=HZ.x-Math.sin(HZ.rot)*.08,cz=HZ.z-Math.cos(HZ.rot)*.08,face=HZ.rot-sgn*.35;
+    let x,y,z,rot;const pose={'legL.x':0,'legR.x':0,'legL.z':0,'legR.z':0,'shinL.x':.05,'shinR.x':.05,'armL.x':0,'armR.x':0,'armL.z':.05,'armR.z':-.05,'body.x':0,'body.z':0,'head.x':0};
+    if(T2<.3){const k=ss(T2/.3);x=M.x0+(sx-M.x0)*k;z=M.z0+(sz-M.z0)*k;y=G(x,z);rot=M.r0+Math.atan2(Math.sin(face-M.r0),Math.cos(face-M.r0))*k;const w=Math.sin(T2*18);pose['legL.x']=w*.45;pose['legR.x']=-w*.45;pose['shinL.x']=.1+Math.max(0,-w)*.5;pose['shinR.x']=.1+Math.max(0,w)*.5;}
+    else if(T2<.5){const k=ss((T2-.3)/.2);x=sx;z=sz;y=G(sx,sz);rot=face;pose['leg'+near+'.x']=-1.5*k;pose['shin'+near+'.x']=1.7*k;pose['armL.x']=-2.3*k;pose['armR.x']=-2.3*k;pose['arm'+near+'.z']=(near==='L'?-.3:.3)*k;pose['body.z']=-sgn*.12*k;}
+    else if(T2<.78){const k=ss((T2-.5)/.28);x=sx-M.px*M.sd*.1*k;z=sz-M.pz*M.sd*.1*k;y=G(sx,sz)+(seatY+.32-G(sx,sz))*k;rot=face+sgn*.2*k;pose['leg'+near+'.x']=-1.5*(1-k);pose['shin'+near+'.x']=1.7*(1-k)+.1;pose['leg'+far+'.x']=.15*k;pose['armL.x']=-2.3+1.0*k;pose['armR.x']=-2.3+1.0*k;pose['body.x']=.35*Math.sin(k*Math.PI);pose['body.z']=-sgn*.12;}
+    else{const k=ss((T2-.78)/.32);x=sx+(cx-sx)*k;z=sz+(cz-sz)*k;y=seatY+.32-(.32)*k+Math.sin(k*Math.PI)*.08;rot=face+sgn*.2+(HZ.rot-(face+sgn*.2))*k;
+      pose['leg'+far+'.x']=.9*Math.sin(k*Math.PI)-.55*k;pose['leg'+far+'.z']=(far==='L'?1:-1)*(1.25*Math.sin(k*Math.PI)+.62*k);pose['shin'+far+'.x']=.3+.7*k;pose['leg'+near+'.x']=-.55*k;pose['leg'+near+'.z']=(near==='L'?1:-1)*.62*k;pose['shin'+near+'.x']=.1+.9*k;pose['armL.x']=-1.3+.45*k;pose['armR.x']=-1.3+.6*k;pose['body.x']=.3*(1-k)+.08*k;pose['body.z']=-sgn*.12*(1-k);}
+    P.x=x;P.z=z;P.rot=rot;P.y=y;g.position.set(x,y,z);g.rotation.y=rot;p.hips.position.y=.78;mntPose(p,pose);
+    if(T2>=1.1){AN.mnt=null;P.x=HZ.x;P.z=HZ.z;_v76tm();if(!HZ.mounted){P.x=sx;P.z=sz;}else sfx('thud');}}
+  else{const lx=M.lx,lz=M.lz,hr=M.hr,sx=HZ.x+M.px*M.sd*.62,sz=HZ.z+M.pz*M.sd*.62,face=hr-sgn*.35;let x,y,z,rot;
+    const pose={'legL.x':-.55,'legR.x':-.55,'legL.z':.62,'legR.z':-.62,'shinL.x':1,'shinR.x':1,'armL.x':-.85,'armR.x':-.7,'armL.z':.05,'armR.z':-.05,'body.x':.08,'body.z':0,'head.x':0};
+    if(T2<.35){const k=ss(T2/.35);x=M.sx+(sx-M.sx)*k*.35;z=M.sz+(sz-M.sz)*k*.35;y=M.sy+.3*Math.sin(k*Math.PI*.5);rot=hr+(face+sgn*.2-hr)*k;
+      pose['leg'+near+'.x']=-.55*(1-k);pose['leg'+near+'.z']=(near==='L'?1:-1)*.62*(1-k);pose['leg'+far+'.x']=-.55+1.4*Math.sin(k*Math.PI);pose['leg'+far+'.z']=(far==='L'?1:-1)*(.62+1.1*Math.sin(k*Math.PI))*(1-k*.8);pose['shin'+far+'.x']=1-.6*k;pose['body.x']=.08+.3*k;pose['body.z']=-sgn*.12*k;pose['armL.x']=-1.3;pose['armR.x']=-1.3;}
+    else if(T2<.75){const k=ss((T2-.35)/.4),x1=M.sx+(sx-M.sx)*.35,z1=M.sz+(sz-M.sz)*.35;x=x1+(sx-x1)*k;z=z1+(sz-z1)*k;const yT=M.sy+.3,yG=G(sx,sz);y=yT+(yG-yT)*k;rot=face+sgn*.2;
+      pose['leg'+near+'.x']=-1.4*(1-k*.7);pose['shin'+near+'.x']=1.6*(1-k*.6);pose['leg'+far+'.x']=.1;pose['leg'+far+'.z']=0;pose['shin'+far+'.x']=.1+.5*k;pose['leg'+near+'.z']=0;pose['armL.x']=-2.2+.4*k;pose['armR.x']=-2.2+.4*k;pose['body.x']=.38-.2*k;pose['body.z']=-sgn*.12;}
+    else{const k=ss((T2-.75)/.3);x=sx+(lx-sx)*k;z=sz+(lz-sz)*k;y=G(x,z);rot=face+sgn*.2;const w=Math.sin(T2*18)*(1-k);pose['legL.x']=w*.4;pose['legR.x']=-w*.4;pose['legL.z']=0;pose['legR.z']=0;pose['shinL.x']=.1+.6*(1-k)*.5;pose['shinR.x']=.1;pose['armL.x']=-.6*(1-k);pose['armR.x']=-.6*(1-k);pose['body.x']=.12*(1-k);}
+    P.x=lx;P.z=lz;P.rot=rot;HZ.mode='idle';HZ.speed=0;g.position.set(x,y,z);g.rotation.y=rot;p.hips.position.y=.78;mntPose(p,pose);
+    if(T2>=1.05){AN.mnt=null;P.x=lx;P.z=lz;P.y=G(lx,lz);}}}
 // ---- crouching to fill the canteen ----
 const _v76fc=fillCanteen;fillCanteen=function(q){_v76fc(q);AN.fill=1.05;};
 function anCalm(){return !P.moving&&!P.sit&&!ACT.mode&&FISH.state==='idle'&&CB.atk<=0&&!CB.block&&!CB.alert&&!CB.tgt&&!BLD.on&&!PLC.on&&!(AP&&AP.idle);}
 function anHero(dt){const p=HERO.parts,g=HERO.g,onFoot=!DRG.ride&&!HZ.mounted&&!BOAT&&!P.swim&&!P.sleeping;
-  // mount / dismount arc
-  if(AN.mnt){const M=AN.mnt;M.t+=dt;const k=Math.min(1,M.t/M.d),e=k*k*(3-2*k),arc=Math.sin(k*Math.PI),tx=g.position.x,ty=g.position.y,tz=g.position.z;
-    if(M.on){g.position.set(M.x+(tx-M.x)*e,M.y+(ty-M.y)*e+arc*.38,M.z+(tz-M.z)*e);apRot(p.legR,'x',-1.15*(1-e));apRot(p.legL,'z',-.55*(1-e));apRot(p.legL,'x',.35*arc);apRot(p.armL,'x',-1.1*arc);apRot(p.armR,'x',-.9*arc);apRot(p.body,'x',.4*arc);}
-    else{g.position.set(M.x+(tx-M.x)*e,M.y+(ty-M.y)*e+arc*.22,M.z+(tz-M.z)*e);apRot(p.legL,'x',-1.2*(1-e));apRot(p.legR,'x',-.45*(1-e));apRot(p.legL,'z',.5*(1-e));apRot(p.body,'x',.3*(1-e)-.12*arc);apRot(p.armL,'x',-1.0*(1-e));p.shinL.rotation.x=Math.max(p.shinL.rotation.x,1.1*arc);p.shinR.rotation.x=Math.max(p.shinR.rotation.x,1.1*arc);}
-    if(k>=1)AN.mnt=null;}
+  if(AN.mnt){mntTick(dt,p,g);return;}
   // sitting down and getting up take a moment
   if(onFoot&&!P.seat){const tgt=P.sit?.42:0;AN.sitOff+=(tgt-AN.sitOff)*Math.min(1,dt*7);g.position.y=P.y-AN.sitOff;const f=AN.sitOff/.42;
     if(P.sit&&f<.92){apRot(p.body,'x',.4*(1-f));apRot(p.armL,'x',-.5*(1-f));apRot(p.armR,'x',-.5*(1-f));}
